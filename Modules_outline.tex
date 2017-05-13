@@ -1,0 +1,95 @@
+\documentclass[11pt, a4paper]{article}
+
+\usepackage{amsmath, amssymb}
+
+\title{Modules}
+\date{last modified: \today}
+\author{}
+
+\begin{document}
+
+\maketitle
+
+The modules below are in no particular order (except for the Basics, of course).
+ 
+\section{Basics}
+
+\begin{itemize}
+\item What is a posterior? $ \rightarrow $ recap of Bayes' rule
+\item Example problems: Factorial HMMs, Bayesian Mixture Models (show GMs)
+\item ELBO derivation I: from KL divergence
+\item ELBO derivation II: with Jensen's inequality
+\item Mean Field inference
+\item Application to example problems (show GMs)
+\end{itemize}
+
+\section{Conjugate Models}
+\begin{itemize}
+\item Exponential families
+\item Gaussian-Gaussian conjugacy
+\item Example: Gaussian Mixture Model
+\item Dirichlet-multinomial conjugacy
+\item Example: Multinomial Mixture Model (maybe even LDA?)
+\item Conjugate VI in the general case
+\end{itemize}
+
+\section{Nonconjugate Models}
+\begin{itemize}
+\item Laplace Approximation
+\item Gradient methods
+\item Problem: cannot simply differentiate an MC average
+\item Idea: transform $ \frac{d}{dq} \mathbb{E}_{q}[\cdot] $ into $ \mathbb{E}[\frac{d}{dq}\cdot] $
+\item Score function gradient $ \rightarrow $ Black Box VI
+\item Reparametrisation gradient
+\end{itemize}
+
+\section{Nonparametric Models}
+\begin{itemize}
+\item Intro to stick-breaking processes
+\item VI for HDP/PYP
+\item Intro to GPs
+\item VI for GPs
+\end{itemize}
+
+\section{Bayesian Neural Networks}
+\begin{itemize}
+\item Putting priors on weights
+\item The old stuff by Neal, MacKay and Hinton
+\item The new stuff by DeepMind
+\item Bayesian Interpretation of Dropout
+\end{itemize}
+
+\section{Deep Generative Models}
+\begin{itemize}
+\item Review of generative models
+\item Exact case: EM with features
+\item Variational Autoencoders
+\item Example models: ???
+\item Code snippet ???
+\item Extra: The Deep Generative CRF (the Ryan Adams paper from NIPS)
+\end{itemize}
+
+\section{Reparametrisation Gradients}
+\begin{itemize}
+\item Recap: Gaussian reparametrisation
+\item Exension to general location-scale families
+\item ADVI (depending on the audience only go until here; the next two are way more complicated)
+\item Generalised Reparametrisation Gradient
+\item Rejection Sampling VI
+\end{itemize}
+
+\section{Extensions [Advanced]}
+\begin{itemize}
+\item Auxiliary variables
+\item Hierarchical Varational models 
+\end{itemize}
+
+\section{Beyond KL [Advanced]}
+\begin{itemize}
+\item $ \alpha $-divergence (make connection to EP)
+\item Stein VI
+\item Implicit models
+\item Hoelder bound
+\end{itemize}
+
+\end{document}
