@@ -5,8 +5,8 @@
 \usepackage[round]{natbib}
 \usepackage{xcolor}
 
-%\newcommand{\pnote}[1]{\textcolor{blue}{#1}}
-%\newcommand{\wnote}[1]{\textcolor{red}{#1}}
+\newcommand{\pnote}[1]{\textcolor{blue}{#1}}
+\newcommand{\wnote}[1]{\textcolor{red}{#1}}
 
 \title{Modules}
 \date{last modified: \today}
@@ -24,12 +24,12 @@ The modules below are in no particular order (except for the Basics, of course).
 \section{Basics}
 
 \begin{itemize}
-\item What is a posterior? $ \rightarrow $ recap of Bayes' rule
+\item What is a posterior and what is posterior inference? $ \rightarrow $ recap of Bayes' rule
+\item Sampling as an intuitive way of performing inference before diving in the realms of VI?
 \item Example problems: Factorial HMMs, Bayesian Mixture Models (show GMs)
-%\item \wnote{Is it worth to use sampling as an intuitive way of performing inference before diving in the realms of VI?}
 \item ELBO derivation I: from KL divergence
 \item ELBO derivation II: with Jensen's inequality
-%\item \wnote{Connection to EM}
+\item Connection to EM
 \item Mean Field inference
 \item Application to example problems (show GMs)
 \end{itemize}
@@ -40,15 +40,15 @@ The modules below are in no particular order (except for the Basics, of course).
 \item Exponential families
 \item Gaussian-Gaussian conjugacy
 \item Example: Bayesian Linear Regression
-%\item \wnote{Beta-Binomial warmup?}
+\item Beta-Binomial warmup for Dirichlet-multinomial?
 \item Dirichlet-multinomial conjugacy
-\item Example: Multinomial Mixture Model (maybe even LDA?) % Yes!
+\item Example: Multinomial Mixture Model (and LDA) 
 \item Conjugate VI in the general case \citep{Beal:2003}
 \end{itemize}
 
 \section{Nonconjugate Models}
 \begin{itemize}
-\item Laplace Approximation %(\wnote{depending on audience})
+\item Laplace Approximation 
 \item Gradient methods
 \item Problem: cannot simply differentiate an MC average
 \item Idea: transform $ \frac{d}{dq} \mathbb{E}_{q}[\cdot] $ into $ \mathbb{E}[\frac{d}{dq}\cdot] $
@@ -58,7 +58,7 @@ The modules below are in no particular order (except for the Basics, of course).
 
 \section{Nonparametric Models}
 
-%\wnote{I would push this module further down and depending on audience drop it altogether. I suppose people who do not know VI, do not know nonparametric models either. Thus we would need to invest quite some time in this.}
+I would put this module as advanced.
 
 \begin{itemize}
 \item Intro to stick-breaking processes \citep{IshwaranJames:2001}
@@ -82,13 +82,13 @@ The modules below are in no particular order (except for the Basics, of course).
 \item First attempt: Wake-sleep \citep{HintonEtAl:1995}
 \item Variational Autoencoders \citep{KingmaWelling:2013, RezendeEtAl:2014}
 \item Example models: ???
-\item Code snippet ??? %\wnote{We can aim to have notebooks for some (or all?) of the modules.}
+\item Code snippet ??? 
 \item Extra: The Deep Generative CRF (the Ryan Adams paper from NIPS)
 \end{itemize}
 
 \section{Reparametrisation Gradients}
 
-%\wnote{I think the whole module should depend on audience and we can cover the location-scale case in the modules about Nonconjugate models and/or DGMs.}
+I think the whole module should depend on audience and we can cover the location-scale case in the modules about Nonconjugate models and/or DGMs.
 
 \begin{itemize}
 \item Recap: Gaussian reparametrisation 
@@ -107,7 +107,7 @@ The modules below are in no particular order (except for the Basics, of course).
 
 \section{Collapsed VB}
 
-%\wnote{Another module that depends on audience: people with Bayesian aspirations vs people who want to play with DGMs.}
+Another module that depends on audience: people with Bayesian aspirations vs people who want to play with DGMs.
 
 \begin{itemize}
 \item Taylor expansions
@@ -124,14 +124,14 @@ The modules below are in no particular order (except for the Basics, of course).
 \item Hoelder bound
 \end{itemize}
 
-%\section{Not sure where to fit}
+\section{Not sure where to fit}
 
-%\begin{itemize}
-%	\item \wnote{Stochastic optimisation: at least at a high level}
-%	\item \wnote{GAN: if Eric Xing's connection between VAEs and GANs turn out interesting}	
-%	\item \wnote{I note that NLP2 students (and colleagues of mine) struggle to understand what it means to impose a prior. We can try to clear that out (perhaps in module Conjugate Models).}
-%	\item \wnote{People are usually ready to quote ``regularisation is an approximate Bayesian prior'' but they do not understand the limits/implications of the word ``approximate'' there and in a way they perceive it as not too different from ``VI is approximate posterior inference''. Perhaps this is worth discussing when we talk about Bayesian interpretations of (stochastic) regularisation techniques in the module BNNs.}
-%\end{itemize}
+\begin{itemize}
+	\item Stochastic optimisation \citep{RobbinsEtAl:1951}: at least at a high level
+	\item GAN: if Eric Xing's connection between VAEs and GANs turn out interesting
+	\item I note that NLP2 students (and colleagues of mine) struggle to understand what it means to impose a prior. We can try to clear that out (perhaps in module Conjugate Models).
+	\item People are usually ready to quote ``regularisation is an approximate Bayesian prior'' but they do not understand the limits/implications of the word ``approximate'' there and in a way they perceive it as not too different from ``VI is approximate posterior inference''. Perhaps this is worth discussing when we talk about Bayesian interpretations of (stochastic) regularisation techniques in the module BNNs.
+\end{itemize}
 
 \bibliographystyle{plainnat}
 \bibliography{VI}
