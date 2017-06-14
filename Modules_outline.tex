@@ -24,6 +24,7 @@ The modules below are in no particular order (except for the Basics, of course).
 \section{Basics}
 
 \begin{itemize}
+\item What is a prior?
 \item What is a posterior and what is posterior inference? $ \rightarrow $ recap of Bayes' rule
 \item Sampling as an intuitive way of performing inference before diving in the realms of VI?
 \item Example problems: Factorial HMMs, Bayesian Mixture Models (show GMs)
@@ -42,7 +43,7 @@ The modules below are in no particular order (except for the Basics, of course).
 \item Example: Bayesian Linear Regression
 \item Beta-Binomial warmup for Dirichlet-multinomial?
 \item Dirichlet-multinomial conjugacy
-\item Example: Multinomial Mixture Model (and LDA) 
+\item Example: LDA
 \item Conjugate VI in the general case \citep{Beal:2003}
 \end{itemize}
 
@@ -56,15 +57,20 @@ The modules below are in no particular order (except for the Basics, of course).
 \item Reparametrisation gradient \citep{KingmaWelling:2013, RezendeEtAl:2014, TitsiasLazarogredilla:2014}
 \end{itemize}
 
-\section{Nonparametric Models}
-
-I would put this module as advanced.
+\section{Nonparametric Models [Advanced]}
 
 \begin{itemize}
 \item Intro to stick-breaking processes \citep{IshwaranJames:2001}
 \item VI for HDP/PYP \citep{WangEtAl:2011}
 \item Intro to GPs
 \item VI for GPs
+\end{itemize}
+
+\section{Stochastic algorithms}
+
+\begin{itemize}
+	\item Stochastic optimisation \citep{RobbinsEtAl:1951}
+	\item SVI \citep{HoffmanEtAl:2013}
 \end{itemize}
 
 \section{Bayesian Neural Networks}
@@ -105,7 +111,7 @@ I think the whole module should depend on audience and we can cover the location
 \item Hierarchical Varational models 
 \end{itemize}
 
-\section{Collapsed VB}
+\section{Collapsed VB [Advanced]}
 
 Another module that depends on audience: people with Bayesian aspirations vs people who want to play with DGMs.
 
@@ -124,14 +130,6 @@ Another module that depends on audience: people with Bayesian aspirations vs peo
 \item Hoelder bound
 \end{itemize}
 
-\section{Not sure where to fit}
-
-\begin{itemize}
-	\item Stochastic optimisation \citep{RobbinsEtAl:1951}: at least at a high level
-	\item GAN: if Eric Xing's connection between VAEs and GANs turn out interesting
-	\item I note that NLP2 students (and colleagues of mine) struggle to understand what it means to impose a prior. We can try to clear that out (perhaps in module Conjugate Models).
-	\item People are usually ready to quote ``regularisation is an approximate Bayesian prior'' but they do not understand the limits/implications of the word ``approximate'' there and in a way they perceive it as not too different from ``VI is approximate posterior inference''. Perhaps this is worth discussing when we talk about Bayesian interpretations of (stochastic) regularisation techniques in the module BNNs.
-\end{itemize}
 
 \bibliographystyle{plainnat}
 \bibliography{VI}
