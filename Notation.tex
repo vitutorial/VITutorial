@@ -1,18 +1,10 @@
 \documentclass[14pt,a4paper]{article}
 
-\usepackage{amsmath, amssymb, bbm, xifthen}
+\usepackage{amsmath, amssymb, bbm, xifthen, vimacros}
 
 \author{}
 \title{Conventions for Slides}
 \date{last modified: \today}
-
-\DeclareMathOperator{\KullbackLeibler}{KL}
-
-\newcommand{\E}[2][]{\ifthenelse{\equal{#1}{}}{\mathbb{E}\left[#2\right]}{\mathbb{E}_{#1}\left[#2\right]}}
-\newcommand{\Ent}[1]{\mathbb{H}\left(#1\right)}
-\newcommand{\KL}[2]{\KullbackLeibler\left(#1\mid\mid #2\right)}
-\newcommand{\NDist}[2]{\mathcal{N}\left(#1,#2\right)}
-\newcommand{\norm}[1]{\lvert \lvert #1 \rvert \rvert}
 
 \begin{document}
 
