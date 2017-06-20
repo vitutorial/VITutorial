@@ -1,0 +1,59 @@
+\documentclass[14pt,a4paper]{article}
+
+\usepackage{amsmath, amssymb, bbm, xifthen}
+
+\author{}
+\title{Conventions for Slides}
+\date{last modified: \today}
+
+\DeclareMathOperator{\KullbackLeibler}{KL}
+
+\newcommand{\E}[2][]{\ifthenelse{\equal{#1}{}}{\mathbb{E}\left[#2\right]}{\mathbb{E}_{#1}\left[#2\right]}}
+\newcommand{\Ent}[1]{\mathbb{H}\left(#1\right)}
+\newcommand{\KL}[2]{\KullbackLeibler\left(#1\mid\mid #2\right)}
+\newcommand{\NDist}[2]{\mathcal{N}\left(#1,#2\right)}
+\newcommand{\norm}[1]{\lvert \lvert #1 \rvert \rvert}
+
+\begin{document}
+
+\begin{abstract}
+This document describes the notational conventions we plan to follow for the tutorial slides. 
+\end{abstract}
+
+\section{Probability}
+\begin{itemize}
+\item Probability densities are denoted by lower case letters and probability mass functions are denoted by upper case letters. Defaults: $ P $ and $ p $ are used for model densities, $ Q $ and $ q $ for approximations to the
+posterior or proposal distributions.
+\item Random variables whose outcomes are data are denoted by upper case Roman letters, while outcomes are denoted by the corresponding lower case letters. Defaults: $ X $ and $ x $ for observed data, $ Z $ and $ z $
+for latent data and $ Y $ and $ y $ for data labels (observed or latent).
+\item The set of outcomes of a random variable $ X $ is denoted by $ \mathcal{X} $. If we take $ \Omega $
+to be the event space, a random variable is thus a function $ X : \Omega \rightarrow \mathcal{X} $.
+\item Random variables whose outcomes are parameters are denoted by upper case Greek letter while outcomes
+are denoted by the corresponding lower case letters. Defaults: $ \Theta $ and $ \theta $ for model parameters
+and $ \Lambda $ and $ \lambda $ for inference parameters.
+\item Non-random hyperparameters are denoted by lower case Greek letters from the beginning of the alphabet.
+Default: $ \alpha $.
+\item By default, all random variables are understood to be vectors.
+\item The expectation of a (function of) a random variable $ X \sim p $ is denoted $ \E[p]{f(X)} $ by default
+or $ \E{f(X)} $ when it is clear which distribution is used.
+\item The entropy of a random variable $ X $ is denoted by $ \Ent{X} $.
+\item The relative entropy, or Kullback-Leibler divergence, from a distribution $ q $ to a distribution $ p $ 
+is denoted as $ \KL{q}{p} $.
+\item The univariate normal distribution with mean $ \mu $ and variance $ \sigma^{2} $ is denoted as 
+$ \NDist{\mu}{\sigma^{2}} $.
+\item The multivariate normal distribution with mean $ \mu $ and covariance matrix $ \Sigma $ is denoted as
+$ \NDist{\mu}{\Sigma} $.
+\end{itemize}
+
+\section{Linear Algebra}
+\begin{itemize}
+\item Vectors are denoted by Roman lower case letters, Matrices (and higher-order tensors) are denoted by
+upper case Roman letters. To avoid the proliferation of letters, we use indeces whenever possible. For example,
+two weight matrices may be distinguished as $ W_{task1} $ and $ W_{task2} $. The letter $ W $ is standardly
+used to denote weight matrices in neural networks.
+\item Matrix multiplication is denoted by $ \times $ or by writing
+to matrices next to each other. Element-wise multiplication (Hadamard product) is denoted by $ \odot $.
+\item The norm of a vector $ x $ is denoted $ \norm{x} $ and the Frobenius norm of a matrix $ W $ is similarly denoted $ \norm{W} $. Unless otherwise indicated, the norm is understood to be the Euclidean or $ L_{2} $-norm.
+\end{itemize}
+
+\end{document}
