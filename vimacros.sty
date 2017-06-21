@@ -1,0 +1,18 @@
+\ProvidesPackage{vimacros}
+
+\usepackage{amsmath, amssymb, xifthen}
+
+\DeclareMathOperator{\KullbackLeibler}{KL}
+
+% Expectation (optional arg: distribution)
+\newcommand{\E}[2][]{\ifthenelse{\equal{#1}{}}{\mathbb{E}\left[#2\right]}{\mathbb{E}_{#1}\left[#2\right]}}
+%Entropy
+\newcommand{\Ent}[1]{\mathbb{H}\left(#1\right)}
+% KL divergence
+\newcommand{\KL}[2]{\KullbackLeibler\left(#1\mid\mid #2\right)}
+% Normal distribution
+\newcommand{\NDist}[2]{\mathcal{N}\left(#1,#2\right)}
+% Norm
+\newcommand{\norm}[1]{\lvert \lvert #1 \rvert \rvert}
+% logarithm (optional arg: base)
+\newcommand{\loga}[2][]{\ifthenelse{\equal{#1}{}}{\log\left(#2\right)}{\log_{#1}\left(#2\right)}}

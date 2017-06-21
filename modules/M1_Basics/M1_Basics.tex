@@ -1,0 +1,96 @@
+\documentclass[14pt]{beamer}
+\usetheme{Montpellier}
+\usecolortheme{beaver}
+
+\title{Variational Inference: The Basics}
+\date{}
+\author[Schulz and Aziz]{Philip Schulz and Wilker Aziz}
+
+\usepackage{amsmath, amssymb, ../../vimacros, hyperref}
+\hypersetup{breaklinks=true, colorlinks=true, linkcolor=blue, citecolor=blue, urlcolor=blue}
+
+\usepackage{tikz}
+\usetikzlibrary{bayesnet}
+
+\begin{document}
+
+\frame{\titlepage}
+
+\section{Generative Models}
+
+\begin{frame}{Joint Distribution}
+Let $ X $ and $ Z $ be random variables. A generative model is any model that defines a joint distribution
+over these variables. 
+\pause
+\begin{block}{2 Examples of Generative Models}
+\begin{itemize}
+\item $ p(x,z) = p(x) p(z|x) $
+\item $ p(x,z) = p(z) p(x|z) $
+\end{itemize}
+\end{block}
+\end{frame}
+
+\begin{frame}{Likelihood and prior}
+From here on, $ x $ is our observed data. On the other hand, $ z $ is an unobserved outcome. 
+\begin{itemize}
+\item $ p(x|z) $ is the \textbf{likelihood}
+\item $ p(z) $ is the \textbf{prior} over $ Z $
+\end{itemize} 
+Notice: the prior may depend on a non-random quantity $ \alpha $ (write $ p(z|\alpha) $). In that case, we 
+call $ \alpha $ a hyperparameter.
+\end{frame}
+
+\begin{frame}{Bayes' rule}
+Bayes rule asserts that we can \textit{invert} a conditional probability distribution.
+\begin{equation}
+p(z|x) = \frac{p(x|z)p(z)}{p(x)}
+\end{equation}
+\end{frame}
+
+\begin{frame}{Bayes' rule}
+Bayes rule asserts that we can \textit{invert} a conditional probability distribution.
+\begin{equation}
+p(z|x) = \frac{\overbrace{p(x|z)}^{\text{likelihood}}\overbrace{p(z)}^{prior}}{p(x)}
+\end{equation}
+\end{frame}
+
+\begin{frame}{Bayes' rule}
+Bayes rule asserts that we can \textit{invert} a conditional probability distribution.
+\begin{equation}
+\underbrace{p(z|x)}_{\text{posterior}} = \frac{\overbrace{p(x|z)}^{\text{likelihood}}\overbrace{p(z)}^{prior}}{p(x)}
+\end{equation}
+\end{frame}
+
+\begin{frame}{Bayes' rule}
+Bayes rule asserts that we can \textit{invert} a conditional probability distribution.
+\begin{equation}
+\underbrace{p(z|x)}_{\text{posterior}} = \frac{\overbrace{p(x|z)}^{\text{likelihood}}\overbrace{p(z)}^{\text{prior}}}{\underbrace{p(x)}_{\text{\alert{marginal likelihood/evidence}}}}
+\end{equation}
+\end{frame}
+
+\begin{frame}{The Basic Problem}
+We want to compute the posterior over latent variables $ p(z|x) $. This involves computing the marginal likelihood
+$$ p(x) = \int p(x,z) dz $$
+which is often \textbf{intractable}. This problem motivates the use of \textbf{approximate inference} techniques.
+\end{frame}
+
+\begin{frame}{Bayesian Inference}
+Under the Bayesian view, model parameters $ \theta $ are also random. The generative model becomes
+\begin{itemize}
+\item $ p(x,\theta) $ for fully observed data (supervised learning)
+\item $ p(x,z,\theta) $ for observed and latent data (unsupervised learning)
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Bayesian Inference}
+The evidence becomes even harder to compute. This is because $ \theta $ is often high-dimensional
+(just think of neural nets!).
+\begin{itemize}
+\item $ p(x) = \int p(x, \theta) d\theta $ (supervised learning)
+\item $ p(x) = \int \int p(x, z, \theta) dz~d\theta $ (unsupervised learning)
+\end{itemize}
+\pause
+Again, approximate inference is needed.
+\end{frame}
+
+\end{document}
