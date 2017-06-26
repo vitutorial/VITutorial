@@ -195,30 +195,9 @@ FHMMs have several Markov chains over latent variables.
 \item Complexity of inference: $ \mathcal{O}(L^{2M}T) $.
 \end{itemize}
 \pause
-This model is \textbf{intractable} because of the exponential dependence on the number of hidden Markov chains.
-\end{frame}
-
-\begin{frame}{Latent Dirichlet Allocation}
-An admixture model that changes its mixture weights per document. We assume that the mixture components
-are fixed.
-\begin{figure}
-\begin{tikzpicture}
-\node[obs] (w) {$ w $};
-\node[latent, left= of w] (z) {$ z $};
-\node[latent, left= of z] (theta) {$ \theta $};
-\node[left= of theta] (alpha) {$ \alpha $};
-\node[above= of w] (beta) {$ \beta $};
-\node[below= of z] (fake) {}; % needed to fit the document plate
-
-\plate {tokens} {(w)(z)} {$ N $};
-\plate {document} {(w)(z)(theta)(fake)} {$ D $};
-
-\edge {alpha} {theta};
-\edge {theta} {z};
-\edge {z} {w};
-\edge {beta} {w};
-\end{tikzpicture}
-\end{figure}
+\begin{alertblock}{Intractable}
+Exponential dependency on the number of hidden Markov chains.
+\end{alertblock}
 \end{frame}
 
 \begin{frame}{Latent Dirichlet Allocation}
@@ -245,6 +224,7 @@ are fixed.
 % inference edges
 \path (w) edge[->,bend left=30,color=red] (z);
 \path (w) edge[->,bend left=30,color=red] (theta);
+\edge[color=red] {beta} {z};
 \pause
 \path (z) edge[-,bend right=30,color=red] (theta);
 \path (alpha) edge[->, bend left=30, color=red] (theta);
@@ -271,6 +251,7 @@ Inference network for LDA.
 \path (w) edge[->,bend left=30,color=red] (theta);
 \path (z) edge[-,bend right=30,color=red] (theta);
 \path (alpha) edge[->, bend left=30, color=red] (theta);
+\edge[color=red] {beta} {z};
 \end{tikzpicture}
 \end{figure}
 \end{frame}
@@ -296,7 +277,7 @@ Let's approximate it by an auxiliary distribution $ q(z) $ that is tractable!
 \end{block}
 \pause
 \begin{block}{Requirement}
-Make $ q(z) $ as close as possible to $ p(z|x) $ to obtain a faithful approximation.
+Choose $ q(z) $ as close as possible to $ p(z|x) $ to obtain a faithful approximation.
 \end{block}
 \pause
 \begin{block}{Implementation}
@@ -308,21 +289,22 @@ Minimize $ \KL{q(z)}{p(z|x)} $.
 The Kullback-Leibler divergence (or relative entropy) measures the divergence of a distribution $ q $ from 
 a distribution $ q $. 
 \begin{itemize}
-\item $ \KL{q(z)}{p(z|x)} = \int q(z) \loga{\frac{q(z)}{p(z|x)}} dz $ (continuous)
+\item $ \KL{q(z)}{p(z|x)} = \intl{ q(z) \loga{\frac{q(z)}{p(z|x)}}}{z} $ (continuous)
 \item $ \KL{q(z)}{p(z|x)} = \sum_{z} q(z) \loga{\frac{q(z)}{p(z|x)}} $ (discrete)
+\item $ \KL{q(z)}{p(z|x)} = \E[q(z)]{\loga{\frac{q(z)}{p(z|x)}}} $ (both)
 \end{itemize}
 \end{frame}
 
 \begin{frame}{Recap KL divergence}
 \begin{block}{Properties}
 \begin{itemize}
-\item $ \KL{q(z)}{p(z|x)} \geq 0 $ with equality iff $ q(z) = p(z|x) $.
+\item $ \KL{q(z)}{p(z|x)} \geq 0 $ with \\ equality iff $ q(z) = p(z|x) $.
 \pause
-\item $ \KL{q(z)}{p(z|x)} = \infty $ if $ \exists z $ s.t. $ p(z|x) = 0 $ and $ q(z) > 0 $.
+\item $ \KL{q(z)}{p(z|x)} = \infty $ \\ if $ \exists z $ s.t. $ p(z|x) = 0 $ and $ q(z) > 0 $.
 \pause
 \item In general $ \KL{q(z)}{p(z|x)} \not = \KL{p(z|x)}{q(z)} $.
 \pause
-\item $ -\KL{q(z)}{p(z|x)} = \int q(z) \frac{p(z|x)}{q(z)} dz \leq 0 $.
+\item $ -\KL{q(z)}{p(z|x)} \leq 0 $.
 \end{itemize}
 \end{block}
 \end{frame}
@@ -332,25 +314,23 @@ a distribution $ q $.
 \begin{frame}{VI derivation I}
 \begin{small}
 \begin{align*}
-\loga{p(x)} &= \int \loga{p(x,z)} dz \\
-&= \int \loga{\alert{q(z)}\frac{p(x,z)}{\alert{q(z)}}} dz \\
-&\geq \int \alert{q(z)} \loga{\frac{p(x,z)}{\alert{q(z)}}} dz \\
-& = \int \alert{q(z)} \loga{\frac{p(z|x)p(x)}{\alert{q(z)}}} dz \\
-&= \int \alert{q(z)} \loga{\frac{p(z|x)}{\alert{q(z)}}} dz + \loga{p(x)}
+\loga{p(x)} &= \loga{\intl{p(x,z)}{z}} \\
+&= \loga{\intl{\alert{q(z)}\frac{p(x,z)}{\alert{q(z)}}}{z}} \\
+&\geq \intl{ \alert{q(z)} \loga{\frac{p(x,z)}{\alert{q(z)}}}} {z} \\
+& = \intl{ \alert{q(z)} \loga{\frac{p(z|x)p(x)}{\alert{q(z)}}}} {z} \\
+&= \intl{ \alert{q(z)} \loga{\frac{p(z|x)}{\alert{q(z)}}}} {z} + \loga{p(x)}
 \end{align*}
 \end{small}
 \end{frame}
 
 \begin{frame}{VI derivation I}
-Notice that 
 \begin{small}
 \begin{align*}
 \int q(z) \loga{\frac{p(z|x)}{q(z)}} dz + \loga{p(x)} \\
 = -\KL{q(z)}{p(z|x)} + \loga{p(x)}
 \end{align*}
 \end{small}
-confirming that we have derived a lower bound on the log-evidence. The gap in the bound is exactly
-the KL divergence between the model posterior $ p(z|x) $ and its approximation $ q(z) $.
+We have derived a lower bound on the log-evidence whose gap is exactly $ \KL{q(z)}{p(z|x)} $.
 \end{frame}
 
 \subsection{Deriving VI from KL Divergence}
@@ -536,6 +516,7 @@ This approximation strategy is commonly known as \textbf{mean field} approximati
 \path (w) edge[->,bend left=30,color=red] (theta);
 \path (z) edge[-,bend right=30,color=red] (theta);
 \path (alpha) edge[->, bend left=30, color=red] (theta);
+\edge[color=red] {beta} {z};
 \end{tikzpicture}
 \end{figure}
 \center{Exact posterior $ p(z,\theta|w,\alpha, \beta) $}
@@ -558,6 +539,7 @@ This approximation strategy is commonly known as \textbf{mean field} approximati
 \path (w) edge[->,bend left=30,color=red] (z);
 \path (w) edge[->,bend left=30,color=red] (theta);
 \path (alpha) edge[->, bend left=30, color=red] (theta);
+\edge[color=red] {beta} {z};
 \end{tikzpicture}
 \end{figure}
 \center{Approximate posterior $ q(z,\theta|w,\alpha, \beta) = q(z|w,\beta)q(\theta|w,\alpha) $}
