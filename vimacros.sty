@@ -1,6 +1,6 @@
 \ProvidesPackage{vimacros}
 
-\usepackage{amsmath, amssymb, xifthen}
+\usepackage{amsmath, amssymb, xifthen, xstring}
 
 \DeclareMathOperator{\KullbackLeibler}{KL}
 
@@ -19,3 +19,15 @@
 % Integral (args: integrand, integration variable -- optional: domain of integration)
 \newcommand{\intl}[3][]{\ifthenelse{\equal{#1}{}}{\int 
 #2 \mathrm{d#3}}{\int_{#1} #2 \mathrm{d#3}}}
+% Exponential family
+% args: RV, canoncial parameters
+% optional: mode -> 
+% base = full exponential family (default)
+% exp = only the exponential
+% log = only the term inside the exponential
+% dot = only the inner product between sufficient statistics and natural parameters
+\newcommand{\expfam}[3][base]{\IfEqCase{#1}{
+{base}{h(#2) \exp\left(\eta(#3)^{\top}t(#2) - a(\eta(#3)\right)}
+{exp}{\exp\left(\eta(#3)^{\top}t(#2) - a(\eta(#3))\right)}
+{log}{\eta(#3)^{\top}t(#2) - a(\eta(#3))}
+{dot}{\eta(#3)^{\top}t(#2)}}}
