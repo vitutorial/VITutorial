@@ -1,0 +1,384 @@
+\documentclass[14pt]{beamer}
+
+\usetheme{Montpellier}
+\usecolortheme{beaver}
+
+\usepackage{amsmath, amssymb, ../../vimacros, hyperref, tikz}
+\usetikzlibrary{positioning, fit, bayesnet}
+\usepackage[round]{natbib}
+
+\hypersetup{breaklinks=true, colorlinks=true, linkcolor=blue, urlcolor=blue, citecolor=blue}
+
+\title{Deep Generative Models}
+\author{Philip Schulz and Wilker Aziz}
+\date{}
+
+
+\begin{document}
+
+\begin{frame}
+\maketitle
+\end{frame}
+
+\frame{\tableofcontents}
+
+\section{Generative Models}
+\frame{\tableofcontents[currentsection]}
+
+\begin{frame}{Recap: Generative Models}
+Joint distribution over observed data $ x $ and latent variables $ Z $.
+\begin{equation*}
+p(x,z|\alpha) = \overbrace{p(x|z,\alpha)}^{\text{likelihood}} \underbrace{p(z|\alpha)}_{\text{prior}}
+\end{equation*} 
+The likelihood and prior are often standard distributions (Gaussian, Bernoulli) with little dependence on side
+information.
+\end{frame}
+
+\section{First Attempt: Log-linear Models}
+\frame{\tableofcontents[currentsection]}
+
+\begin{frame}{Feature-rich Generative Models}
+Let us assume that $ z $ has internal structure (features). How can we exploit that?
+\begin{block}{First Idea}
+Make $ p(x|z,\alpha) $ a log-linear model.
+\begin{itemize}
+\item Only discrete data
+\item Trainable with EM if we can efficiently enumerate $ \mathcal{X} $ and $ \mathcal{Z} $.
+\end{itemize}
+\end{block}
+\end{frame}
+
+\begin{frame}{Log-linear Model}
+Let us treat $ z $ as observed.
+\begin{equation*}
+p(x|z,\alpha\alert{=w}) = \frac{\exp\left(w^{\top}f(x,y)\right)}{\sum_{x\in \mathcal{X}}\exp\left(w^{\top}f(x,y)\right)}
+\end{equation*}
+\pause
+\begin{block}{Weight Gradient}
+\begin{equation*}
+\frac{d}{dw}\log p(x|z,w) = x - \E{X|z,w} 
+\end{equation*}
+\pause
+Updates need to be performed iteratively.
+\end{block}
+\end{frame}
+
+\begin{frame}{Log-linear model with latent variables}
+Now let us treat $ z $ as latent.
+\pause
+\begin{block}{Model}
+\begin{equation*}
+p(x,z|w) = \frac{\exp\left(w^{\top}f(x,y)\right)}{\sum_{x\in \mathcal{X}}\exp\left(w^{\top}f(x,y)\right)} 
+\times \underbrace{p(z)}_{arbitrary}
+\end{equation*}
+\end{block}
+\end{frame}
+
+\begin{frame}{Log-linear model with latent variables}
+\begin{block}{Posterior}
+\begin{align*}
+p(z|x,w) = \frac{p(x,z|w)}{p(x|w)} = \frac{p(x,z|w)}{\sum_{z} p(x,z|w)} = \\
+\dfrac{\frac{\exp\left(w^{\top}f(x,y)\right)}{\sum_{x\in \mathcal{X}}\exp\left(w^{\top}f(x,y)\right)} \times p(z)}
+{\sum_{z} \frac{\exp\left(w^{\top}f(x,y)\right)}{\sum_{x\in \mathcal{X}}\exp\left(w^{\top}f(x,y)\right)} \times p(z)}
+\end{align*}
+\end{block}
+\end{frame}
+
+\begin{frame}{Log-linear model with latent variables}
+\begin{block}{Weight Gradient}
+\begin{align*}
+\frac{d}{dw}\E[p(z|x,w)]{\log p(x,z|w)} = \\ 
+\frac{d}{dw}\sum_{z}p(z|x,w) \log p(x,z|w) = \\
+\sum_{z}p(z|x,w)  \frac{d}{dw}\log p(x,z|w)
+\end{align*}
+\end{block}
+\end{frame}
+
+\begin{frame}{Log-linear model with latent variables}
+\begin{block}{Weight Gradient}
+\begin{align*}
+\frac{d}{dw}\E[p(z|x,w)]{\log p(x,z|w)} = \\ 
+\frac{d}{dw}\sum_{z}p(z|x,w) \log p(x,z|w) = \\
+\sum_{z}p(z|x,w) \alert{\underbrace{\frac{d}{dw} \log p(x,z|w)}_{\text{We've already solved this!}}}
+\end{align*}
+\end{block}
+\end{frame}
+
+\begin{frame}{Log-linear model with latent variables}
+\begin{block}{Weight Gradient}
+\begin{align*}
+&\frac{d}{dw}\E[p(z|x,w)]{\log p(x,z|w)} = \\ 
+&\E[p(z|x,w)]{X} - \E[p(z|x,w)]{\E{X|z,w}}
+\end{align*}
+\end{block}
+\pause
+\begin{block}{Procedurally}
+\center{E\_count($x,z$) - E\_count($ x,z $) $ \times  \E{X|z,w} $}
+\end{block}
+\end{frame}
+
+\begin{frame}{EM}
+\begin{itemize}
+\item[E-step] $ p(z|x,w) = \frac{p(x,z|w)}{\sum_{z} p(x,z|w)} $
+in $ \mathcal{O}(|\mathcal{X}|\times |\mathcal{Z}|) $
+\item[M-step] Iteratively optimise $ w $ to match E\_count($x,z$) with E\_count($ x,z $) $ \times  \E{X|z,w} $ 
+\end{itemize}
+\begin{block}{Restrictions}
+\begin{itemize}
+\item Only log-linear models
+\item Scales badly
+\end{itemize}
+\end{block}
+\end{frame}
+
+\section{Second Attempt: Wake-Sleep}
+\frame{\tableofcontents[currentsection]}
+
+\begin{frame}{Wake-sleep Algorithm}
+\begin{itemize}
+\item Generalise latent variables to Neural Networks
+\item Train generative neural model
+\item Use variational inference!
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Wake-sleep Architecture}
+2 Neural Networks:
+\begin{itemize}
+\item A generation network to model the data (the one we want to optimise) -- parameters: $ \theta $
+\item An inference (recognition) network (to model the latent variable) -- parameters: $ \lambda $
+\item Original setting: binary hidden units
+\pause
+\item Training is performed in a ``hard EM'' fashion
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Wake-sleep Training}
+\textbf{Wake Phase} \\
+\begin{itemize}
+\item Use inference network to sample hidden unit setting $ z $ from $ q(z|x,\lambda) $
+\item Update generation parameters $ \theta $ to maximize liklelihood of data given latent state $ p(x|z,\theta) $
+\end{itemize}
+\pause
+\textbf{Sleep Phase}
+\begin{itemize}
+\item Produce dream sample $ \tilde{x} $ from random hidden unit $ z $
+\item Update inference parameters $ \lambda $ to maximize probability of latent state $ q(z|\tilde{x},\lambda) $
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Wake Phase Objective}
+Assumes latent state $ z $ to be fixed random draws from $ q(z|x,\lambda) $.
+\begin{equation*}
+\max_{\theta} \log p(x|z,\theta) 
+\end{equation*}
+This is simply supervised learning with imputed latent data!
+\end{frame}
+
+\begin{frame}{Sleep Phase Objective}
+Assumes fake data $ \tilde{x} $ to be fixed random draw from $ \log p(x|,z,\theta) $.
+\begin{equation*}
+\min_{\lambda} = \E[q(z|x,\lambda)]{\log p(x,z|\theta)} + \Ent{q(z|x,\lambda)}
+\end{equation*}
+\end{frame}
+
+\begin{frame}{Wake-sleep Algorithm}
+\textbf{Advantages}
+\begin{itemize}
+\item Backprop can be used without modification
+\item Amortised inference: all latent variables are inferred from the same weights $ \lambda $
+\end{itemize}
+\pause
+\textbf{Drawbacks}
+\begin{itemize}
+\item Inference and generative networks are trained on different objectives
+\item Inference weights $ \lambda $ are updated on fake data $ \tilde{x} $
+\item Generative weights are bad initially, giving wrong signal to the updates of $ \lambda $
+\end{itemize}
+\end{frame}
+
+\section{This is how we do: Variational Autoencoders}
+\frame{\tableofcontents[currentsection]}
+
+\begin{frame}{Generative Model with NN Likelihood}
+\begin{block}{Goal}
+Define model $ p(x,z|\theta) = p(x|z,\theta)p(z) $ where the likelihood $ p(x|z,\theta) $ is given by a neural
+network. (We fix $ p(z) $ for simplicity.)
+\end{block}
+\pause
+\begin{block}{Problem}
+$ p(x) = \intl{p(x|z,\theta) p(z)}{z} $ is hard to compute.
+\end{block}
+\end{frame}
+
+\begin{frame}{Generative Model with NN Likelihood}
+\begin{block}{Goal}
+Define model $ p(x,z|\theta) = p(x|z,\theta)p(z) $ where the likelihood $ p(x|z,\theta) $ is given by a neural
+network. (We fix $ p(z) $ for simplicity.)
+\end{block}
+\begin{block}{Problem}
+$ p(x) = \intl{\alert{\underbrace{p(x|z,\theta)}_{\substack{\text{highly} \\  \text{non-linear!}}}} p(z)}{z} $ is hard to compute.
+\end{block}
+\end{frame}
+
+\begin{frame}{Generative Model with NN Likelihood}
+\begin{block}{Solution: VI}
+\begin{small}
+\begin{align*}
+\log p(x) &\geq \overbrace{\E[q(z|x,\lambda)]{\log p(x,z|\theta)} + \Ent{q(z|x,\lambda)}}^{\ELBO} \\
+&= \E[q(z|x,\lambda)]{\log p(x|z,\theta)} + \KL{p(z)}{q(z|x,\lambda)}
+\end{align*}
+\end{small}
+\end{block}
+\end{frame}
+
+\begin{frame}{Generative Model with NN Likelihood}
+\begin{block}{Solution: VI}
+\begin{small}
+\begin{align*}
+\log p(x) &\geq \overbrace{\E[q(z|x,\lambda)]{\log p(x,z|\theta)} + \Ent{q(z|x,\lambda)}}^{\ELBO} \\
+&= \E[q(z|x,\lambda)]{\log p(x|z,\theta)} + \alert{\underbrace{\KL{p(z)}{q(z|x,\lambda)}}_{\text{assume analytical}}}
+\end{align*}
+\end{small}
+\end{block}
+\end{frame}
+
+\begin{frame}{Generative Model with NN Likelihood}
+\begin{block}{Solution: VI}
+\begin{small}
+\begin{align*}
+\log p(x) &\geq \overbrace{\E[q(z|x,\lambda)]{\log p(x,z|\theta)} + \Ent{q(z|x,\lambda)}}^{\ELBO} \\
+&= \alert{\underbrace{\E[q(z|x,\lambda)]{\log p(x|z,\theta)}}_{\text{approximate by sampling}}} + \underbrace{\KL{p(z)}{q(z|x,\lambda)}}_{\text{assume analytical}}
+\end{align*}
+\end{small}
+\end{block}
+\end{frame}
+
+\begin{frame}{Generation Network Gradient}
+\begin{align*}
+&\frac{d}{d\theta}\E[q(z|x,\lambda)]{\log p(x|z,\theta)} \\ 
+&=\E[q(z|x,\lambda)]{\frac{d}{d\theta}\log p(x|z,\theta)} \\
+&\overset{\text{MC}}{\approx} \frac{1}{S}\sum_{i=1}^{S}
+\frac{d}{d\theta} \log p(x|z_{i},\theta)
+\end{align*}
+\end{frame}
+
+\begin{frame}{Inference Network Gradient}
+\begin{align*}
+&\frac{d}{d\lambda}\left[\E[q(z|x,\lambda)]{\log p(x|z,\theta)} + \KL{p(z)}{q(z|x,\lambda)} \right] \\
+= &\frac{d}{d\lambda}\E[q(z|x,\lambda)]{\log p(x|z,\theta)}
++ \text{analytical computation}
+\end{align*}
+\end{frame}
+
+\begin{frame}{Inference Network Gradient}
+\begin{align*}
+&\frac{d}{d\lambda}\E[q(z|x,\lambda)]{\log p(x|z,\theta)} \\
+&= \frac{d}{d\lambda} \intl{q(z|x,\lambda)\log p(x|z,\theta)}{z}
+\end{align*}
+\begin{block}{Problems for MC}
+\begin{itemize}
+\item Sampling $ z $ neglects $ \frac{d}{d\lambda} q(z|x,\lambda) $
+\item Differentiating $ q(z|x,\lambda) $ breaks the expectation
+\end{itemize}
+\end{block}
+\end{frame}
+
+\begin{frame}{Inference Network Gradient}
+\begin{small}
+\begin{align*}
+&= \frac{d}{d\lambda} \intl{q(z|x,\lambda)\log p(x|z,\theta)}{z} \\
+&= \frac{d}{d\lambda} \intl{\alert{q(\epsilon)} \loga{ p(x | \alert{\overbrace{h(\epsilon, \lambda)}^{=z}},\theta) \times \alert{\underbrace{\left|\frac{d}{d\epsilon}h(\epsilon, \lambda)\right|}_{\text{constant if h linear}}}}}{\alert{\epsilon}} \\
+&= \intl{q(\epsilon) \frac{d}{d\lambda} \log p(x| h(\epsilon, \lambda), \theta)}{\epsilon} \\
+&= \E[p(\epsilon)]{\frac{d}{d\lambda} \log p(x| h(\epsilon, \lambda), \theta)}
+\overset{\text{MC}}{\approx} \sum_{i=1}^{S} \frac{d}{d\lambda} \log p(x| h(\epsilon, \lambda), \theta)
+\end{align*}
+\end{small}
+\end{frame}
+
+\begin{frame}{Computation Graph}
+\begin{figure}
+\begin{tikzpicture}[node distance=1cm]
+\node[rectangle, draw, rounded corners, thick] (input) {$x$};
+\node[rectangle, draw, rounded corners, thick, above left=of input] (mu) {$ \mu $};
+\node[rectangle, draw, rounded corners, thick, above right=of input] (var) {$ \sigma $};
+\node[circle, draw, rounded corners, thick, above right= of mu] (z) {$ z $};
+\node[rectangle, fill=blue!20, thick, above of= z, rounded corners, draw] (output) {$ \tilde{x} $};
+
+\draw[->, thick] (input) edge (mu);
+\draw[->, thick] (input) edge (var);
+\draw[->, thick] (mu) edge (z);
+\draw[->, thick] (var) edge (z);
+\draw[->, thick] (z) edge (output);
+
+\pause
+\node[draw=orange, thick, rectangle, fit= (input) (mu) (var), rounded corners] {};
+\node[left= of mu] (inference) {\textcolor{orange}{inference model}};
+
+\pause
+\node[draw=blue!50, thick, rectangle, fit= (z) (output), rounded corners] {};
+\node[above= of inference] (generation) {\textcolor{blue!50}{generation model}};
+
+\pause
+\node[draw, rectangle, rounded corners, right =of var] (epsilon) {$ \epsilon $};
+\draw[->, thick] (epsilon) edge (var);
+\end{tikzpicture}
+\end{figure}
+\end{frame}
+
+\begin{frame}{Example}
+\begin{itemize}
+\item Data: binary mnist
+\item Likelihood: product of Bernoullis
+\item Prior over $ z $: $\NDist{0}{1}$
+\item $ q(z|x,\lambda) = \NDist{\mu(x,\lambda)}{\sigma(x,\lambda)^{2}} $
+\item $ \mu(x, \lambda) = \text{NN}_{\mu}(x; \lambda) $
+\item $ \sigma(x, \lambda) = \text{NN}_{\sigma}(x; \lambda) $
+\end{itemize}
+\pause
+\begin{block}{Mean Field assumption}
+Variational approximation factorises over latent dimensions.
+\end{block}
+\end{frame}
+
+\begin{frame}{Graphical Model}
+	
+	\begin{columns}
+	\begin{column}{0.2\textwidth}
+	\begin{tikzpicture}
+    % Define nodes
+    \node[latent]		(z)		{$ z $};
+    \node[obs, below = of z]		(x)		{$ x $};
+    \node[right = of x]		(theta)		{$ \theta $};
+    
+    % Connect nodes
+    \edge{z,theta}{x};
+    
+    % add plates
+    \plate {x-sentence} {(x)(z)} {$ m $}; \pause
+   
+    \node[right = of z]		(lambda)		{$ \lambda $};   
+    \edge[dashed, bend right]{x}{z};
+    \edge{lambda}{z};
+    \end{tikzpicture}
+    \end{column}
+    \begin{column}{0.7\textwidth}
+    	\begin{itemize}
+			\item approximate posterior \\ 
+			\begin{small}
+			$q(z|x,\lambda) = \NDist{\mu(x,\lambda)}{\sigma(x,\lambda)^{2}}$
+			\end{small} \pause
+			\item where 
+			\begin{itemize}
+				\item $\mu(x, \lambda) = \text{NN}_{\mu}(x; \lambda) $ \\
+				e.g. $\mu(x, \lambda) = \tanh(W^{(u)} r(x) + b^{(u)})$ \pause
+				\item $\sigma(x, \lambda) = \exp(\text{NN}_{\sigma}(x; \lambda))$ \\
+				e.g. $\sigma(x, \lambda) = \exp \left( \tanh(W^{(v)} r(x) + b^{(v)}) \right)$ \pause
+			  \item $\lambda=(W^{(u)}, W^{(v)}, b^{(u)}, b^{(v)})$
+		   \end{itemize}
+	  \end{itemize}
+    \end{column}
+    \end{columns}
+\end{frame}
+
+\end{document}
