@@ -321,13 +321,13 @@ h(\epsilon, \lambda) = \mu(x,\lambda) + \text{diag}(\sigma(x, \lambda))  \odot \
 \node[rectangle, draw, rounded corners, thick, above left=of input] (mu) {$ \mu $};
 \node[rectangle, draw, rounded corners, thick, above right=of input] (var) {$ \sigma $};
 \node[circle, draw, rounded corners, thick, above right= of mu] (z) {$ z $};
-\node[rectangle, fill=blue!20, thick, above of= z, rounded corners, draw] (output) {$ x $};
+\node[rectangle, fill=blue!20, thick, above of= z, rounded corners, draw, node distance=1.5cm] (output) {$ x $};
 
-\draw[->, thick] (input) edge (mu);
-\draw[->, thick] (input) edge (var);
+\draw[->, thick] (input) -- (mu) node[midway, above, rotate=315] {$ \lambda $};
+\draw[->, thick] (input) -- (var) node[midway, above, rotate=45] {$ \lambda $};
 \draw[->, thick] (mu) edge (z);
 \draw[->, thick] (var) edge (z);
-\draw[->, thick] (z) edge (output);
+\draw[->, thick] (z) -- (output) node[midway, right] {$ \theta $};
 
 \pause
 \node[draw=orange, thick, rectangle, fit= (input) (mu) (var), rounded corners] {};
