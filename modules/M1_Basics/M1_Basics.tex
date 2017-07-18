@@ -4,7 +4,8 @@
 
 \title{Variational Inference: The Basics}
 \date{}
-\author[Schulz and Aziz]{Philip Schulz and Wilker Aziz}
+\author[Schulz and Aziz]{Philip Schulz and Wilker Aziz \\
+\url{https://github.com/philschulz/VITutorial}}
 
 \usepackage{amsmath, amssymb, ../../vimacros, hyperref, enumerate}
 \usepackage[round]{natbib}
@@ -18,16 +19,20 @@
 
 \frame{\titlepage}
 
+\frame{\tableofcontents}
+
 \section{Generative Models}
+\frame{\tableofcontents[currentsection]}
 
 \begin{frame}{Joint Distribution}
 Let $ X $ and $ Z $ be random variables. A generative model is any model that defines a joint distribution
 over these variables. 
 \pause
-\begin{block}{2 Examples of Generative Models}
+\begin{block}{3 Examples of Generative Models}
 \begin{itemize}
 \item $ p(x,z) = p(x) p(z|x) $
 \item $ p(x,z) = p(z) p(x|z) $
+\item $ p(x,z) = p(x) p(z) $
 \end{itemize}
 \end{block}
 \end{frame}
@@ -38,36 +43,36 @@ From here on, $ x $ is our observed data. On the other hand, $ z $ is an unobser
 \item $ p(x|z) $ is the \textbf{likelihood}
 \item $ p(z) $ is the \textbf{prior} over $ Z $
 \end{itemize} 
-Notice: the prior may depend on a non-random quantity $ \alpha $ (write $ p(z|\alpha) $). In that case, we 
+Notice: both distributions may depend on a non-random quantity $ \alpha $ (write e.g. $ p(z|\alpha) $). In that case, we 
 call $ \alpha $ a hyperparameter.
 \end{frame}
 
-\begin{frame}{Bayes' rule}
-Bayes rule asserts that we can \textit{invert} a conditional probability distribution.
-\begin{equation}
+\begin{frame}{Bayes rule}
+We can \textit{invert} a conditional probability distribution.
+\begin{equation*}
 p(z|x) = \frac{p(x|z)p(z)}{p(x)}
-\end{equation}
+\end{equation*}
 \end{frame}
 
-\begin{frame}{Bayes' rule}
-Bayes rule asserts that we can \textit{invert} a conditional probability distribution.
-\begin{equation}
+\begin{frame}{Bayes rule}
+We can \textit{invert} a conditional probability distribution.
+\begin{equation*}
 p(z|x) = \frac{\overbrace{p(x|z)}^{\text{likelihood}}\overbrace{p(z)}^{prior}}{p(x)}
-\end{equation}
+\end{equation*}
 \end{frame}
 
-\begin{frame}{Bayes' rule}
-Bayes rule asserts that we can \textit{invert} a conditional probability distribution.
-\begin{equation}
+\begin{frame}{Bayes rule}
+We can \textit{invert} a conditional probability distribution.
+\begin{equation*}
 \underbrace{p(z|x)}_{\text{posterior}} = \frac{\overbrace{p(x|z)}^{\text{likelihood}}\overbrace{p(z)}^{prior}}{p(x)}
-\end{equation}
+\end{equation*}
 \end{frame}
 
-\begin{frame}{Bayes' rule}
-Bayes rule asserts that we can \textit{invert} a conditional probability distribution.
-\begin{equation}
+\begin{frame}{Bayes rule}
+We can \textit{invert} a conditional probability distribution.
+\begin{equation*}
 \underbrace{p(z|x)}_{\text{posterior}} = \frac{\overbrace{p(x|z)}^{\text{likelihood}}\overbrace{p(z)}^{\text{prior}}}{\underbrace{p(x)}_{\text{\alert{marginal likelihood/evidence}}}}
-\end{equation}
+\end{equation*}
 \end{frame}
 
 \begin{frame}{The Basic Problem}
@@ -96,6 +101,7 @@ Again, approximate inference is needed.
 \end{frame}
 
 \section{Examples}
+\frame{\tableofcontents[currentsection]}
 
 \begin{frame}{Factorial HMMs}
 FHMMs have several Markov chains over latent variables.
@@ -136,15 +142,15 @@ FHMMs have several Markov chains over latent variables.
 \path (xt+1) edge[->, color=red, bend right=30] (st+1);
 
 \pause
-\edge[-, color=red]{st-1}{zt-1};
-\edge[-, color=red]{st}{zt};
-\edge[-, color=red]{st+1}{zt+1};
-
-\pause
 \path (st-1) edge[-, color=red, bend left=30] (st);
 \path (st) edge[-, color=red, bend left=30] (st+1);
 \path (zt-1) edge[-, color=red, bend left=30] (zt);
 \path (zt) edge[-, color=red, bend left=30] (zt+1);
+
+\pause
+\edge[-, color=red]{st-1}{zt-1};
+\edge[-, color=red]{st}{zt};
+\edge[-, color=red]{st+1}{zt+1};
 \end{tikzpicture}
 \end{figure}
 \end{frame}
@@ -223,7 +229,6 @@ are fixed.
 \pause
 % inference edges
 \path (w) edge[->,bend left=30,color=red] (z);
-\path (w) edge[->,bend left=30,color=red] (theta);
 \edge[color=red] {beta} {z};
 \pause
 \path (z) edge[-,bend right=30,color=red] (theta);
@@ -248,7 +253,6 @@ Inference network for LDA.
 
 % inference edges
 \path (w) edge[->,bend left=30,color=red] (z);
-\path (w) edge[->,bend left=30,color=red] (theta);
 \path (z) edge[-,bend right=30,color=red] (theta);
 \path (alpha) edge[->, bend left=30, color=red] (theta);
 \edge[color=red] {beta} {z};
@@ -268,6 +272,7 @@ are fixed.
 \end{frame}
 
 \section{Variational Inference}
+\frame{\tableofcontents[currentsection]}
 
 \begin{frame}{The Goal}
 Assume $ p(z|x) $ is intractable.
@@ -300,11 +305,11 @@ a distribution $ q $.
 \begin{itemize}
 \item $ \KL{q(z)}{p(z|x)} \geq 0 $ with \\ equality iff $ q(z) = p(z|x) $.
 \pause
+\item $ -\KL{q(z)}{p(z|x)} \leq 0 $.
+\pause
 \item $ \KL{q(z)}{p(z|x)} = \infty $ \\ if $ \exists z $ s.t. $ p(z|x) = 0 $ and $ q(z) > 0 $.
 \pause
 \item In general $ \KL{q(z)}{p(z|x)} \not = \KL{p(z|x)}{q(z)} $.
-\pause
-\item $ -\KL{q(z)}{p(z|x)} \leq 0 $.
 \end{itemize}
 \end{block}
 \end{frame}
@@ -313,23 +318,31 @@ a distribution $ q $.
 
 \begin{frame}{VI derivation I}
 \begin{small}
-\begin{align*}
+\begin{equation*}
+\begin{aligned}
 \log p(x) &= \loga{\intl{p(x,z)}{z}} \\
+\pause
 &= \loga{\intl{\alert{q(z)}\frac{p(x,z)}{\alert{q(z)}}}{z}} \\
+\pause
 &\geq \intl{ \alert{q(z)} \loga{\frac{p(x,z)}{\alert{q(z)}}}} {z} \\
+\pause
 & = \intl{ \alert{q(z)} \loga{\frac{p(z|x)p(x)}{\alert{q(z)}}}} {z} \\
+\pause
 &= \intl{ \alert{q(z)} \loga{\frac{p(z|x)}{\alert{q(z)}}}} {z} + \log p(x)
-\end{align*}
+\end{aligned}
+\end{equation*}
 \end{small}
 \end{frame}
 
 \begin{frame}{VI derivation I}
-\begin{small}
-\begin{align*}
-\intl{ q(z) \loga{\frac{p(z|x)}{q(z)}}}{z} + \loga{p(x)} \\
-= -\KL{q(z)}{p(z|x)} + \loga{p(x)}
-\end{align*}
-\end{small}
+\begin{equation*}
+\begin{aligned}
+\log p(x) &\geq \intl{ q(z) \loga{\frac{p(z|x)}{q(z)}}}{z} + \loga{p(x)} \\
+\pause
+&= -\KL{q(z)}{p(z|x)} + \loga{p(x)}
+\end{aligned}
+\end{equation*}
+\pause
 We have derived a lower bound on the log-evidence whose gap is exactly $ \KL{q(z)}{p(z|x)} $.
 \end{frame}
 
@@ -347,14 +360,20 @@ Recall that we want to find $ q(z) $ such that $ \KL{q(z)}{p(z|x)} $ is small.
 
 \begin{frame}{VI derivation II}
 \begin{small}
-\begin{align*}
+\begin{equation*}
+\begin{aligned}
 &\underset{q(z)}{\max} -\KL{q(z)}{p(z|x)} \\ 
+\pause
 &= \underset{q(z)}{\max} \intl{ q(z) \loga{\frac{p(z|x)}{q(z)}}}{z} \\
+\pause
 &= \underset{q(z)}{\max} \intl{ q(z) \loga{\frac{p(z,x)}{p(x)q(z)}}} {z} \\
+\pause
 &= \underset{q(z)}{\max} \intl{ q(z) \loga{p(z,x)}} {z} - \intl{ q(z) \loga{q(z)}} {z} 
 - \overbrace{\log(p(x))}^{constant} \\
+\pause
 &= \underset{q(z)}{\max}~\E[q(z)]{\loga{p(x,z)}} + \Ent{q(z)}
-\end{align*}
+\end{aligned}
+\end{equation*}
 \end{small}
 \end{frame}
 
@@ -376,11 +395,11 @@ VI in its basic form can be performed via coordinate ascent. This can be done as
 \pause
 \item Compute the expected log-density $ \E[q(z)]{\loga{p(x,z)}} $.
 \pause
-\item Maximize with respect to $ q(z) $ and while trying to keep $ q(z) $ as broad as possible (through entropy
-regularisation):
-\begin{equation}
+\item Maximize with respect to $ q(z) $ with entropy
+regularisation:
+\begin{equation*}
 \underset{q(z)}{\max}~\E[q(z)]{\loga{p(x,z)}} + \Ent{q(z)}
-\end{equation}
+\end{equation*}
 \end{enumerate}
 \end{frame}
 
@@ -388,23 +407,24 @@ regularisation):
 If $ q(z) = p(z|x) $ then $ \KL{q(z)}{p(z|x)} = 0 $ and thus we are directly optimising the log-evidence.
 \begin{enumerate}
 \item Compute the expected log-density $ \E[p(z|x)]{\loga{p(x,z)}} $.
-\item Maximize with respect to $ p(z|x) $ and while trying to keep $ p(z|x) $ as broad as possible (through entropy
-regularisation):
-\begin{equation}
+\item Maximize with respect to $ p(z|x) $ with entropy
+regularisation:
+\begin{equation*}
 \underset{p(z|x)}{\max}~\E[p(z|x)]{\loga{p(x,z)}} + \Ent{p(z|x)}
-\end{equation}
+\end{equation*}
 \end{enumerate}
 \end{frame}
 
 \begin{frame}{What if $ q(z) = p(z|x) $?}
 If $ q(z) = p(z|x) $ then $ \KL{q(z)}{p(z|x)} = 0 $ and thus we are directly optimising the log-evidence.
+\pause
 \begin{itemize}
 \item[\alert{E-step}] $ \E[p(z|x)]{\loga{p(x,z)}} $.
-\item[\alert{M-step}] Maximize with respect to $ p(z|x) $ and while trying to keep $ p(z|x) $ as broad as possible 
-(through entropy regularisation):
-\begin{equation}
+\pause
+\item[\alert{M-step}] Maximize with respect to $ p(z|x) $ with entropy regularisation:
+\begin{equation*}
 \underset{p(z|x)}{\max}~\E[p(z|x)]{\loga{p(x,z)}} + \Ent{p(z|x)}
-\end{equation}
+\end{equation*}
 \end{itemize}
 \end{frame}
 
@@ -422,7 +442,8 @@ that we are using $ q(z) $ to compute the expected density.
 \end{itemize}
 \end{frame}
 
-\subsection{Mean Field Inference}
+\section{Mean Field Inference}
+\frame{\tableofcontents[currentsection]}
 
 \begin{frame}{Designing a tractable approximation}
 \begin{itemize}
@@ -544,17 +565,15 @@ This approximation strategy is commonly known as \textbf{mean field} approximati
 \center{Approximate posterior $ q(z,\theta|w,\alpha, \beta) = \prod_{d=1}^{D}q(\theta_{d})\prod_{i=1}^{N}q(z_i|w) $}
 \end{frame}
 
-\section{Summary}
-
 \begin{frame}{Summary}
 \begin{itemize}
 \item Posterior inference is often \textbf{intractable} because the marginal likelihood (or \textbf{evidence}) 
 $ p(x) $ cannot be computed efficiently.
 \item Variational inference approximates the posterior $ p(z|x) $ with a simpler distribution $ q(z) $.
 \item The variational objective is the \textbf{evidence lower bound (ELBO)}:
-\begin{equation}
+\begin{equation*}
 \E[q(z)]{\loga{p(x,z)}} + \Ent{q(z)}
-\end{equation}
+\end{equation*}
 \end{itemize}
 \end{frame}
 
@@ -569,8 +588,6 @@ q(z) = \prod_{i=1}^{N} q(z_{i})
 \end{equation*}
 \end{itemize}
 \end{frame}
-
-\section{Literature}
 
 \nocite{BleiEtAl:2016}
 \nocite{NealHinton:1998}
