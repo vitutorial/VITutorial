@@ -175,11 +175,103 @@ Assumes latent state $ z $ to be fixed random draws from $ q(z|x,\lambda) $.
 This is simply supervised learning with imputed latent data!
 \end{frame}
 
+\begin{frame}{Wake Phase Sampling}
+\begin{figure}
+\center
+\begin{tikzpicture}
+\node[draw, circle, fill=orange] (z3) {$ z_{3} $};
+
+\node[draw, circle, fill=orange, below left =of z3] (z1) {$ z_{1} $};
+\node[draw, circle, fill=orange, below right = of z3] (z2) {$ z_{2} $};
+
+\node[draw, rectangle,  below left= of z1] (in1) {$ x_{1} $};
+\node[draw, rectangle, below left=of z2] (in2) {$ x_{2} $}; 
+\node[draw, rectangle, below right= of z2] (in3) {$ x_{3} $};
+
+\draw[->, thick] (in1) -- (z1) node[midway, above, rotate=45] {$ \lambda $};
+\draw[->, thick] (in2) -- (z1) node[midway, above, rotate=315] {$ \lambda $};
+\draw[->, thick] (in2) -- (z2) node[midway, above, rotate=45] {$ \lambda $};
+\draw[->, thick] (in3) -- (z2) node[midway, above, rotate=315] {$ \lambda $};
+\draw[->, thick] (z1) -- (z3) node[midway, above, rotate=45] {$ \lambda $};
+\draw[->, thick] (z2) -- (z3) node[midway, above, rotate=315] {$ \lambda $};
+\end{tikzpicture}
+\end{figure}
+\end{frame}
+
+\begin{frame}{Wake Phase Update}
+\begin{figure}
+\center
+\begin{tikzpicture}
+\node[draw, circle, fill=orange] (z3) {$ z_{3} $};
+
+\node[draw, circle, fill=orange, below left =of z3] (z1) {$ z_{1} $};
+\node[draw, circle, fill=orange, below right = of z3] (z2) {$ z_{2} $};
+
+\node[draw, rectangle,  below left= of z1] (in1) {$ x_{1} $};
+\node[draw, rectangle, below left=of z2] (in2) {$ x_{2} $}; 
+\node[draw, rectangle, below right= of z2] (in3) {$ x_{3} $};
+
+\draw[->, thick] (z1) -- (in1) node[midway, above, rotate=45] {$ \theta $};
+\draw[->, thick] (z1) -- (in2) node[midway, above, rotate=315] {$ \theta $};
+\draw[->, thick] (z2) -- (in2) node[midway, above, rotate=45] {$ \theta $};
+\draw[->, thick] (z2) -- (in3) node[midway, above, rotate=315] {$ \theta $};
+\draw[->, thick] (z3) -- (z1) node[midway, above, rotate=45] {$ \theta $};
+\draw[->, thick] (z3) -- (z2) node[midway, above, rotate=315] {$ \theta $};
+\end{tikzpicture}
+\end{figure}
+\end{frame}
+
 \begin{frame}{Sleep Phase Objective}
 Assumes fake data $ \tilde{x} $ and latent variables $ z $ to be fixed random draw from $ p(x,z|\theta) $.
 \begin{equation*}
 \min_{\lambda}~  \E[q(z|\tilde{x},\lambda)]{\log p(\tilde{x},z|\theta)} + \Ent{q(z|\tilde{x},\lambda)}
 \end{equation*}
+\end{frame}
+
+\begin{frame}{Sleep Phase Sampling}
+\begin{figure}
+\center
+\begin{tikzpicture}
+\node[draw, circle, fill=blue!20] (z3) {$ z_{3} $};
+
+\node[draw, circle, fill=blue!20, below left =of z3] (z1) {$ z_{1} $};
+\node[draw, circle, fill=blue!20, below right = of z3] (z2) {$ z_{2} $};
+
+\node[draw, circle, fill=blue!20, below left= of z1] (in1) {$ \tilde{x}_{1} $};
+\node[draw, circle, fill=blue!20, below left=of z2] (in2) {$ \tilde{x}_{2} $}; 
+\node[draw, circle, fill=blue!20, below right= of z2] (in3) {$ \tilde{x}_{3} $};
+
+\draw[->, thick] (z1) -- (in1) node[midway, above, rotate=45] {$ \theta $};
+\draw[->, thick] (z1) -- (in2) node[midway, above, rotate=315] {$ \theta $};
+\draw[->, thick] (z2) -- (in2) node[midway, above, rotate=45] {$ \theta $};
+\draw[->, thick] (z2) -- (in3) node[midway, above, rotate=315] {$ \theta $};
+\draw[->, thick] (z3) -- (z1) node[midway, above, rotate=45] {$ \theta $};
+\draw[->, thick] (z3) -- (z2) node[midway, above, rotate=315] {$ \theta $};
+\end{tikzpicture}
+\end{figure}
+\end{frame}
+
+\begin{frame}{Sleep Phase Update}
+\begin{figure}
+\center
+\begin{tikzpicture}
+\node[draw, circle, fill=blue!20] (z3) {$ z_{3} $};
+
+\node[draw, circle, fill=blue!20, below left =of z3] (z1) {$ z_{1} $};
+\node[draw, circle, fill=blue!20, below right = of z3] (z2) {$ z_{2} $};
+
+\node[draw, circle, fill=blue!20, below left= of z1] (in1) {$ \tilde{x}_{1} $};
+\node[draw, circle, fill=blue!20, below left=of z2] (in2) {$ \tilde{x}_{2} $}; 
+\node[draw, circle, fill=blue!20, below right= of z2] (in3) {$ \tilde{x}_{3} $};
+
+\draw[->, thick] (in1) -- (z1) node[midway, above, rotate=45] {$ \lambda $};
+\draw[->, thick] (in2) -- (z1) node[midway, above, rotate=315] {$ \lambda $};
+\draw[->, thick] (in2) -- (z2) node[midway, above, rotate=45] {$ \lambda $};
+\draw[->, thick] (in3) -- (z2) node[midway, above, rotate=315] {$ \lambda $};
+\draw[->, thick] (z1) -- (z3) node[midway, above, rotate=45] {$ \lambda $};
+\draw[->, thick] (z2) -- (z3) node[midway, above, rotate=315] {$ \lambda $};
+\end{tikzpicture}
+\end{figure}
 \end{frame}
 
 \begin{frame}{Wake-sleep Algorithm}
