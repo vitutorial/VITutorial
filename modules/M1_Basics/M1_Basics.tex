@@ -2,11 +2,6 @@
 \usetheme{Montpellier}
 \usecolortheme{beaver}
 
-\title{Variational Inference: The Basics}
-\date{}
-\author[Schulz and Aziz]{Philip Schulz and Wilker Aziz \\
-\url{https://github.com/philschulz/VITutorial}}
-
 \usepackage{amsmath, amssymb, ../../vimacros, hyperref, enumerate}
 \usepackage[round]{natbib}
 
@@ -14,6 +9,11 @@
 
 \usepackage{tikz}
 \usetikzlibrary{bayesnet}
+
+\title{Variational Inference: The Basics}
+\date{}
+\author[Schulz and Aziz]{Philip Schulz and Wilker Aziz \\
+\url{https://github.com/philschulz/VITutorial}}
 
 \begin{document}
 
@@ -353,7 +353,7 @@ Recall that we want to find $ q(z) $ such that $ \KL{q(z)}{p(z|x)} $ is small.
 \pause
 \begin{block}{Formal Objective}
 \begin{equation*}
-\underset{q(z)}{\min} \KL{q(z)}{p(z|x)} = \underset{q(z)}{\max} -\KL{q(z)}{p(z|x)}
+\underset{q(z)}{\min} \KL{q(z)}{p(z|x)} \pause = \underset{q(z)}{\max} -\KL{q(z)}{p(z|x)}
 \end{equation*}
 \end{block}
 \end{frame}
@@ -393,38 +393,33 @@ or \textbf{ELBO} is our optimisation objective.
 VI in its basic form can be performed via coordinate ascent. This can be done as a 2-step procedure.
 \begin{enumerate}
 \pause
-\item Compute the expected log-density $ \E[q(z)]{\loga{p(x,z)}} $.
-\pause
-\item Maximize with respect to $ q(z) $ with entropy
-regularisation:
+\item Maximize (regularised) expected log-density.
 \begin{equation*}
 \underset{q(z)}{\max}~\E[q(z)]{\loga{p(x,z)}} + \Ent{q(z)}
 \end{equation*}
+\pause
+\item Maximize the expected log-density:
+\begin{equation*}
+\underset{p(x,z)}{\max}~ \E[q(z)]{\loga{p(x,z)}} + \underbrace{\Ent{q(z)}}_{\text{constant}}
+\end{equation*}
 \end{enumerate}
 \end{frame}
 
 \begin{frame}{What if $ q(z) = p(z|x) $?}
 If $ q(z) = p(z|x) $ then $ \KL{q(z)}{p(z|x)} = 0 $ and thus we are directly optimising the log-evidence.
+\pause
 \begin{enumerate}
-\item Compute the expected log-density $ \E[p(z|x)]{\loga{p(x,z)}} $.
-\item Maximize with respect to $ p(z|x) $ with entropy
-regularisation:
-\begin{equation*}
-\underset{p(z|x)}{\max}~\E[p(z|x)]{\loga{p(x,z)}} + \Ent{p(z|x)}
-\end{equation*}
+\item Compute $ \E[p(z|x)]{\loga{p(x,z)}} $
+\pause
+\item $ \underset{p(x,z)}{\max}~\E[p(z|x)]{\loga{p(x,z)}} + \underbrace{\Ent{p(z|x)}}_{\text{constant}} $
 \end{enumerate}
 \end{frame}
 
 \begin{frame}{What if $ q(z) = p(z|x) $?}
 If $ q(z) = p(z|x) $ then $ \KL{q(z)}{p(z|x)} = 0 $ and thus we are directly optimising the log-evidence.
-\pause
 \begin{itemize}
-\item[\alert{E-step}] $ \E[p(z|x)]{\loga{p(x,z)}} $.
-\pause
-\item[\alert{M-step}] Maximize with respect to $ p(z|x) $ with entropy regularisation:
-\begin{equation*}
-\underset{p(z|x)}{\max}~\E[p(z|x)]{\loga{p(x,z)}} + \Ent{p(z|x)}
-\end{equation*}
+\item[\alert{E-step}] Compute $ \E[p(z|x)]{\loga{p(x,z)}} $.
+\item[\alert{M-step}] $ \underset{p(x,z)}{\max}~\E[p(z|x)]{\loga{p(x,z)}} + \underbrace{\Ent{p(z|x)}}_{\text{constant}} $
 \end{itemize}
 \end{frame}
 
@@ -536,7 +531,6 @@ This approximation strategy is commonly known as \textbf{mean field} approximati
 
 % inference edges
 \path (w) edge[->,bend left=30,color=red] (z);
-\path (w) edge[->,bend left=30,color=red] (theta);
 \path (z) edge[-,bend right=30,color=red] (theta);
 \path (alpha) edge[->, bend left=30, color=red] (theta);
 \edge[color=red] {beta} {z};
