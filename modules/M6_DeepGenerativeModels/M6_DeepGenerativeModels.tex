@@ -30,8 +30,20 @@ Joint distribution over observed data $ x $ and latent variables $ Z $.
 \begin{equation*}
 p(x,z|\alpha) = \overbrace{p(x|z,\alpha)}^{\text{likelihood}} \underbrace{p(z|\alpha)}_{\text{prior}}
 \end{equation*} 
-The likelihood and prior are often standard distributions (Gaussian, Bernoulli) with little dependence on side
+The likelihood and prior are often standard distributions (Gaussian, Bernoulli) with simple dependence on conditioning
 information.
+\end{frame}
+
+\begin{frame}{Recap: Variational Inference}
+\begin{block}{Objective}
+\begin{equation*}
+\underset{q(z)}{\max}~\E{\log p(x,z)} + \Ent{q(z)}
+\end{equation*}
+\begin{itemize}
+\item The ELBO is a lower bound on $ \log p(x) $
+\item Mean field assumption: $ q(z) = \prod_{i=1}^{N}q(z_{i}) $
+\end{itemize}
+\end{block}
 \end{frame}
 
 \section{First Attempt: Log-linear Models}
@@ -145,8 +157,11 @@ in $ \mathcal{O}(|\mathcal{X}|\times |\mathcal{Z}|) $
 \begin{frame}{Wake-sleep Architecture}
 2 Neural Networks:
 \begin{itemize}
+\pause
 \item A generation network to model the data (the one we want to optimise) -- parameters: $ \theta $
+\pause
 \item An inference (recognition) network (to model the latent variable) -- parameters: $ \lambda $
+\pause
 \item Original setting: binary hidden units
 \pause
 \item Training is performed in a ``hard EM'' fashion
@@ -173,6 +188,22 @@ Assumes latent state $ z $ to be fixed random draws from $ q(z|x,\lambda) $.
 \max_{\theta}~ \log p(x|z,\theta) 
 \end{equation*}
 This is simply supervised learning with imputed latent data!
+\end{frame}
+
+\begin{frame}{Wake Phase Sampling}
+\begin{figure}
+\center
+\begin{tikzpicture}
+\node[draw, circle] (z3) {$ z_{3} $};
+
+\node[draw, circle, below left =of z3] (z1) {$ z_{1} $};
+\node[draw, circle, below right = of z3] (z2) {$ z_{2} $};
+
+\node[draw, rectangle,  below left= of z1] (in1) {$ x_{1} $};
+\node[draw, rectangle, below left=of z2] (in2) {$ x_{2} $}; 
+\node[draw, rectangle, below right= of z2] (in3) {$ x_{3} $};
+\end{tikzpicture}
+\end{figure}
 \end{frame}
 
 \begin{frame}{Wake Phase Sampling}
@@ -232,6 +263,18 @@ Assumes fake data $ \tilde{x} $ and latent variables $ z $ to be fixed random dr
 \begin{figure}
 \center
 \begin{tikzpicture}
+\node[draw, circle] (z3) {$ z_{3} $};
+
+\node[draw, circle, below left =of z3] (z1) {$ z_{1} $};
+\node[draw, circle, below right = of z3] (z2) {$ z_{2} $};
+\end{tikzpicture}
+\end{figure}
+\end{frame}
+
+\begin{frame}{Sleep Phase Sampling}
+\begin{figure}
+\center
+\begin{tikzpicture}
 \node[draw, circle, fill=blue!20] (z3) {$ z_{3} $};
 
 \node[draw, circle, fill=blue!20, below left =of z3] (z1) {$ z_{1} $};
@@ -277,7 +320,7 @@ Assumes fake data $ \tilde{x} $ and latent variables $ z $ to be fixed random dr
 \begin{frame}{Wake-sleep Algorithm}
 \textbf{Advantages}
 \begin{itemize}
-\item Backprop can be used without modification
+\item Simple layer-wise updates
 \item Amortised inference: all latent variables are inferred from the same weights $ \lambda $
 \end{itemize}
 \pause
@@ -316,9 +359,25 @@ $ p(x) = \intl{\alert{\underbrace{p(x|z,\theta)}_{\substack{\text{highly} \\  \t
 \begin{frame}{Generative Model with NN Likelihood}
 \begin{block}{Solution: VI}
 \begin{small}
+\begin{equation*}
+\begin{aligned}
+\log p(x) &\geq \overbrace{\E[q(z|x,\lambda)]{\log p(x,z|\theta)} + \Ent{q(z|x,\lambda)}}^{\ELBO} \\ 
+\pause
+&= \E[q(z|x,\lambda)]{\log p(x|z,\theta)p(z)} + \Ent{q(z|x,\lambda)} \\ \pause
+&= \E[q(z|x,\lambda)]{\log p(x|z,\theta)} - \KL{p(z)}{q(z|x,\lambda)}
+\end{aligned}
+\end{equation*}
+\end{small}
+\end{block}
+\end{frame}
+
+\begin{frame}{Generative Model with NN Likelihood}
+\begin{block}{Solution: VI}
+\begin{small}
 \begin{align*}
 \log p(x) &\geq \overbrace{\E[q(z|x,\lambda)]{\log p(x,z|\theta)} + \Ent{q(z|x,\lambda)}}^{\ELBO} \\
-&= \E[q(z|x,\lambda)]{\log p(x|z,\theta)} + \KL{p(z)}{q(z|x,\lambda)}
+&= \E[q(z|x,\lambda)]{\log p(x|z,\theta)p(z)} + \Ent{q(z|x,\lambda)} \\
+&= \E[q(z|x,\lambda)]{\log p(x|z,\theta)} - \alert{\underbrace{\KL{p(z)}{q(z|x,\lambda)}}_{\substack{\text{assume analytical} \\ \text{(true for exponential families)}}}}
 \end{align*}
 \end{small}
 \end{block}
@@ -329,38 +388,34 @@ $ p(x) = \intl{\alert{\underbrace{p(x|z,\theta)}_{\substack{\text{highly} \\  \t
 \begin{small}
 \begin{align*}
 \log p(x) &\geq \overbrace{\E[q(z|x,\lambda)]{\log p(x,z|\theta)} + \Ent{q(z|x,\lambda)}}^{\ELBO} \\
-&= \E[q(z|x,\lambda)]{\log p(x|z,\theta)} + \alert{\underbrace{\KL{p(z)}{q(z|x,\lambda)}}_{\substack{\text{assume analytical} \\ \text{(true for exponential families)}}}}
-\end{align*}
-\end{small}
-\end{block}
-\end{frame}
-
-\begin{frame}{Generative Model with NN Likelihood}
-\begin{block}{Solution: VI}
-\begin{small}
-\begin{align*}
-\log p(x) &\geq \overbrace{\E[q(z|x,\lambda)]{\log p(x,z|\theta)} + \Ent{q(z|x,\lambda)}}^{\ELBO} \\
-&= \alert{\underbrace{\E[q(z|x,\lambda)]{\log p(x|z,\theta)}}_{\text{approximate by sampling}}} + \underbrace{\KL{p(z)}{q(z|x,\lambda)}}_{\substack{\text{assume analytical} \\ \text{(true for exponential families)}}}
+&= \E[q(z|x,\lambda)]{\log p(x|z,\theta)p(z)} + \Ent{q(z|x,\lambda)} \\ 
+&= \alert{\underbrace{\E[q(z|x,\lambda)]{\log p(x|z,\theta)}}_{\text{approximate by sampling}}} - \underbrace{\KL{p(z)}{q(z|x,\lambda)}}_{\substack{\text{assume analytical} \\ \text{(true for exponential families)}}}
 \end{align*}
 \end{small}
 \end{block}
 \end{frame}
 
 \begin{frame}{Generation Network Gradient}
-\begin{align*}
-&\frac{d}{d\theta}\E[q(z|x,\lambda)]{\log p(x|z,\theta)} \\ 
-&=\E[q(z|x,\lambda)]{\frac{d}{d\theta}\log p(x|z,\theta)} \\
+\begin{equation*}
+\begin{aligned}
+&\frac{d}{d\theta}\E[q(z|x,\lambda)]{\log p(x|z,\theta)} - \overbrace{\KL{p(z)}{q(z|x,\lambda)}}^{constant} \\ \pause 
+&=\E[q(z|x,\lambda)]{\frac{d}{d\theta}\log p(x|z,\theta)} \\ \pause
 &\overset{\text{MC}}{\approx} \frac{1}{S}\sum_{i=1}^{S}
 \frac{d}{d\theta} \log p(x|z_{i},\theta)
-\end{align*}
+\end{aligned}
+\end{equation*}
+\pause
 \center{Note: $ q(z|x,\lambda) $ does not depend on $ \theta $.}
 \end{frame}
 
 \begin{frame}{Inference Network Gradient}
-\begin{align*}
-&\frac{d}{d\lambda}\left[\E[q(z|x,\lambda)]{\log p(x|z,\theta)} + \KL{p(z)}{q(z|x,\lambda)} \right] \\
-=&\frac{d}{d\lambda}\E[q(z|x,\lambda)]{\log p(x|z,\theta)} + \underbrace{\frac{d}{d\lambda}\KL{p(z)}{q(z|x,\lambda)}}_{\text{analytical computation}} \\
-\end{align*}
+\begin{equation*}
+\begin{aligned}
+&\frac{d}{d\lambda}\left[\E[q(z|x,\lambda)]{\log p(x|z,\theta)} - \KL{p(z)}{q(z|x,\lambda)} \right] \\ \pause
+=&\frac{d}{d\lambda}\E[q(z|x,\lambda)]{\log p(x|z,\theta)} - \underbrace{\frac{d}{d\lambda}\KL{p(z)}{q(z|x,\lambda)}}_{\text{analytical computation}} \\
+\end{aligned}
+\end{equation*}
+\pause
 \center{The first term again requires approximation by sampling}
 \end{frame}
 
@@ -369,9 +424,12 @@ $ p(x) = \intl{\alert{\underbrace{p(x|z,\theta)}_{\substack{\text{highly} \\  \t
 &\frac{d}{d\lambda}\E[q(z|x,\lambda)]{\log p(x|z,\theta)} \\
 &= \frac{d}{d\lambda} \intl{q(z|x,\lambda)\log p(x|z,\theta)}{z}
 \end{align*}
-\begin{block}{Problems for MC}
+\pause
+\begin{block}{MC estimator non-differentiable}
 \begin{itemize}
+\pause
 \item Sampling $ z $ neglects $ \frac{d}{d\lambda} q(z|x,\lambda) $
+\pause
 \item Differentiating $ q(z|x,\lambda) $ breaks the expectation
 \end{itemize}
 \end{block}
@@ -379,14 +437,24 @@ $ p(x) = \intl{\alert{\underbrace{p(x|z,\theta)}_{\substack{\text{highly} \\  \t
 
 \begin{frame}{Inference Network Gradient}
 \begin{small}
-\begin{align*}
-&= \frac{d}{d\lambda} \intl{q(z|x,\lambda)\log p(x|z,\theta)}{z} \\
-&= \frac{d}{d\lambda} \intl{\alert{q(\epsilon)} \loga{ p(x | \alert{\overbrace{h(\epsilon, \lambda)}^{=z}},\theta) \times \alert{\underbrace{\left|\frac{d}{d\epsilon}h(\epsilon, \lambda)\right|}_{\text{constant if h linear}}}}}{\alert{\epsilon}} \\
-&= \intl{q(\epsilon) \frac{d}{d\lambda} \log p(x| h(\epsilon, \lambda), \theta)}{\epsilon} \\
-&= \E[p(\epsilon)]{\frac{d}{d\lambda} \log p(x| h(\epsilon, \lambda), \theta)}
-\overset{\text{MC}}{\approx} \frac{1}{S}\sum_{i=1}^{S} \frac{d}{d\lambda} \log p(x| h(\epsilon_{i}, \lambda), \theta)
-\end{align*}
+\begin{equation*}
+\begin{aligned}
+&= \frac{d}{d\lambda} \intl{q(z|x,\lambda)\log p(x|z,\theta)}{z} \\ \pause
+&= \frac{d}{d\lambda} \intl{\alert{q(\epsilon)} \log p(x | \alert{\overbrace{h(\epsilon, \lambda)}^{=z}},\theta)}{\alert{\epsilon}} \\ \pause
+&= \intl{q(\epsilon) \frac{d}{d\lambda} \left[ \log p(x| h(\epsilon, \lambda), \theta)\right] }{\epsilon} \\ \pause
+&= \intl{q(\epsilon) \frac{d}{d\lambda} \log p(x| h(\epsilon, \lambda), \theta) \times \frac{d}{d\lambda} h(\epsilon, \lambda)}{\epsilon}  \\ \pause
+&= \E[p(\epsilon)]{\frac{d}{d\lambda} \log p(x| h(\epsilon, \lambda), \theta)\times \frac{d}{d\lambda} h(\epsilon, \lambda)}\\ \pause
+&\overset{\text{MC}}{\approx} \frac{1}{S}\sum_{i=1}^{S} \frac{d}{d\lambda} \log p(x| h(\epsilon_{i}, \lambda), \theta) \times \frac{d}{d\lambda} h(\epsilon, \lambda)
+\end{aligned}
+\end{equation*}
 \end{small}
+\end{frame}
+
+\begin{frame}{Reparametrisation Trick}
+\begin{itemize}
+\item Find transformation $ h(\epsilon, \lambda) $ of parameter-free variable $ \epsilon $
+\item $ h(\epsilon, \lambda) $ needs to be invertible
+\end{itemize}
 \end{frame}
 
 \begin{frame}{Gaussian Transformation}
@@ -404,6 +472,11 @@ Ax + b \sim \NDist{b}{A A^{T}} \text{ for } x \sim \NDist{0}{\IMatrix}
 \begin{equation*}
 h(\epsilon, \lambda) = \mu(x,\lambda) + \sigma(x, \lambda)  \odot \epsilon~~~\epsilon \sim \NDist{0}{\IMatrix}
 \end{equation*}
+\end{frame}
+
+\begin{frame}{Gaussian KL}
+
+
 \end{frame}
 
 \begin{frame}{Computation Graph}
@@ -432,6 +505,12 @@ h(\epsilon, \lambda) = \mu(x,\lambda) + \sigma(x, \lambda)  \odot \epsilon~~~\ep
 \pause
 \node[right =of var] (epsilon) {$ \epsilon  \sim \NDist{0}{1}$};
 \draw[->, thick] (epsilon) edge (var);
+
+\pause
+\node[above= of mu] (KLmu) {$ \KullbackLeibler $};
+\draw[->, thick] (mu) edge (KLmu);
+\node[above= of var] (KLvar) {$ \KullbackLeibler $};
+\draw[->, thick] (var) edge (KLvar);
 \end{tikzpicture}
 \end{figure}
 \end{frame}
@@ -487,7 +566,7 @@ Variational approximation factorises over latent dimensions.
 				\item $\mu(x, \lambda) = \text{NN}_{\mu}(x; \lambda) $ \\
 				e.g. $\mu(x, \lambda) = W^{(u)} x + b^{(u)}$ \pause
 				\item $\sigma(x, \lambda) = \exp(\text{NN}_{\sigma}(x; \lambda))$ \\
-				e.g. $\sigma(x, \lambda) = \exp \left( \tanh(W^{(v)} x + b^{(v)}) \right)$ \pause
+				e.g. $\sigma(x, \lambda) = \exp \left( W^{(v)} x + b^{(v)} \right)$ \pause
 			  \item $\lambda=(W^{(u)}, W^{(v)}, b^{(u)}, b^{(v)})$
 		   \end{itemize}
 	  \end{itemize}
@@ -531,6 +610,7 @@ Variational approximation factorises over latent dimensions.
 \nocite{RezendeEtAl:2014}
 \nocite{TitsiasLazarogredilla:2014}
 \nocite{BergkirkpatrickEtAl:2010}
+\nocite{KucukelbirEtAl:2017}
 
 \bibliographystyle{plainnat}
 \bibliography{../../VI}
