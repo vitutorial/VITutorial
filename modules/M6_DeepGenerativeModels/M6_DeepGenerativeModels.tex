@@ -10,7 +10,8 @@
 \hypersetup{breaklinks=true, colorlinks=true, linkcolor=blue, urlcolor=blue, citecolor=blue}
 
 \title{Deep Generative Models}
-\author{Philip Schulz and Wilker Aziz}
+\author{Philip Schulz and Wilker Aziz\\
+\url{https://github.com/philschulz/VITutorial}}
 \date{}
 
 
@@ -440,7 +441,8 @@ $ p(x) = \intl{\alert{\underbrace{p(x|z,\theta)}_{\substack{\text{highly} \\  \t
 \begin{equation*}
 \begin{aligned}
 &= \frac{d}{d\lambda} \intl{q(z|x,\lambda)\log p(x|z,\theta)}{z} \\ \pause
-&= \frac{d}{d\lambda} \intl{\alert{q(\epsilon)} \log p(x | \alert{\overbrace{h(\epsilon, \lambda)}^{=z}},\theta)}{\alert{\epsilon}} \\ \pause
+&= \frac{d}{d\lambda} \intl{\alert{q(\epsilon)} \loga{ p(x | \alert{\overbrace{h(\epsilon, \lambda)}^{=z}},\theta)
+\alert{\overbrace{\frac{d}{d\epsilon}h(\epsilon, \lambda)}^{\text{constant if h linear}}}}}{\alert{\epsilon}} \\ \pause
 &= \intl{q(\epsilon) \frac{d}{d\lambda} \left[ \log p(x| h(\epsilon, \lambda), \theta)\right] }{\epsilon} \\ \pause
 &= \intl{q(\epsilon) \frac{d}{d\lambda} \log p(x| h(\epsilon, \lambda), \theta) \times \frac{d}{d\lambda} h(\epsilon, \lambda)}{\epsilon}  \\ \pause
 &= \E[p(\epsilon)]{\frac{d}{d\lambda} \log p(x| h(\epsilon, \lambda), \theta)\times \frac{d}{d\lambda} h(\epsilon, \lambda)}\\ \pause
@@ -448,6 +450,15 @@ $ p(x) = \intl{\alert{\underbrace{p(x|z,\theta)}_{\substack{\text{highly} \\  \t
 \end{aligned}
 \end{equation*}
 \end{small}
+\end{frame}
+
+\begin{frame}{Inference Network Gradient}
+\begin{equation*}
+\begin{aligned}
+\E[p(\epsilon)]{\frac{d}{d\lambda} \log p(x| h(\epsilon, \lambda), \theta)\times \frac{d}{d\lambda} h(\epsilon, \lambda)}\\
+\overset{\text{MC}}{\approx} \frac{1}{S}\sum_{i=1}^{S} \frac{d}{d\lambda} \log p(x| h(\epsilon_{i}, \lambda), \theta) \times \frac{d}{d\lambda} h(\epsilon, \lambda)
+\end{aligned}
+\end{equation*}
 \end{frame}
 
 \begin{frame}{Reparametrisation Trick}
