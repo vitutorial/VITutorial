@@ -475,8 +475,11 @@ h(\epsilon, \lambda) = \mu(x,\lambda) + \sigma(x, \lambda)  \odot \epsilon~~~\ep
 \end{frame}
 
 \begin{frame}{Gaussian KL}
-
-
+Analytical computation of $ -\KL{q(z|x,\lambda)}{p(z)} $:
+\begin{equation*}
+-\frac{1}{2}\sum_{i=1}^{N}\left(1 + \loga{\sigma^{2}_{i}} - 
+\mu_i - \sigma^{2}_{i} \right)
+\end{equation*}
 \end{frame}
 
 \begin{frame}{Computation Graph}
@@ -566,7 +569,7 @@ Variational approximation factorises over latent dimensions.
 				\item $\mu(x, \lambda) = \text{NN}_{\mu}(x; \lambda) $ \\
 				e.g. $\mu(x, \lambda) = W^{(u)} x + b^{(u)}$ \pause
 				\item $\sigma(x, \lambda) = \exp(\text{NN}_{\sigma}(x; \lambda))$ \\
-				e.g. $\sigma(x, \lambda) = \exp \left( W^{(v)} x + b^{(v)} \right)$ \pause
+				e.g. $\sigma(x, \lambda) = \loga{ 1 + \exp \left( W^{(v)} x + b^{(v)} \right)}$ \pause
 			  \item $\lambda=(W^{(u)}, W^{(v)}, b^{(u)}, b^{(v)})$
 		   \end{itemize}
 	  \end{itemize}
