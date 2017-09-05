@@ -160,7 +160,6 @@ class GaussianInferenceNetwork(InferenceNetwork):
         :return: A Gaussian sample
         """
         # TODO sampling needs to be adjusted once correlations are introduced
-        batch_size = mx.sym.sum(mx.sym.ones_like(std), axis=0)
         return mean + std * mx.sym.random_normal(loc=0, scale=1, shape=(0, self.latent_var_size))
 
 
