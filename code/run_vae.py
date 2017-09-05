@@ -1,10 +1,9 @@
 import mxnet as mx
-import urllib as url
+import urllib.request
 import os
 from os.path import join, exists
 from numpy import genfromtxt
 from vae import construct_vae
-import logging, time
 
 data_sets = ['train', 'valid', 'test']
 data_dir = join(os.curdir, "binary_mnist")
@@ -27,7 +26,7 @@ def load_data() -> dict:
             print("Downloading {}".format(file_name))
             link = "http://www.cs.toronto.edu/~larocheh/public/datasets/binarized_mnist/binarized_mnist_{}.amat".format(
                 data_set)
-            url.request.urlretrieve(link, goal)
+            urllib.request.urlretrieve(link, goal)
             print("Finished")
 
     data = {}
@@ -41,7 +40,7 @@ def load_data() -> dict:
 
 
 def main():
-    ctx = mx.cpu()
+    ctx = mx.cpu(0)
     opt = "adam"
     learning_rate = 0.0003
     epochs = 20
@@ -62,7 +61,7 @@ def main():
                         infer_layer_size=inference_layers, latent_variable_size=latent_size,
                         data_dims=mnist['train'].shape[1], generator_act_type='tanh', infer_act_type='tanh')
 
-    module = mx.module.Module(vae.train(mx.sym.Variable("data"), mx.sym.Variable('label'), batch_size=batch_size),
+    module = mx.module.Module(vae.train(mx.sym.Variable("data"), mx.sym.Variable('label')),
                               data_names=[train_iter.provide_data[0][0]],
                               label_names=["label"], context=ctx)
 

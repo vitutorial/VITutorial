@@ -178,3 +178,8 @@ TSWLatexianTemp*
 
 # KBibTeX
 *~[0-9]*
+.idea/
+code/__pycache__/
+code/binary_mnist/
+code/*.params
+code/*.json
