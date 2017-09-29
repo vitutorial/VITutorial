@@ -1,61 +1,110 @@
 import mxnet as mx
 import urllib.request
-import os
+import os, logging, sys
+import numpy as np
+from typing import Optional
+from argparse import ArgumentParser
 from os.path import join, exists
 from numpy import genfromtxt
 from vae import construct_vae
+#from matplotlib import pyplot as plt
 
-data_sets = ['train', 'valid', 'test']
+data_names = ['train', 'valid', 'test']
+train_set = ['train', 'valid']
+test_set = ['test']
 data_dir = join(os.curdir, "binary_mnist")
 
 
-def load_data() -> dict:
+# def plot_digit(digit: np.array) -> None:
+#     '''
+#     Plots an mnist digit encoded in a pixel array.
+#
+#     :param digit: An array of pixels.
+#     '''
+#     size = np.sqrt(digit.shape[0])
+#     digit.reshape((size, size))
+#
+#     plt.imshow(digit, cmap='gray')
+#     plt.show()
+
+
+def load_data(train: bool=True, logger: Optional[logging.Logger] = None) -> dict:
     '''
     Download binarised mnist data set and load it into memory.
 
-    :return: binarised mnist data
+    :param: Whether to load training or test data.
+    :param: A logger for the data loading process.
+    :return: Binarised mnist data.
     '''
     if not exists(data_dir):
         os.mkdir(data_dir)
-    for data_set in data_sets:
+    for data_set in data_names:
         file_name = "binary_mnist.{}".format(data_set)
         goal = join(data_dir, file_name)
         if exists(goal):
-            print("Data file {} exists".format(file_name))
+            logger.info("Data file {} exists".format(file_name))
         else:
-            print("Downloading {}".format(file_name))
+            logger.info("Downloading {}".format(file_name))
             link = "http://www.cs.toronto.edu/~larocheh/public/datasets/binarized_mnist/binarized_mnist_{}.amat".format(
                 data_set)
             urllib.request.urlretrieve(link, goal)
-            print("Finished")
+            logger.info("Finished")
 
     data = {}
+    data_sets = train_set if train else test_set
     for data_set in data_sets:
         file_name = join(data_dir, "binary_mnist.{}".format(data_set))
-        print("Reading {} into memory".format(file_name))
+        logger.info("Reading {} into memory".format(file_name))
         data[data_set] = mx.nd.array(genfromtxt(file_name))
-        print("Data shape = {}".format(data[data_set].shape))
+        print("{} contains {} data points".format(file_name, data[data_set].shape)[0])
 
     return data
 
 
 def main():
-    ctx = mx.cpu(0)
-    opt = "adam"
+
+    command_line_parser = ArgumentParser("Train a VAE on binary mnist and generate images of random digits.")
+
+    command_line_parser.add_argument('-b','--batch-size', default=500, type=int,
+                                     help="Training batch size. Default: %(default)s.")
+    command_line_parser.add_argument('--opt', type=str, choices=["sgd", "adam"], default="adam",
+                                     help="The optimizer to use during training. "
+                                          "Choices: %(choices)s. Default: %(default)s")
+    command_line_parser.add_argument('-e', '--epochs', default=20, type=int,
+                                     help="Number of epochs to run during training. Default: %(default)s.")
+    command_line_parser.add_argument('--latent-dim', type=int, default=300,
+                                     help='Dimensionality of the latent variable. Default: %(default)s.')
+    command_line_parser.add_argument('--num-gpus', type=int, default=0,
+                                     help="Number of GPUs to use. CPU is used if set to 0. Default: %(default)s.")
+    command_line_parser.add_argument('-s', '--sample-random-digits', action='store_true',
+                                     help="Load parameters of a previously trained VAE and randomly generate "
+                                          "image digits from it.")
+
+    args = command_line_parser.parse_args()
+
+    ctx = mx.cpu() if args.num_gpus <= 0 else args.num_gpus
+    opt = args.opt
     learning_rate = 0.0003
-    epochs = 20
-    batch_size = 100
+    epochs = args.epochs
+    batch_size = args.batch_size
 
     generator_layers = [400, 600]
     inference_layers = [600, 400]
-    latent_size = 300
+    latent_size = args.latent_dim
 
-    mnist = load_data()
+    training = not args.sample_random_digits
 
-    train_iter = mx.io.NDArrayIter(data=mnist['train'], data_name="data", label=mnist["train"], label_name="label",
-                                   batch_size=batch_size, shuffle=True)
-    val_iter = mx.io.NDArrayIter(mnist['valid'], data_name="data")
-    test_iter = mx.io.NDArrayIter(data=mnist['test'], label_name="label")
+    if training:
+        logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.DEBUG, stream=sys.stdout)
+        logger = logging.getLogger(__name__)
+
+        mnist = load_data(training, logger)
+
+        train_iter = mx.io.NDArrayIter(data=mnist['train'], data_name="data", label=mnist["train"], label_name="label",
+                                           batch_size=batch_size, shuffle=True)
+        val_iter = mx.io.NDArrayIter(data=mnist['valid'], data_name="data", label_name="label", batch_size=batch_size)
+    else:
+        test_iter = mx.io.NDArrayIter(data=mnist['test'], label=mnist['test'], label_name="label")
 
     vae = construct_vae(latent_type="gaussian", likelihood="bernoulliProd", generator_layer_sizes=generator_layers,
                         infer_layer_size=inference_layers, latent_variable_size=latent_size,
@@ -63,25 +112,28 @@ def main():
 
     module = mx.module.Module(vae.train(mx.sym.Variable("data"), mx.sym.Variable('label')),
                               data_names=[train_iter.provide_data[0][0]],
-                              label_names=["label"], context=ctx)
+                              label_names=["label"], context=ctx,
+                              logger=logger)
 
-    print("starting to train")
+    logger.info("Starting to train")
     module.fit(train_data=train_iter, optimizer=opt,force_init=True, force_rebind=True, num_epoch=epochs,
                optimizer_params={'learning_rate': learning_rate},
+               # validation_metric=mx.metric.Perplexity(None),
+               # eval_data=val_iter,
                batch_end_callback=mx.callback.Speedometer(frequent=1, batch_size=batch_size),
                epoch_end_callback=mx.callback.do_checkpoint('vae'))
 
-    # # set up training
-    # module.bind(data_shapes=train_iter.provide_data, label_shapes=train_iter.provide_label, for_training=True,
-    #             force_rebind=True)
-    # module.init_params(force_init=True)
-    # module.init_optimizer(optimizer=opt, optimizer_params={('learning_rate', learning_rate)})
-    #
-    # eval_metric = mx.metric.Accuracy()
-    #
-    # callback_func = mx.callback.do_checkpoint('params',1)
-
-#     for epoch in range(epochs):
+#     # set up training
+#     module.bind(data_shapes=train_iter.provide_data, label_shapes=train_iter.provide_label, for_training=True,
+#                 force_rebind=True)
+#     module.init_params(force_init=True)
+#     module.init_optimizer(optimizer=opt, optimizer_params={('learning_rate', learning_rate)})
+#
+#     eval_metric = mx.metric.Accuracy()
+#
+#     callback_func = mx.callback.do_checkpoint('vae',1)
+#
+# #     for epoch in range(epochs):
 #         tic = time.time()
 #         eval_metric.reset()
 #         nbatch = 0

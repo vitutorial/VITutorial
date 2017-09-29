@@ -12,6 +12,7 @@ class Generator(ABC):
     :param layer_sizes: Size of each layer in the network.
     :param act_type: The activation after each layer.
     """
+
     def __init__(self, data_dims: int, layer_sizes: List[int], act_type: str) -> None:
         self.data_dims = data_dims
         self.layer_sizes = layer_sizes
@@ -42,6 +43,7 @@ class ProductOfBernoullisGenerator(Generator):
     :param layer_sizes: Size of each layer in the network.
     :param act_type: The activation after each layer.
     """
+
     def __init__(self, data_dims: int, layer_sizes=List[int], act_type=str) -> None:
         super().__init__(data_dims, layer_sizes, act_type)
         self.output_act = "sigmoid"
@@ -98,6 +100,7 @@ class InferenceNetwork(ABC):
     :param layer_sizes: Size of each layer in the network.
     :param act_type: The activation after each layer.
     """
+
     def __init__(self, latent_variable_size: int, layer_sizes: List[int], act_type: str) -> None:
         self.latent_var_size = latent_variable_size
         self.layer_sizes = layer_sizes
@@ -121,6 +124,7 @@ class GaussianInferenceNetwork(InferenceNetwork):
     :param layer_sizes: Size of each layer in the network.
     :param act_type: The activation after each layer.
     """
+
     def __init__(self, latent_variable_size: int, layer_sizes: List[int], act_type: str):
         super().__init__(latent_variable_size, layer_sizes, act_type)
 
@@ -147,7 +151,9 @@ class GaussianInferenceNetwork(InferenceNetwork):
             var_act_i = mx.sym.Activation(data=var_fc_i, act_type="relu", name="rec_var_act_{}".format(i))
             prev_out = var_act_i
         # soft-relu maps std onto non-negative real line
-        std = mx.sym.Activation(mx.sym.FullyConnected(data=prev_out, num_hidden=self.latent_var_size, name="inf_var_compute"), act_type="softrelu")
+        std = mx.sym.Activation(
+            mx.sym.FullyConnected(data=prev_out, num_hidden=self.latent_var_size, name="inf_var_compute"),
+            act_type="softrelu")
 
         return mean, std
 
@@ -171,6 +177,7 @@ class VAE(ABC):
     :param generator: A generator network that specifies the likelihood of the model.
     :param inference_net: An inference network that specifies the distribution over latent values.
     """
+
     def __init__(self, generator: Generator, inference_net: InferenceNetwork) -> None:
         self.generator = generator
         self.inference_net = inference_net
@@ -184,7 +191,7 @@ class VAE(ABC):
         """
         raise NotImplementedError()
 
-    def generate_reconstructions(self, data:mx.sym.Symbol, n: int) -> mx.sym.Symbol:
+    def generate_reconstructions(self, data: mx.sym.Symbol, n: int) -> mx.sym.Symbol:
         """
         Generate a number of reconstructions of input data points.
 
@@ -211,6 +218,7 @@ class GaussianVAE(VAE):
     :param generator: A generator network that specifies the likelihood of the model.
     :param inference_net: An inference network that specifies the Gaussian over latent values.
     """
+
     def __init__(self,
                  generator: Generator,
                  inference_net: GaussianInferenceNetwork) -> None:
@@ -229,7 +237,7 @@ class GaussianVAE(VAE):
         mx.sym.MakeLoss(diagonal_gaussian_kl(mean, std))
         return self.generator.train(latent_state=latent_state, label=label)
 
-    def generate_reconstructions(self, data:mx.sym.Symbol, n: int) -> mx.sym.Symbol:
+    def generate_reconstructions(self, data: mx.sym.Symbol, n: int) -> mx.sym.Symbol:
         """
         Generate a number of reconstructions of input data points.
 
@@ -238,8 +246,8 @@ class GaussianVAE(VAE):
         :return: The reconstructed data.
         """
         mean, std = self.inference_net.inference(data=data)
-        mean = mx.sym.tile(data=mean, reps=(n,1))
-        std = mx.sym.tile(data=std, reps=(n,1))
+        mean = mx.sym.tile(data=mean, reps=(n, 1))
+        std = mx.sym.tile(data=std, reps=(n, 1))
         latent_state = self.sample_latent_state(mean, std, n)
         return self.generator.generate_sample(latent_state=latent_state)
 
@@ -287,6 +295,3 @@ def construct_vae(latent_type: str,
         return GaussianVAE(generator=generator, inference_net=inference_net)
     else:
         raise Exception("{} is an invalid latent variable type.".format(latent_type))
-
-
-
