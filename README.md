@@ -3,7 +3,13 @@ This repository stores slides for a tutorial on variational inference for NLP au
 
 # News
 
+* We are now working on mxnet code for variational autoencoders. Soon this will be turned into a jupyter notebook.
 * The tutorial has already been presented in Berlin, where it was given in 2 sessions. The focus was on Deep Generative Models ([Module 6](https://github.com/philschulz/VITutorial/blob/master/modules/M6_DeepGenerativeModels/M6_DeepGenerativeModels.pdf)). The next stop will be Dublin.
+
+# Tour
+Below are confirmed venues where we will give the tutorial.
+* Melbourne University
+* Dublin City University
 
 # Latex Dependencies
 To compile the slides, latex needs to have access to the [bayesnet tikz library](https://github.com/jluttine/tikz-bayesnet).
