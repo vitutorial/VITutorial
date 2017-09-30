@@ -1,0 +1,67 @@
+\documentclass[a4paper,11pt]{article}
+
+\usepackage{amsmath, amssymb, hyperref, ../../vimacros}
+\usepackage[round]{natbib}
+\hypersetup{breaklinks=true, colorlinks=true, urlcolor=blue, linkcolor=blue, citecolor=blue}
+
+\author{Philip Schulz and Wilker Aziz}
+\title{Understanding Reparametrisation Gradients}
+\date{last modified: \today}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+This note explains derives in detail the reparametrisation trick presented in \cite{KingmaWelling:2013,RezendeEtAl:2014,TitsiasLazarogredilla:2014}. Our derivation mostly follows \cite{TitsiasLazarogredilla:2014}. It also gives some advice how terms such as Jacobians should be distributed.
+\end{abstract}
+
+\section{Derivation}
+
+We assume a model of some data $ y $ whose log-likelihood is given as
+\begin{equation}
+\log p(y|\theta) = \intl { \log \underbrace{p(y,x|\theta)}_{g(x)} } {x} 
+\end{equation}
+where $ x $ is any set of latent variables and $ \theta $ are the model parameters. The joint likelihood, which we abbreviate as $ g(x) $, can be arbitrarily
+complex; in particular, it can be given by a neural network. Since for comples models exact integration over the latent space is impossible, we employ variational
+inference for parameter optimisation. The variational parameters are called $ \lambda $. The objective is
+\begin{equation} \label{eq:objective}
+\underset{\lambda}{\arg \max} = \E[q(x|\lambda)]{\log \dfrac{g(x)}{q(x|\lambda)}} \ .
+\end{equation}
+We further assume that exact integration is not possible even under the variational approximation (this is the case in non-conjugate models, such as neural networks). Instead we want to sample gradient estimates using Monte Carlo (MC) sampling. Unfortunately, the MC estimator is not differentiable. We thus to sample the simpler
+random variable $ Z \sim \NDist{0}{I} $ which does not depend on the variational parameters. In order to express $ q(\theta|\lambda) $ in terms of the density 
+$ \phi(z) $ we need to tranform one into the other.
+\begin{align}
+Z &= h(x, \lambda) = (X - \mu) C^{-1} \\
+X &= h^{-1}(z, \lambda) = ZC + \mu
+\end{align}
+We thus get the following transformed density which is equivalent to $ q(\theta|\lambda) $, where we use $ |\cdot| $ to denote the absolute value function.
+\begin{equation}
+\phi((x - \mu) C^{-1})|\det\frac{dh(x, \lambda)}{x}| = \phi((x - \mu) C^{-1})|C^{-1}| =  q(\theta|\lambda)
+\end{equation}
+
+Using the transformation to rewrite the expectation from Equation~\eqref{eq:objective}.
+\begin{small}
+\begin{align}
+\E[q(x|\lambda)]{\log \dfrac{g(x)}{q(x|\lambda)}} &= \intl { q(x|\lambda) \log \dfrac{g(x)}{q(x|\lambda)} }{x} \\
+&= \intl { \phi((X - \mu) C^{-1})|C^{-1}| \log \dfrac{g(x)}{\phi((x - \mu) C^{-1})|C^{-1}|} }{zC} \\
+&= \intl { \phi((X - \mu) C^{-1}) \log \dfrac{g(x)}{\phi((x - \mu) C^{-1})|C^{-1}|} }{z} \\
+&= \intl { \phi((X - \mu) C^{-1}) \log \dfrac{g((x - \mu) C^{-1})}{\phi((x - \mu) C^{-1})|C^{-1}|} }{z} \\
+&= \E[\phi(z)]{ \log \dfrac{\overbrace{g((x - \mu) C^{-1})}^{g(x)}}{\underbrace{\phi((x - \mu) C^{-1})|C^{-1}|}_{q(\theta|\lambda)}}}
+\end{align}
+\end{small}
+
+\section{Noteworthy Points}
+\begin{itemize}
+\item The cancellation of the absolute value of the Jacobian determinant and 
+\item We can usually rewrite $ g(x) = p(y|x, \theta)p(x|\theta) $. This enables us to split up the objective function as
+\begin{equation}
+\E[q(x|\lambda)]{\log \dfrac{p(y|x, \theta)p(x|\theta)}{q(x|\lambda)}} = \E[q(x|\lambda)]{\log p(y|x, \theta)} - \KL{q(x|\lambda)}{p(x|\theta)}
+\end{equation}
+In case we can compute the KL term analytically, we do not need to included the Jacobian in the objective. 
+\end{itemize}
+
+\bibliographystyle{plainnat}
+\bibliography{../../VI}
+
+\end{document}
