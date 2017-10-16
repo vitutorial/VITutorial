@@ -1,13 +1,15 @@
 import mxnet as mx
 import urllib.request
 import os, logging, sys
-import numpy as np
-from typing import Optional
+from typing import Optional, List
 from argparse import ArgumentParser
 from os.path import join, exists
 from numpy import genfromtxt
-from vae import construct_vae
-#from matplotlib import pyplot as plt
+from .vae import construct_vae
+
+# from matplotlib import pyplot as plt
+
+DEFAULT_LEARNING_RATE = 0.0003
 
 data_names = ['train', 'valid', 'test']
 train_set = ['train', 'valid']
@@ -28,7 +30,7 @@ data_dir = join(os.curdir, "binary_mnist")
 #     plt.show()
 
 
-def load_data(train: bool=True, logger: Optional[logging.Logger] = None) -> dict:
+def load_data(train: bool = True, logger: Optional[logging.Logger] = logging) -> dict:
     '''
     Download binarised mnist data set and load it into memory.
 
@@ -61,11 +63,59 @@ def load_data(train: bool=True, logger: Optional[logging.Logger] = None) -> dict
     return data
 
 
-def main():
+def train_model(generator_layers: List[int],
+                inference_layers: List[int],
+                latent_size: int,
+                batch_size: int,
+                epochs: int = 10,
+                learning_rate: float = DEFAULT_LEARNING_RATE,
+                optimiser: str = "adam",
+                ctx: mx.context = mx.cpu(),
+                logger: Optional[logging.logger] = logging):
+    """
+    Train a variational autoencoder model.
 
+    :param generator_layers:
+    :param inference_layers:
+    :param latent_size:
+    :param batch_size:
+    :param ctx:
+    :param logger:
+    :return:
+    """
+    mnist = load_data(train=True, logger=logger)
+    train_iter = mx.io.NDArrayIter(data=mnist['train'], data_name="data", label=mnist["train"], label_name="label",
+                                   batch_size=batch_size, shuffle=True)
+    val_iter = mx.io.NDArrayIter(data=mnist['valid'], data_name="data", label=mnist['valid'], label_name="label",
+                                 batch_size=batch_size)
+
+    vae = construct_vae(latent_type="gaussian", likelihood="bernoulliProd", generator_layer_sizes=generator_layers,
+                        infer_layer_size=inference_layers, latent_variable_size=latent_size,
+                        data_dims=mnist['train'].shape[1], generator_act_type='tanh', infer_act_type='tanh')
+
+    module = mx.module.Module(vae.train(mx.sym.Variable("data"), mx.sym.Variable('label')),
+                              data_names=[train_iter.provide_data[0][0]],
+                              label_names=["label"], context=ctx,
+                              logger=logger)
+
+    logger.info("Starting to train")
+    module.fit(train_data=train_iter, optimizer=optimiser, force_init=True, force_rebind=True, num_epoch=epochs,
+               optimizer_params={'learning_rate': learning_rate},
+               # validation_metric=mx.metric.Perplexity(None),
+               # eval_data=val_iter,
+               batch_end_callback=mx.callback.Speedometer(frequent=1, batch_size=batch_size),
+               epoch_end_callback=mx.callback.do_checkpoint('vae'))
+
+
+def load_model(model_file: str):
+    # TODO
+    pass
+
+
+def main():
     command_line_parser = ArgumentParser("Train a VAE on binary mnist and generate images of random digits.")
 
-    command_line_parser.add_argument('-b','--batch-size', default=500, type=int,
+    command_line_parser.add_argument('-b', '--batch-size', default=500, type=int,
                                      help="Training batch size. Default: %(default)s.")
     command_line_parser.add_argument('--opt', type=str, choices=["sgd", "adam"], default="adam",
                                      help="The optimizer to use during training. "
@@ -82,9 +132,8 @@ def main():
 
     args = command_line_parser.parse_args()
 
-    ctx = mx.cpu() if args.num_gpus <= 0 else args.num_gpus
+    ctx = mx.cpu() if args.num_gpus <= 0 else [mx.gpu(i) for i in range(args.num_gpus)]
     opt = args.opt
-    learning_rate = 0.0003
     epochs = args.epochs
     batch_size = args.batch_size
 
@@ -94,34 +143,18 @@ def main():
 
     training = not args.sample_random_digits
 
+    logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.DEBUG, stream=sys.stdout)
+    logger = logging.getLogger(__name__)
+
     if training:
-        logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.DEBUG, stream=sys.stdout)
-        logger = logging.getLogger(__name__)
-
-        mnist = load_data(training, logger)
-
-        train_iter = mx.io.NDArrayIter(data=mnist['train'], data_name="data", label=mnist["train"], label_name="label",
-                                           batch_size=batch_size, shuffle=True)
-        val_iter = mx.io.NDArrayIter(data=mnist['valid'], data_name="data", label_name="label", batch_size=batch_size)
+        train_model(generator_layers=generator_layers, inference_layers=inference_layers, latent_size=latent_size,
+                    batch_size=batch_size, epochs=epochs, optimiser=opt, ctx=ctx)
     else:
+        mnist = load_data(False, logger)
         test_iter = mx.io.NDArrayIter(data=mnist['test'], label=mnist['test'], label_name="label")
 
-    vae = construct_vae(latent_type="gaussian", likelihood="bernoulliProd", generator_layer_sizes=generator_layers,
-                        infer_layer_size=inference_layers, latent_variable_size=latent_size,
-                        data_dims=mnist['train'].shape[1], generator_act_type='tanh', infer_act_type='tanh')
 
-    module = mx.module.Module(vae.train(mx.sym.Variable("data"), mx.sym.Variable('label')),
-                              data_names=[train_iter.provide_data[0][0]],
-                              label_names=["label"], context=ctx,
-                              logger=logger)
 
-    logger.info("Starting to train")
-    module.fit(train_data=train_iter, optimizer=opt,force_init=True, force_rebind=True, num_epoch=epochs,
-               optimizer_params={'learning_rate': learning_rate},
-               # validation_metric=mx.metric.Perplexity(None),
-               # eval_data=val_iter,
-               batch_end_callback=mx.callback.Speedometer(frequent=1, batch_size=batch_size),
-               epoch_end_callback=mx.callback.do_checkpoint('vae'))
 
 #     # set up training
 #     module.bind(data_shapes=train_iter.provide_data, label_shapes=train_iter.provide_label, for_training=True,
