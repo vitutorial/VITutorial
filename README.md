@@ -7,9 +7,17 @@ This repository stores slides for a tutorial on variational inference for NLP au
 * The tutorial has already been presented in Berlin, where it was given in 2 sessions. The focus was on Deep Generative Models ([Module 6](https://github.com/philschulz/VITutorial/blob/master/modules/M6_DeepGenerativeModels/M6_DeepGenerativeModels.pdf)). The next stop will be Dublin.
 
 # Tour
-Below are confirmed venues where we will give the tutorial.
+**Upcoming**
+
+Below are confirmed venues and dates (if available) for future presentations of the tutorial.
 * Melbourne University
+  1. Basics of Variational Inference: Tue, 31-10-2017, Doug McDonell Building, room 8.03, 2:00pm-3:15pm
+  2. Deep Generative Models: Thu, 02-11-2017, Doug McDonell Building, room 8.03, 2:15pm-3:30pm
+  3. Coding Tutorial: Tue, 07-11-2017, Doug McDonell Building, room 8.03, 2:00pm-3:15pm
 * Dublin City University
+
+**Past**
+* Berlin
 
 # Latex Dependencies
 To compile the slides, latex needs to have access to the [bayesnet tikz library](https://github.com/jluttine/tikz-bayesnet).
