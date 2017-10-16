@@ -513,7 +513,7 @@ Analytical computation of $ -\KL{q(z|x,\lambda)}{p(z)} $:
 \node[rectangle, draw, rounded corners, thick] (input) {$x$};
 \node[rectangle, draw, rounded corners, thick, above left=of input] (mu) {$ \mu $};
 \node[rectangle, draw, rounded corners, thick, above right=of input] (var) {$ \sigma $};
-\node[circle, draw, rounded corners, thick, above right= of mu] (z) {$ z $};
+\node[rectangle, draw, rounded corners, thick, above right= of mu] (z) {$ z $};
 \node[rectangle, fill=blue!20, thick, above of= z, rounded corners, draw, node distance=1.5cm] (output) {$ x $};
 
 \draw[->, thick] (input) -- (mu) node[midway, above, rotate=315] {$ \lambda $};
@@ -531,7 +531,8 @@ Analytical computation of $ -\KL{q(z|x,\lambda)}{p(z)} $:
 \node[above= of inference] (generation) {\textcolor{blue!50}{generation model}};
 
 \pause
-\node[right =of var] (epsilon) {$ \epsilon  \sim \NDist{0}{1}$};
+\node[circle, draw, thick ,right =of var, xshift=-.5cm] (epsilon) {$ \epsilon $};
+\node[right = of epsilon, xshift=-1cm] (stdNormal) {$ \sim \NDist{0}{1} $};
 \draw[->, thick] (epsilon) edge (var);
 
 \pause
