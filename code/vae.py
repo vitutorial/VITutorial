@@ -1,6 +1,6 @@
 import mxnet as mx
 from abc import ABC
-from typing import List, Tuple
+from typing import List, Tuple, Callable
 from .kl_divergences import diagonal_gaussian_kl
 
 
@@ -27,10 +27,12 @@ class Generator(ABC):
         """
         raise NotImplementedError()
 
-    def train(self, latent_state: mx.sym.Symbol) -> None:
+    def train(self, latent_state: mx.sym.Symbol) -> mx.sym.Symbol:
         """
         Train the generator from a given latent state.
+
         :param latent_state: The latent input state
+        :return: The loss symbol used for training.
         """
         raise NotImplementedError()
 
@@ -86,6 +88,7 @@ class ProductOfBernoullisGenerator(Generator):
 
         :param latent_state: The input latent state
         :param label: A binary vector (same as input for inference module)
+        :return: The loss symbol used for training
         """
         output = self._preactivation(latent_state=latent_state)
         output = mx.sym.reshape(data=output, shape=(-1, 2, self.data_dims))
@@ -182,12 +185,13 @@ class VAE(ABC):
         self.generator = generator
         self.inference_net = inference_net
 
-    def train(self, data: mx.sym.Symbol, label: mx.sym.Symbol) -> None:
+    def train(self, data: mx.sym.Symbol, label: mx.sym.Symbol) -> mx.sym.Symbol:
         """
         Train the generator and inference network jointly by optimising the ELBO.
 
         :param data: The training data.
         :param label: Copy of the training data.
+        :param: A list of loss symbols.
         """
         raise NotImplementedError()
 
@@ -221,21 +225,24 @@ class GaussianVAE(VAE):
 
     def __init__(self,
                  generator: Generator,
-                 inference_net: GaussianInferenceNetwork) -> None:
+                 inference_net: GaussianInferenceNetwork,
+                 kl_divergence: Callable) -> None:
         self.generator = generator
         self.inference_net = inference_net
+        self.kl_divergence = kl_divergence
 
-    def train(self, data: mx.sym.Symbol, label: mx.sym.Symbol) -> None:
+    def train(self, data: mx.sym.Symbol, label: mx.sym.Symbol) -> mx.sym.Symbol:
         """
         Train the generator and inference network jointly by optimising the ELBO.
 
         :param data: The training data.
         :param label: Copy of the training data.
+        :return: A list of loss symbols.
         """
         mean, std = self.inference_net.inference(data=data)
         latent_state = self.inference_net.sample_latent_state(mean, std)
-        mx.sym.MakeLoss(diagonal_gaussian_kl(mean, std))
-        return self.generator.train(latent_state=latent_state, label=label)
+        kl_loss = mx.sym.MakeLoss(self.kl_divergence(mean, std))
+        return mx.sym.Group([self.generator.train(latent_state=latent_state, label=label), kl_loss])
 
     def generate_reconstructions(self, data: mx.sym.Symbol, n: int) -> mx.sym.Symbol:
         """
@@ -291,7 +298,8 @@ def construct_vae(latent_type: str,
 
     if latent_type == "gaussian":
         inference_net = GaussianInferenceNetwork(latent_variable_size=latent_variable_size,
-                                                 layer_sizes=infer_layer_size, act_type=infer_act_type)
-        return GaussianVAE(generator=generator, inference_net=inference_net)
+                                                 layer_sizes=infer_layer_size,
+                                                 act_type=infer_act_type)
+        return GaussianVAE(generator=generator, inference_net=inference_net, kl_divergence=diagonal_gaussian_kl)
     else:
         raise Exception("{} is an invalid latent variable type.".format(latent_type))
