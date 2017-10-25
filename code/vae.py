@@ -1,7 +1,7 @@
 import mxnet as mx
 from abc import ABC
 from typing import List, Tuple
-from kl_divergences import diagonal_gaussian_kl
+from .kl_divergences import diagonal_gaussian_kl
 
 
 class Generator(ABC):
@@ -118,7 +118,7 @@ class InferenceNetwork(ABC):
 
 class GaussianInferenceNetwork(InferenceNetwork):
     """
-    An infernence network that predicts the parameters of a diagonal Gaussian.
+    An inference network that predicts the parameters of a diagonal Gaussian.
 
     :param latent_variable_size: The dimensionality of the latent variable.
     :param layer_sizes: Size of each layer in the network.

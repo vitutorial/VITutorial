@@ -14,37 +14,38 @@ Below are confirmed venues and dates (if available) for future presentations of 
   1. Basics of Variational Inference: Tue, 31-10-2017, Doug McDonell Building, room 8.03, 2:00pm-3:15pm
   2. Deep Generative Models: Thu, 02-11-2017, Doug McDonell Building, room 8.03, 2:15pm-3:30pm
   3. Coding Tutorial: Tue, 07-11-2017, Doug McDonell Building, room 8.03, 2:00pm-3:15pm
+* Monash University
+  1. Basics of Variational Inference: Thu, 16-11-217, 10am-11:30am
+  2. Deep Generative Models: Thu, 16-11-2017, afternoon
 * Dublin City University
 
 **Past**
-* Berlin
+* Berlin, July 26-27 2017
 
 # Latex Dependencies
 To compile the slides, latex needs to have access to the [bayesnet tikz library](https://github.com/jluttine/tikz-bayesnet).
 
 # Python Code
 
-## Usage
-
-TBD
-
 ## Dependencies
+**Framework**: Our code uses mxnet which is a scalable machine learning library that is under active development.
+For more details see [here](https://mxnet.incubator.apache.org/get_started/install.html).
 
-To train and evaluate the model you need mxnet. For more detailed info
-see [here](https://mxnet.incubator.apache.org/get_started/install.html).
-
+To run the tutorial code and notebook, we recommend that you setup a virtual environment. Your Python version
+should be 3.5 or higher.
+**Warning**: If you are using linux and Python3.6 or higher you need to run `sudo apt-get install libssl-dev` before
+building Python. Otherwise, there is a chance that your virtualenv will not be able to download packages.
 ```
+virtualenv -p python3.5 vi-tutorial-env
+source vi-tutorial-env/bin/activate
 pip install mxnet # cpu installation
 pip install mxnet-cu80 # gpu installation with cuda 8
+pip install jupyter matplotlib
 ```
+**Issues with matplotlib:** If you are using linux and building python from source, pyplot might not work for you 
+because it's missing tkinter (`_tkinter` module). In that case run `sudo apt-get install tk-dev` and rebuild python.
 
-If you also want to visualize the digits, you need matplotlib.
-```
-pip install matplotlib
-```
-Now if you run the code, python might tell you that you are missing ```_tkinter```. This is bad news as it means 
-that you'll have to rebuild python. First, you have to
-```
-sudo apt-get install tk-dev
-```
-and after rebuilding python should be configured for Tk.
+## Usage
+
+If you want to use the notebook, run `jupyter notebook` and use your browser to navigate to the notebook file. You can 
+then manipulate the notebook and do the exercises in your browser.
