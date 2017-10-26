@@ -113,9 +113,9 @@ Again, approximate inference is needed.
 \begin{frame}{Bayesian Logistic Regression}
 \begin{figure}
 \begin{tikzpicture}
-\node[obs] (x) {$ x $};
+\node[obs] (x) {$ y $};
 \node[latent, left=of x] (w) {$ w $};
-\node[obs,right=of x] (f) {$ f(x) $};
+\node[obs,right=of x] (f) {$ x $};
 \node[above left= of w] (mu) {$ \mu $};
 \node[above right=of w] (sigma) {$ \Sigma $};
 
@@ -126,6 +126,12 @@ Again, approximate inference is needed.
 \end{tikzpicture}
 \end{figure}
 The Normal distribution is not conjugate to the Gibbs distribution. The form of the posterior is unknown.
+\end{frame}
+
+\begin{frame}{Bayesian Logistic Regression}
+\begin{block}{Intuition}
+Simply assume that the posterior is Gaussian.
+\end{block}
 \end{frame}
 
 \begin{frame}{Factorial HMMs}
@@ -231,6 +237,12 @@ Exponential dependency on the number of hidden Markov chains.
 \end{alertblock}
 \end{frame}
 
+\begin{frame}{Factorial HMMs}
+\begin{block}{Intuition}
+Simply assume that the posterior consists of independent Markov chains.
+\end{block}
+\end{frame}
+
 \begin{frame}{Latent Dirichlet Allocation}
 An admixture model that changes its mixture weights per document. We assume that the mixture components
 are fixed.
@@ -298,6 +310,17 @@ are fixed.
 \end{itemize}
 \end{frame}
 
+\begin{frame}{Latent Dirichlet Allocation}
+\begin{block}{Intuition}
+Simply assume that the posterior consists of independent categorical and Dirichlet distributions.
+\end{block}
+\pause
+\begin{block}{Rule of Thumb}
+Simply assume that the posterior is in the same family as the prior.
+\end{block}
+\end{frame}
+
+
 \section{Variational Inference}
 \frame{\tableofcontents[currentsection]}
 
@@ -321,8 +344,11 @@ Minimize $ \KL{q(z)}{p(z|x)} $.
 The Kullback-Leibler divergence (or relative entropy) measures the divergence of a distribution $ q $ from 
 a distribution $ p $. 
 \begin{itemize}
+\pause
 \item $ \KL{q(z)}{p(z|x)} = \intl{ q(z) \loga{\frac{q(z)}{p(z|x)}}}{z} $ (continuous)
+\pause
 \item $ \KL{q(z)}{p(z|x)} = \sum_{z} q(z) \loga{\frac{q(z)}{p(z|x)}} $ (discrete)
+\pause
 \item $ \KL{q(z)}{p(z|x)} = \E[q(z)]{\loga{\frac{q(z)}{p(z|x)}}} $ (both)
 \end{itemize}
 \end{frame}
@@ -364,9 +390,9 @@ a distribution $ p $.
 \begin{frame}{VI derivation I}
 \begin{equation*}
 \begin{aligned}
-\log p(x) &\geq \intl{ q(z) \loga{\frac{p(z|x)}{q(z)}}}{z} + \loga{p(x)} \\
+\log p(x) &\geq \intl{ q(z) \loga{\frac{p(z|x)}{q(z)}}}{z} + \log p(x) \\
 \pause
-&= -\KL{q(z)}{p(z|x)} + \loga{p(x)}
+&= -\KL{q(z)}{p(z|x)} + \log p(x)
 \end{aligned}
 \end{equation*}
 \pause
@@ -395,10 +421,10 @@ Recall that we want to find $ q(z) $ such that $ \KL{q(z)}{p(z|x)} $ is small.
 \pause
 &= \underset{q(z)}{\max} \intl{ q(z) \loga{\frac{p(z,x)}{p(x)q(z)}}} {z} \\
 \pause
-&= \underset{q(z)}{\max} \intl{ q(z) \loga{p(z,x)}} {z} - \intl{ q(z) \loga{q(z)}} {z} 
-- \overbrace{\log(p(x))}^{constant} \\
+&= \underset{q(z)}{\max} \intl{ q(z) \loga{p(z,x)}} {z} - \intl{ q(z) \log q(z)} {z} 
+- \overbrace{\log p(x)}^{constant} \\
 \pause
-&= \underset{q(z)}{\max}~\E[q(z)]{\loga{p(x,z)}} + \Ent{q(z)}
+&= \underset{q(z)}{\max}~\E[q(z)]{\log p(x,z) } + \Ent{q(z)}
 \end{aligned}
 \end{equation*}
 \end{small}
@@ -408,9 +434,10 @@ Recall that we want to find $ q(z) $ such that $ \KL{q(z)}{p(z|x)} $ is small.
 As before, we have derived a lower bound on the log-evidence. This \textbf{evidence lower bound}
 or \textbf{ELBO} is our optimisation objective.
 \begin{block}{ELBO}
-\begin{equation*}
-\underset{q(z)}{\max}~\E[q(z)]{\loga{p(x,z)}} + \Ent{q(z)}
-\end{equation*}
+\center
+\boxed{
+\underset{q(z)}{\max}~\E[q(z)]{\log p(x,z)} + \Ent{q(z)}
+}
 \end{block}
 \end{frame}
 
@@ -434,8 +461,8 @@ VI in its basic form can be performed via coordinate ascent. This can be done as
 
 \begin{frame}{Recap: EM Algorithm}
 \begin{itemize}
-\item[\alert{E-step}] Compute: $ \E[p(z|x)]{\loga{p(x,z)}} $. \\ Same as: $ \underset{p(z|x)}{\max}~ \E[p(z|x)]{\loga{p(x,z)}} $
-\item[\alert{M-step}] $ \underset{p(x,z)}{\max}~\E[p(z|x)]{\loga{p(x,z)}} + \underbrace{\Ent{p(z|x)}}_{\text{constant}} $
+\item[\alert{E-step}] Compute: $ \E[p(z|x)]{\loga{p(x,z)}} $. \\ Same as: $ \underset{p(z|x)}{\max}~ \E[p(z|x)]{\log p(x,z)} $
+\item[\alert{M-step}] $ \underset{p(x,z)}{\max}~\E[p(z|x)]{\log p(x,z)} + \underbrace{\Ent{p(z|x)}}_{\text{constant}} $
 \end{itemize}
 \pause 
 \begin{block}{EM is variational inference!}
