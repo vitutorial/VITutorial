@@ -1,7 +1,8 @@
 \documentclass[a4paper,11pt]{article}
-
+\usepackage[margin=1in]{geometry}
 \usepackage{amsmath, amssymb, hyperref, ../../vimacros}
 \usepackage[round]{natbib}
+\usepackage{physics}
 \hypersetup{breaklinks=true, colorlinks=true, urlcolor=blue, linkcolor=blue, citecolor=blue}
 
 \author{Philip Schulz and Wilker Aziz}
@@ -13,7 +14,7 @@
 \maketitle
 
 \begin{abstract}
-This note explains derives in detail the reparametrisation trick presented in \cite{KingmaWelling:2013,RezendeEtAl:2014,TitsiasLazarogredilla:2014}. Our derivation mostly follows \cite{TitsiasLazarogredilla:2014}. It also gives some advice how terms such as Jacobians should be distributed.
+This note explains in detail the reparametrisation trick presented in \cite{KingmaWelling:2013,RezendeEtAl:2014,TitsiasLazarogredilla:2014}. Our derivation mostly follows \cite{TitsiasLazarogredilla:2014}. It also gives some advice how terms such as Jacobians should be distributed.
 \end{abstract}
 
 \section{Derivation}
@@ -28,28 +29,63 @@ inference for parameter optimisation. The variational parameters are called $ \l
 \begin{equation} \label{eq:objective}
 \underset{\lambda}{\arg \max} = \E[q(x|\lambda)]{\log \dfrac{g(x)}{q(x|\lambda)}} \ .
 \end{equation}
-We further assume that exact integration is not possible even under the variational approximation (this is the case in non-conjugate models, such as neural networks). Instead we want to sample gradient estimates using Monte Carlo (MC) sampling. Unfortunately, the MC estimator is not differentiable. We thus to sample the simpler
-random variable $ Z \sim \NDist{0}{I} $ which does not depend on the variational parameters. In order to express $ q(\theta|\lambda) $ in terms of the density 
-$ \phi(z) $ we need to tranform one into the other.
+We further assume that exact integration is not possible even under the variational approximation (this is the case in non-conjugate models, such as neural networks). Instead we want to sample gradient estimates using Monte Carlo (MC) sampling. Unfortunately, the MC estimator is not differentiable.
+
+We assume that the random variable $X$ can be represented by transforming samples from a standard distribution $\phi(z)$ using an affine transformation:
+%We thus to sample the simpler random variable $ Z \sim \NDist{0}{I} $ which does not depend on the variational parameters. In order to express $ q(\theta|\lambda) $ in terms of the density 
+%$ \phi(z) $ we need to tranform one into the other.
+\begin{subequations}\label{eq:h}
 \begin{align}
-Z &= h(x, \lambda) = (X - \mu) C^{-1} \\
-X &= h^{-1}(z, \lambda) = ZC + \mu
+z &= h(x, \lambda) = C^{-1} (x - \mu)  \\
+x &= h^{-1}(z, \lambda) = \mu + Cz ~ .
 \end{align}
-We thus get the following transformed density which is equivalent to $ q(\theta|\lambda) $, where we use $ |\cdot| $ to denote the absolute value function.
+\end{subequations}
+Note that $\phi(z)$ does not depend on $\lambda$ which were absorbed in the affine transformation---this in fact restricts the class of approximations $q(x|\lambda)$ to location-scale distributions.
+
+For the sake of generality we take $x$ and $z$ to be vector valued. Then we write $J_{h(x, \lambda)}$ to denote the Jacobian matrix of the transformation $h(x, \lambda)$, and $J_{h^{-1}(z, \lambda)}$ to denote the Jacobian matrix of the inverse transformation.\footnote{Recall that a Jacobian matrix $\mathbf J \triangleq J_{f(x)}$ of some vector value function $f(x)$ is such that $J_{i,j} = \pdv{x_j} f_i(x)$.} 
+An important property, which we will use to derive reparameterised gradients, is that the inverse of a Jacobian matrix is related to the Jacobian matrix of the inverse function by $J_{h^{-1}} \circ h(x)= J^{-1}_{h(x)}$.\footnote{The notation $J_{h^{-1}} \circ h(x)$ denotes function composition, that is, $J_{h^{-1}}(z=h(x))$ or equivalently $J_{h^{-1}}(z)\evaluated_{z=h(x)}$.}
+
+For an invertible transformation of random variables, it holds that %We thus get the following transformed density which is equivalent to $ q(x|\lambda) $, 
 \begin{equation}
-\phi((x - \mu) C^{-1})|\det\frac{dh(x, \lambda)}{x}| = \phi((x - \mu) C^{-1})|C^{-1}| =  q(\theta|\lambda)
+q(x|\lambda) = \phi(h(x, \lambda))\abs{\det J_{h(x, \lambda)}}
+\end{equation}
+and therefore for the transformation in (\ref{eq:h}) we can write
+\begin{equation}
+q(x|\lambda) = \phi(C^{-1}(x - \mu))\abs{\det C^{-1}} 
+\end{equation}
+and
+\begin{equation}
+\phi(z) = q(\mu + Cz| \lambda)\abs{\det C} ~ .
 \end{equation}
 
-Using the transformation to rewrite the expectation from Equation~\eqref{eq:objective}.
+Re-writing the expectation from Equation~\eqref{eq:objective} in terms of the transformed random variable we have
 \begin{small}
+\begin{subequations}
 \begin{align}
-\E[q(x|\lambda)]{\log \dfrac{g(x)}{q(x|\lambda)}} &= \intl { q(x|\lambda) \log \dfrac{g(x)}{q(x|\lambda)} }{x} \\
-&= \intl { \phi((X - \mu) C^{-1})|C^{-1}| \log \dfrac{g(x)}{\phi((x - \mu) C^{-1})|C^{-1}|} }{zC} \\
-&= \intl { \phi((X - \mu) C^{-1}) \log \dfrac{g(x)}{\phi((x - \mu) C^{-1})|C^{-1}|} }{z} \\
-&= \intl { \phi((X - \mu) C^{-1}) \log \dfrac{g((x - \mu) C^{-1})}{\phi((x - \mu) C^{-1})|C^{-1}|} }{z} \\
-&= \E[\phi(z)]{ \log \dfrac{\overbrace{g((x - \mu) C^{-1})}^{g(x)}}{\underbrace{\phi((x - \mu) C^{-1})|C^{-1}|}_{q(\theta|\lambda)}}}
+%& \E[q(x|\lambda)]{\log \dfrac{g(x)}{q(x|\lambda)}} \\
+& \int q(x|\lambda) \log \dfrac{g(x)}{q(x|\lambda)} \dd x \\
+&= \int \phi(\underbrace{h(x, \lambda)}_{z}) \abs{\det J_{h(x, \lambda)}} \log \frac{g(x)}{\phi(h(x, \lambda)) \abs{\det J_{h(x, \lambda)}}} \dd x \label{eq:change-density}\\
+&= \int \phi(z) \abs{\det J_{h} \circ h^{-1}(z, \lambda)} \log \frac{g(h^{-1}(z, \lambda))}{\phi(z) \abs{\det J_{h} \circ h^{-1}(z, \lambda)}} \abs{\det J_{h^{-1}(z, \lambda)}} \dd z \label{eq:change-variable} \\
+&= \int \phi(z) \abs{\det J^{-1}_{h^{-1}(z, \lambda)}} \log \frac{g(h^{-1}(z, \lambda))}{\phi(z) \abs{\det J^{-1}_{h^{-1}(z, \lambda)}}} \abs{\det J_{h^{-1}(z, \lambda)}} \dd z \label{eq:inverse-theorem} \\
+&= \int \phi(z) \frac{1}{\abs{\det J_{h^{-1}}(z, \lambda)}} \log \frac{g(h^{-1}(z, \lambda))\abs{\det J_{h^{-1}}(z, \lambda)}}{\phi(z)} \abs{\det J_{h^{-1}}(z, \lambda)} \dd z \label{eq:det} \\
+&= \int \phi(z) \log \frac{g(h^{-1}(z, \lambda))\abs{\det J_{h^{-1}}(z, \lambda)}}{\phi(z)} \dd z \label{eq:cancel}\\
+&= \int \phi(z) \log \left(g(h^{-1}(z, \lambda))\abs{\det \underbrace{J_{h^{-1}}(z, \lambda)}_{C}}\right) \dd z  - \int \phi(z) \log \phi(z) \dd z \label{eq:scale} \\
+&= \mathbb E_{\phi(Z)}[\log g(h^{-1}(Z, \lambda))] + \log \abs{C} + \mathbb H[\phi(Z)]
 \end{align}
+\end{subequations}
 \end{small}
+for which we can easily construct gradient estimates by MC sampling.
+
+\paragraph{A digest of what happened} 
+
+\begin{itemize}
+	\item In (\ref{eq:change-density}) we applied a change of density. 
+	\item In (\ref{eq:change-variable}) we applied a change of variable thus expressing every integrand as a function of $z$ rather than $x$. First, note that this calls for a change of infinitesimal volumes, i.e. $\dd x = \abs{\det J_{h^{-1}}(z, \lambda)} \dd z$. Second, note that, to express the Jacobian $J_{h(x, \lambda)}$ as a function of $z$, we used function composition.
+	\item In (\ref{eq:inverse-theorem}) we used the inverse function theorem to both Jacobian terms of the kind $J_{h} \circ h^{-1}(z, \lambda)$.
+	\item In (\ref{eq:det}) we use a property of determinant of invertible matrices, namely, $\det A^{-1} = \frac{1}{\det A}$.	
+	\item In (\ref{eq:cancel}) the absolute determinants outside the $\log$ cancel and we are left with (\ref{eq:scale}) where we used the Jacobian of the affine transform.
+	\item Note that $\phi(z)$ does not depend on $C$ and therefore the Jacobian is constant with respect to the standard distribution. 
+\end{itemize}
 
 \section{Noteworthy Points}
 \begin{itemize}
@@ -58,7 +94,7 @@ Using the transformation to rewrite the expectation from Equation~\eqref{eq:obje
 \begin{equation}
 \E[q(x|\lambda)]{\log \dfrac{p(y|x, \theta)p(x|\theta)}{q(x|\lambda)}} = \E[q(x|\lambda)]{\log p(y|x, \theta)} - \KL{q(x|\lambda)}{p(x|\theta)}
 \end{equation}
-In case we can compute the KL term analytically, we do not need to included the Jacobian in the objective. 
+In case we can compute the KL term analytically, we do not need to included $\abs{\det J_{h^{-1}(z, \lambda)}}$ in the objective. 
 \end{itemize}
 
 \bibliographystyle{plainnat}
