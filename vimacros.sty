@@ -24,7 +24,7 @@
 
 % Integral (args: integrand, integration variable -- optional: domain of integration)
 \newcommand{\intl}[3][]{\ifthenelse{\equal{#1}{}}{\int 
-#2 \mathrm{d#3}}{\int_{#1} #2 \mathrm{d}#3}}
+#2 \mathrm{d}#3}{\int_{#1} #2 \mathrm{d}#3}}
 
 % ELBO
 \DeclareMathOperator{\ELBO}{ELBO}
