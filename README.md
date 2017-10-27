@@ -16,7 +16,7 @@ Below are confirmed venues and dates (if available) for future presentations of 
   3. Coding Tutorial: Tue, 07-11-2017, Doug McDonell Building, room 8.03, 2:00pm-3:15pm
 * Monash University
   1. Basics of Variational Inference: Thu, 16-11-217, 10am-11:30am
-  2. Deep Generative Models: Thu, 16-11-2017, afternoon
+  2. Deep Generative Models: Thu, 16-11-2017, 2:30pm-4pm
 * Dublin City University
 
 **Past**
@@ -27,12 +27,17 @@ To compile the slides, latex needs to have access to the [bayesnet tikz library]
 
 # Python Code
 
+While we strive to update our code base with new and more complex models, the Gaussian VAE is at the heart of the tutorial.
+See [here](code/gaussian_vae.pdf.gv) for what the computation graph of such a model looks like. (No worries, it's actually
+pretty straightforward to implement.) 
+
 ## Dependencies
 **Framework**: Our code uses mxnet which is a scalable machine learning library that is under active development.
 For more details see [here](https://mxnet.incubator.apache.org/get_started/install.html).
 
 To run the tutorial code and notebook, we recommend that you setup a virtual environment. Your Python version
 should be 3.5 or higher.
+
 **Warning**: If you are using linux and Python3.6 or higher you need to run `sudo apt-get install libssl-dev` before
 building Python. Otherwise, there is a chance that your virtualenv will not be able to download packages.
 ```
@@ -47,5 +52,6 @@ because it's missing tkinter (`_tkinter` module). In that case run `sudo apt-get
 
 ## Usage
 
-If you want to use the notebook, run `jupyter notebook` and use your browser to navigate to the notebook file. You can 
-then manipulate the notebook and do the exercises in your browser.
+One you have executed the above commands, open a notebook with `jupyter notebook`. Then use your browser to navigate
+to the notebook. The notebook file is: `<path to repo>/VITutorial/code/vae_notebook.ipynb`. Make sure to have activated
+the `vi-tutorial-env` environment before starting the notebook.

@@ -354,11 +354,26 @@ a distribution $ p $.
 \end{frame}
 
 \begin{frame}{Recap KL divergence}
+Originally known as relative entropy. Read $ \KL{q(z)}{p(z)} $ as the divergence of $ p $ from $ q $ or the entropy of $ p $ relative to $ q $.
+\pause
+\begin{small}
+\begin{block}{Expand $ \KL{q}{p} $}
+\begin{align*}
+\E[q(z)]{\loga{\frac{q(z)}{p(z)}}} &= - \E[q(z)]{\log p(z)} + \E[q(z)]{\log q(z)} \\
+&= \text{CE} - \Ent{q(z)}
+\end{align*}
+\end{block}
+\end{small}
+\pause
+Bits needed to encode $ p $ once we know $ q $. 
+\end{frame}
+
+\begin{frame}{Recap KL divergence}
 \begin{block}{Properties}
 \begin{itemize}
 \item $ \KL{q(z)}{p(z|x)} \geq 0 $ with \\ equality iff $ q(z) = p(z|x) $.
 \pause
-\item $ -\KL{q(z)}{p(z|x)} \leq 0 $.
+\item $ -\KL{q(z)}{p(z|x)} = \E[q(z)]{\loga{\frac{p(z|x)}{q(z)}}} \leq 0 $.
 \pause
 \item $ \KL{q(z)}{p(z|x)} = \infty $ \\ if $ \exists z $ s.t. $ p(z|x) = 0 $ and $ q(z) > 0 $.
 \pause
