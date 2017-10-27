@@ -28,7 +28,7 @@ To compile the slides, latex needs to have access to the [bayesnet tikz library]
 # Python Code
 
 While we strive to update our code base with new and more complex models, the Gaussian VAE is at the heart of the tutorial.
-See [here](code/gaussian_vae.pdf.gv) for what the computation graph of such a model looks like. (No worries, it's actually
+See [here](code/gaussian_vae.pdf.gv.pdf) for what the computation graph of such a model looks like. (No worries, it's actually
 pretty straightforward to implement.) 
 
 ## Dependencies
