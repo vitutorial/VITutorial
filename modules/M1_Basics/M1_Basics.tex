@@ -103,6 +103,37 @@ Again, approximate inference is needed.
 \section{Examples}
 \frame{\tableofcontents[currentsection]}
 
+\begin{frame}{We cannot compute the posterior when}
+\begin{enumerate}
+\item The functional form of the posterior is unknown (we don't know which parameters to infer)
+\item The functional form is known but the computation is intractable
+\end{enumerate}
+\end{frame}
+
+\begin{frame}{Bayesian Logistic Regression}
+\begin{figure}
+\begin{tikzpicture}
+\node[obs] (x) {$ y $};
+\node[latent, left=of x] (w) {$ w $};
+\node[obs,right=of x] (f) {$ x $};
+\node[above left= of w] (mu) {$ \mu $};
+\node[above right=of w] (sigma) {$ \Sigma $};
+
+\edge{w,f}{x};
+\edge{mu,sigma}{w};
+
+\plate {data} {(x)(f)} {$ N $};
+\end{tikzpicture}
+\end{figure}
+The Normal distribution is not conjugate to the Gibbs distribution. The form of the posterior is unknown.
+\end{frame}
+
+\begin{frame}{Bayesian Logistic Regression}
+\begin{block}{Intuition}
+Simply assume that the posterior is Gaussian.
+\end{block}
+\end{frame}
+
 \begin{frame}{Factorial HMMs}
 FHMMs have several Markov chains over latent variables.
 \begin{figure}
@@ -206,6 +237,12 @@ Exponential dependency on the number of hidden Markov chains.
 \end{alertblock}
 \end{frame}
 
+\begin{frame}{Factorial HMMs}
+\begin{block}{Intuition}
+Simply assume that the posterior consists of independent Markov chains.
+\end{block}
+\end{frame}
+
 \begin{frame}{Latent Dirichlet Allocation}
 An admixture model that changes its mixture weights per document. We assume that the mixture components
 are fixed.
@@ -230,6 +267,7 @@ are fixed.
 % inference edges
 \path (w) edge[->,bend left=30,color=red] (z);
 \edge[color=red] {beta} {z};
+\path (w) edge[->,bend left=30,color=red] (theta);
 \pause
 \path (z) edge[-,bend right=30,color=red] (theta);
 \path (alpha) edge[->, bend left=30, color=red] (theta);
@@ -253,6 +291,7 @@ Inference network for LDA.
 
 % inference edges
 \path (w) edge[->,bend left=30,color=red] (z);
+\path (w) edge[->,bend left=30,color=red] (theta);
 \path (z) edge[-,bend right=30,color=red] (theta);
 \path (alpha) edge[->, bend left=30, color=red] (theta);
 \edge[color=red] {beta} {z};
@@ -271,33 +310,58 @@ are fixed.
 \end{itemize}
 \end{frame}
 
+\begin{frame}{Latent Dirichlet Allocation}
+\begin{block}{Intuition}
+Simply assume that the posterior consists of independent categorical and Dirichlet distributions.
+\end{block}
+\pause
+\begin{block}{Rule of Thumb}
+Simply assume that the posterior is in the same family as the prior.
+\end{block}
+\end{frame}
+
+
 \section{Variational Inference}
 \frame{\tableofcontents[currentsection]}
 
 \begin{frame}{The Goal}
-Assume $ p(z|x) $ is intractable.
+Assume $ p(z|x) $ is not computable.
 \pause
 \begin{block}{Idea}
-Let's approximate it by an auxiliary distribution $ q(z) $ that is tractable!
+Let's approximate it by an auxiliary distribution $ q(z) $ that is computable!
 \end{block}
 \pause
 \begin{block}{Requirement}
 Choose $ q(z) $ as close as possible to $ p(z|x) $ to obtain a faithful approximation.
 \end{block}
-\pause
-\begin{block}{Implementation}
-Minimize $ \KL{q(z)}{p(z|x)} $.
-\end{block}
 \end{frame}
 
 \begin{frame}{Recap KL divergence}
 The Kullback-Leibler divergence (or relative entropy) measures the divergence of a distribution $ q $ from 
-a distribution $ q $. 
+a distribution $ p $. 
 \begin{itemize}
+\pause
 \item $ \KL{q(z)}{p(z|x)} = \intl{ q(z) \loga{\frac{q(z)}{p(z|x)}}}{z} $ (continuous)
+\pause
 \item $ \KL{q(z)}{p(z|x)} = \sum_{z} q(z) \loga{\frac{q(z)}{p(z|x)}} $ (discrete)
+\pause
 \item $ \KL{q(z)}{p(z|x)} = \E[q(z)]{\loga{\frac{q(z)}{p(z|x)}}} $ (both)
 \end{itemize}
+\end{frame}
+
+\begin{frame}{Recap KL divergence}
+Originally known as relative entropy. Read $ \KL{q(z)}{p(z)} $ as the divergence of $ p $ from $ q $ or the entropy of $ p $ relative to $ q $.
+\pause
+\begin{small}
+\begin{block}{Expand $ \KL{q}{p} $}
+\begin{align*}
+\E[q(z)]{\loga{\frac{q(z)}{p(z)}}} &= - \E[q(z)]{\log p(z)} + \E[q(z)]{\log q(z)} \\
+&\onslide<3->{= \text{CE} - \Ent{q(z)}}
+\end{align*}
+\end{block}
+\onslide<4>
+\end{small}
+Bits needed to encode $ p $ once we know $ q $. 
 \end{frame}
 
 \begin{frame}{Recap KL divergence}
@@ -305,7 +369,7 @@ a distribution $ q $.
 \begin{itemize}
 \item $ \KL{q(z)}{p(z|x)} \geq 0 $ with \\ equality iff $ q(z) = p(z|x) $.
 \pause
-\item $ -\KL{q(z)}{p(z|x)} \leq 0 $.
+\item $ -\KL{q(z)}{p(z|x)} = \E[q(z)]{\loga{\frac{p(z|x)}{q(z)}}} \leq 0 $.
 \pause
 \item $ \KL{q(z)}{p(z|x)} = \infty $ \\ if $ \exists z $ s.t. $ p(z|x) = 0 $ and $ q(z) > 0 $.
 \pause
@@ -337,9 +401,9 @@ a distribution $ q $.
 \begin{frame}{VI derivation I}
 \begin{equation*}
 \begin{aligned}
-\log p(x) &\geq \intl{ q(z) \loga{\frac{p(z|x)}{q(z)}}}{z} + \loga{p(x)} \\
+\log p(x) &\geq \intl{ q(z) \loga{\frac{p(z|x)}{q(z)}}}{z} + \log p(x) \\
 \pause
-&= -\KL{q(z)}{p(z|x)} + \loga{p(x)}
+&= -\KL{q(z)}{p(z|x)} + \log p(x)
 \end{aligned}
 \end{equation*}
 \pause
@@ -368,10 +432,10 @@ Recall that we want to find $ q(z) $ such that $ \KL{q(z)}{p(z|x)} $ is small.
 \pause
 &= \underset{q(z)}{\max} \intl{ q(z) \loga{\frac{p(z,x)}{p(x)q(z)}}} {z} \\
 \pause
-&= \underset{q(z)}{\max} \intl{ q(z) \loga{p(z,x)}} {z} - \intl{ q(z) \loga{q(z)}} {z} 
-- \overbrace{\log(p(x))}^{constant} \\
+&= \underset{q(z)}{\max} \intl{ q(z) \loga{p(z,x)}} {z} - \intl{ q(z) \log q(z)} {z} 
+- \overbrace{\log p(x)}^{constant} \\
 \pause
-&= \underset{q(z)}{\max}~\E[q(z)]{\loga{p(x,z)}} + \Ent{q(z)}
+&= \underset{q(z)}{\max}~\E[q(z)]{\log p(x,z) } + \Ent{q(z)}
 \end{aligned}
 \end{equation*}
 \end{small}
@@ -381,15 +445,16 @@ Recall that we want to find $ q(z) $ such that $ \KL{q(z)}{p(z|x)} $ is small.
 As before, we have derived a lower bound on the log-evidence. This \textbf{evidence lower bound}
 or \textbf{ELBO} is our optimisation objective.
 \begin{block}{ELBO}
-\begin{equation*}
-\underset{q(z)}{\max}~\E[q(z)]{\loga{p(x,z)}} + \Ent{q(z)}
-\end{equation*}
+\center
+\boxed{
+\underset{q(z)}{\max}~\E[q(z)]{\log p(x,z)} + \Ent{q(z)}
+}
 \end{block}
 \end{frame}
 
 \subsection{Relationship to EM}
 
-\begin{frame}{Performing VI}
+\begin{frame}{Performing VI (Frequentist Case)}
 VI in its basic form can be performed via coordinate ascent. This can be done as a 2-step procedure.
 \begin{enumerate}
 \pause
@@ -405,35 +470,42 @@ VI in its basic form can be performed via coordinate ascent. This can be done as
 \end{enumerate}
 \end{frame}
 
-\begin{frame}{What if $ q(z) = p(z|x) $?}
-If $ q(z) = p(z|x) $ then $ \KL{q(z)}{p(z|x)} = 0 $ and thus we are directly optimising the log-evidence.
-\pause
+\begin{frame}{Recap: EM Algorithm}
+\begin{itemize}
+\item[\alert{E-step}] Compute: $ \E[p(z|x)]{\loga{p(x,z)}} $. \\ Same as: $ \underset{p(z|x)}{\max}~ \E[p(z|x)]{\log p(x,z)} $
+\item[\alert{M-step}] $ \underset{p(x,z)}{\max}~\E[p(z|x)]{\log p(x,z)} + \underbrace{\Ent{p(z|x)}}_{\text{constant}} $
+\end{itemize}
+\pause 
+\begin{block}{EM is variational inference!}
+\begin{align*}
+&q(z) = p(z|x) \\
+&\KL{q(z)}{p(z|x)} = 0
+\end{align*}
+\end{block}
+\end{frame}
+
+
+\subsection{Variational Bayes}
+
+\begin{frame}{Performing VI (Bayesian Case)}
+We have latent variables $ z $ (e.g. POS tags) and $ \theta $ (e.g. model parameters).
 \begin{enumerate}
-\item Compute $ \E[p(z|x)]{\loga{p(x,z)}} $
+\item Maximise over local variables $ z $.
+\begin{equation*}
+\underset{q(z)}{\max}~\E[q(z)]{\log p(x,z,\theta)} + \Ent{q(z)}
+\end{equation*}
 \pause
-\item $ \underset{p(x,z)}{\max}~\E[p(z|x)]{\loga{p(x,z)}} + \underbrace{\Ent{p(z|x)}}_{\text{constant}} $
+\item Maximise over global variables $ \theta $.
+\begin{equation*}
+\underset{q(\theta)}{\max}~ \E[q(\theta)]{\log p(x,z,\theta)} + \Ent{q(\theta)}
+\end{equation*}
 \end{enumerate}
 \end{frame}
 
-\begin{frame}{What if $ q(z) = p(z|x) $?}
-If $ q(z) = p(z|x) $ then $ \KL{q(z)}{p(z|x)} = 0 $ and thus we are directly optimising the log-evidence.
+\begin{frame}{Differences between frequentist VI and VB (Variational Bayes)}
 \begin{itemize}
-\item[\alert{E-step}] Compute $ \E[p(z|x)]{\loga{p(x,z)}} $.
-\item[\alert{M-step}] $ \underset{p(x,z)}{\max}~\E[p(z|x)]{\loga{p(x,z)}} + \underbrace{\Ent{p(z|x)}}_{\text{constant}} $
-\end{itemize}
-\end{frame}
-
-\begin{frame}{Relationship to EM}
-\begin{itemize}
-\item Variational Inference where $ q(z) = p(z|x) $ is EM!
-\item The E-step does not change except
-that we are using $ q(z) $ to compute the expected density.
-\begin{equation*}
-\E[q(z)]{\loga{p(x,z)}} \not = \E[p(z|x)]{\loga{p(x,z)}}
-\end{equation*}
-\item The M-step depends on what family we chose for $ q(z) $.
-\pause
-\alert{This may be a different family than $ p(z|x) $!}
+\item Frequentist VI optimises two sets of parameters, VB only optimises variational parameters
+\item Entropy term matters in the M-step for VB but not for VI
 \end{itemize}
 \end{frame}
 
@@ -531,6 +603,7 @@ This approximation strategy is commonly known as \textbf{mean field} approximati
 
 % inference edges
 \path (w) edge[->,bend left=30,color=red] (z);
+\path (w) edge[->,bend left=30,color=red] (theta);
 \path (z) edge[-,bend right=30,color=red] (theta);
 \path (alpha) edge[->, bend left=30, color=red] (theta);
 \edge[color=red] {beta} {z};

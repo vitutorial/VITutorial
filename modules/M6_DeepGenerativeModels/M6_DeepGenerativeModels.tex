@@ -90,35 +90,41 @@ p(x,z|w) = \underbrace{\frac{\exp\left(w^{\top}f(x,z)\right)}{\sum_{x\in \mathca
 \begin{frame}{Log-linear model with latent variables}
 \begin{block}{Posterior}
 \begin{align*}
-p(z|x,w) = \frac{p(x,z|w)}{p(x|w)} = \frac{p(x,z|w)}{\sum_{z} p(x,z|w)} = \\
-\dfrac{\frac{\exp\left(w^{\top}f(x,z)\right)}{\sum_{x\in \mathcal{X}}\exp\left(w^{\top}f(x,z)\right)} \times p(z)}
-{\sum_{z} \frac{\exp\left(w^{\top}f(x,z)\right)}{\sum_{x\in \mathcal{X}}\exp\left(w^{\top}f(x,z)\right)} \times p(z)}
+p(z|x,w) \onslide<2->{= \frac{p(x,z|w)}{p(x|w)}} \onslide<3->{= \frac{p(x,z|w)}{\sum_{z} p(x,z|w)} =} \\
+\onslide<4>{\dfrac{\frac{\exp\left(w^{\top}f(x,z)\right)}{\sum_{x\in \mathcal{X}}\exp\left(w^{\top}f(x,z)\right)} \times p(z)}
+{\sum_{z} \frac{\exp\left(w^{\top}f(x,z)\right)}{\sum_{x\in \mathcal{X}}\exp\left(w^{\top}f(x,z)\right)} \times p(z)}}
 \end{align*}
 \end{block}
 \end{frame}
 
 \begin{frame}{Log-linear model with latent variables}
-\begin{block}{Weight Gradient}
+\begin{block}{Weight Gradient (treat $ p(z|x,w) $ as fixed)}
+\begin{small}
 \begin{align*}
-\frac{d}{dw}\E[p(z|x,w)]{\log p(x,z|w)} = \\ 
-\frac{d}{dw}\sum_{z}p(z|x,w) \log p(x,z|w) = \\
-\sum_{z}p(z|x,w)  \frac{d}{dw}\log p(x,z|w)
+&\frac{d}{dw}\E[p(z|x,w)]{\log p(x,z|w)} = \\ 
+&\onslide<2->{\frac{d}{dw}\sum_{z}p(z|x,w) \log p(x,z|w) =} \\
+&\onslide<3->{\sum_{z}p(z|x,w)  \frac{d}{dw}\log p(x,z|w) =} \\
+&\onslide<4>{\sum_{z}p(z|x,w) \left( \frac{d}{dw}\log p(x|z,w) + \frac{d}{dw} p(z) \right)}
 \end{align*}
+\end{small}
 \end{block}
 \end{frame}
 
 \begin{frame}{Log-linear model with latent variables}
-\begin{block}{Weight Gradient}
+\begin{block}{Weight Gradient (treat $ p(z|x,w) $ as fixed)}
+\begin{small}
 \begin{align*}
-\frac{d}{dw}\E[p(z|x,w)]{\log p(x,z|w)} = \\ 
-\frac{d}{dw}\sum_{z}p(z|x,w) \log p(x,z|w) = \\
-\sum_{z}p(z|x,w) \alert{\underbrace{\frac{d}{dw} \log p(x,z|w)}_{\text{We've already solved this!}}}
+&\frac{d}{dw}\E[p(z|x,w)]{\log p(x,z|w)} = \\ 
+&\frac{d}{dw}\sum_{z}p(z|x,w) \log p(x,z|w) = \\
+&\sum_{z}p(z|x,w)  \frac{d}{dw}\log p(x,z|w) = \\
+&\sum_{z}p(z|x,w) \left( \alert{\overbrace{\frac{d}{dw} \log p(x,z|w)}^{\text{We've already solved this!}}} + \overbrace{\frac{d}{dw} p(z)}^{\text{0}} \right)
 \end{align*}
+\end{small}
 \end{block}
 \end{frame}
 
 \begin{frame}{Log-linear model with latent variables}
-\begin{block}{Weight Gradient}
+\begin{block}{Weight Gradient (treat $ p(z|x,w) $ as fixed)}
 \begin{align*}
 &\frac{d}{dw}\E[p(z|x,w)]{\log p(x,z|w)} = \\ 
 &\E[p(z|x,w)]{f(x,Z)|x,w} - \E[p(z|x,w)]{\E{(f(X,Z)|Z,w}}
@@ -126,7 +132,7 @@ p(z|x,w) = \frac{p(x,z|w)}{p(x|w)} = \frac{p(x,z|w)}{\sum_{z} p(x,z|w)} = \\
 \end{block}
 \pause
 \begin{block}{Procedurally}
-\center{E\_count($x,z$) - E\_count($ x,z $) $ \times  \E{X|z,w} $}
+\center{E\_count($x,z$) - \{ E\_count($ x,z $) $ \times  \E{X|z,w} $ \}}
 \end{block}
 \end{frame}
 
@@ -364,8 +370,8 @@ $ p(x) = \intl{\alert{\underbrace{p(x|z,\theta)}_{\substack{\text{highly} \\  \t
 \begin{aligned}
 \log p(x) &\geq \overbrace{\E[q(z|x,\lambda)]{\log p(x,z|\theta)} + \Ent{q(z|x,\lambda)}}^{\ELBO} \\ 
 \pause
-&= \E[q(z|x,\lambda)]{\log p(x|z,\theta)p(z)} + \Ent{q(z|x,\lambda)} \\ \pause
-&= \E[q(z|x,\lambda)]{\log p(x|z,\theta)} - \KL{p(z)}{q(z|x,\lambda)}
+&= \E[q(z|x,\lambda)]{\log p(x|z,\theta) + \log p(z)} + \Ent{q(z|x,\lambda)} \\ \pause
+&= \E[q(z|x,\lambda)]{\log p(x|z,\theta)} - \KL{q(z|x,\lambda)}{p(z)}
 \end{aligned}
 \end{equation*}
 \end{small}
@@ -377,8 +383,8 @@ $ p(x) = \intl{\alert{\underbrace{p(x|z,\theta)}_{\substack{\text{highly} \\  \t
 \begin{small}
 \begin{align*}
 \log p(x) &\geq \overbrace{\E[q(z|x,\lambda)]{\log p(x,z|\theta)} + \Ent{q(z|x,\lambda)}}^{\ELBO} \\
-&= \E[q(z|x,\lambda)]{\log p(x|z,\theta)p(z)} + \Ent{q(z|x,\lambda)} \\
-&= \E[q(z|x,\lambda)]{\log p(x|z,\theta)} - \alert{\underbrace{\KL{p(z)}{q(z|x,\lambda)}}_{\substack{\text{assume analytical} \\ \text{(true for exponential families)}}}}
+&= \E[q(z|x,\lambda)]{\log p(x|z,\theta) + \log p(z)} + \Ent{q(z|x,\lambda)} \\
+&= \E[q(z|x,\lambda)]{\log p(x|z,\theta)} - \alert{\underbrace{\KL{q(z|x,\lambda)}{p(z)}}_{\substack{\text{assume analytical} \\ \text{(true for exponential families)}}}}
 \end{align*}
 \end{small}
 \end{block}
@@ -389,8 +395,8 @@ $ p(x) = \intl{\alert{\underbrace{p(x|z,\theta)}_{\substack{\text{highly} \\  \t
 \begin{small}
 \begin{align*}
 \log p(x) &\geq \overbrace{\E[q(z|x,\lambda)]{\log p(x,z|\theta)} + \Ent{q(z|x,\lambda)}}^{\ELBO} \\
-&= \E[q(z|x,\lambda)]{\log p(x|z,\theta)p(z)} + \Ent{q(z|x,\lambda)} \\ 
-&= \alert{\underbrace{\E[q(z|x,\lambda)]{\log p(x|z,\theta)}}_{\text{approximate by sampling}}} - \underbrace{\KL{p(z)}{q(z|x,\lambda)}}_{\substack{\text{assume analytical} \\ \text{(true for exponential families)}}}
+&= \E[q(z|x,\lambda)]{\log p(x|z,\theta) + \log p(z)} + \Ent{q(z|x,\lambda)} \\ 
+&= \alert{\underbrace{\E[q(z|x,\lambda)]{\log p(x|z,\theta)}}_{\text{approximate by sampling}}} - \underbrace{\KL{q(z|x,\lambda)}{p(z)}}_{\substack{\text{assume analytical} \\ \text{(true for exponential families)}}}
 \end{align*}
 \end{small}
 \end{block}
@@ -399,7 +405,7 @@ $ p(x) = \intl{\alert{\underbrace{p(x|z,\theta)}_{\substack{\text{highly} \\  \t
 \begin{frame}{Generation Network Gradient}
 \begin{equation*}
 \begin{aligned}
-&\frac{d}{d\theta}\E[q(z|x,\lambda)]{\log p(x|z,\theta)} - \overbrace{\KL{p(z)}{q(z|x,\lambda)}}^{constant} \\ \pause 
+&\frac{d}{d\theta}\E[q(z|x,\lambda)]{\log p(x|z,\theta)} - \overbrace{\KL{q(z|x,\lambda)}{p(z)}}^{constant} \\ \pause 
 &=\E[q(z|x,\lambda)]{\frac{d}{d\theta}\log p(x|z,\theta)} \\ \pause
 &\overset{\text{MC}}{\approx} \frac{1}{S}\sum_{i=1}^{S}
 \frac{d}{d\theta} \log p(x|z_{i},\theta)
@@ -412,8 +418,8 @@ $ p(x) = \intl{\alert{\underbrace{p(x|z,\theta)}_{\substack{\text{highly} \\  \t
 \begin{frame}{Inference Network Gradient}
 \begin{equation*}
 \begin{aligned}
-&\frac{d}{d\lambda}\left[\E[q(z|x,\lambda)]{\log p(x|z,\theta)} - \KL{p(z)}{q(z|x,\lambda)} \right] \\ \pause
-=&\frac{d}{d\lambda}\E[q(z|x,\lambda)]{\log p(x|z,\theta)} - \underbrace{\frac{d}{d\lambda}\KL{p(z)}{q(z|x,\lambda)}}_{\text{analytical computation}} \\
+&\frac{d}{d\lambda}\left[\E[q(z|x,\lambda)]{\log p(x|z,\theta)} - \KL{q(z|x,\lambda)}{p(z)} \right] \\ \pause
+=&\frac{d}{d\lambda}\E[q(z|x,\lambda)]{\log p(x|z,\theta)} - \underbrace{\frac{d}{d\lambda}\KL{q(z|x,\lambda)}{p(z)}}_{\text{analytical computation}} \\
 \end{aligned}
 \end{equation*}
 \pause
@@ -429,7 +435,7 @@ $ p(x) = \intl{\alert{\underbrace{p(x|z,\theta)}_{\substack{\text{highly} \\  \t
 \begin{block}{MC estimator non-differentiable}
 \begin{itemize}
 \pause
-\item Sampling $ z $ neglects $ {d}{d\lambda} q(z|x,\lambda) $
+\item Sampling $ z $ neglects $ \frac{d}{d\lambda} q(z|x,\lambda) $
 \pause
 \item Differentiating $ q(z|x,\lambda) $ breaks the expectation
 \end{itemize}
