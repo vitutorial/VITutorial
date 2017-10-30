@@ -334,10 +334,6 @@ Let's approximate it by an auxiliary distribution $ q(z) $ that is computable!
 \begin{block}{Requirement}
 Choose $ q(z) $ as close as possible to $ p(z|x) $ to obtain a faithful approximation.
 \end{block}
-\pause
-\begin{block}{Implementation}
-Minimize $ \KL{q(z)}{p(z|x)} $.
-\end{block}
 \end{frame}
 
 \begin{frame}{Recap KL divergence}
@@ -360,11 +356,11 @@ Originally known as relative entropy. Read $ \KL{q(z)}{p(z)} $ as the divergence
 \begin{block}{Expand $ \KL{q}{p} $}
 \begin{align*}
 \E[q(z)]{\loga{\frac{q(z)}{p(z)}}} &= - \E[q(z)]{\log p(z)} + \E[q(z)]{\log q(z)} \\
-&= \text{CE} - \Ent{q(z)}
+&\onslide<3->{= \text{CE} - \Ent{q(z)}}
 \end{align*}
 \end{block}
+\onslide<4>
 \end{small}
-\pause
 Bits needed to encode $ p $ once we know $ q $. 
 \end{frame}
 
@@ -488,17 +484,19 @@ VI in its basic form can be performed via coordinate ascent. This can be done as
 \end{block}
 \end{frame}
 
+\subsection{Variational Bayes}
+
 \begin{frame}{Performing VI (Bayesian Case)}
-We split $ z $ into local variables $ z_{loc} $ (e.g. POS tags) and global variables $ z_{glob} $ (e.g. model parameters).
+We have latent variables $ z $ (e.g. POS tags) and $ \theta $ (e.g. model parameters).
 \begin{enumerate}
-\item Maximise over local variables $ z_{loc} $.
+\item Maximise over local variables $ z $.
 \begin{equation*}
-\underset{q(z_{loc})}{\max}~\E[q(z)]{\loga{p(x,z_{loc},z_{glob})}} + \Ent{q(z_{loc})}
+\underset{q(z)}{\max}~\E[q(z)]{\log p(x,z,\theta)} + \Ent{q(z)}
 \end{equation*}
 \pause
-\item Maximise over global variables $ z_{glob} $.
+\item Maximise over global variables $ \theta $.
 \begin{equation*}
-\underset{q(z_{glob})}{\max}~ \E[q(z)]{\loga{p(x,z_{loc},z_{glob})}} + {\Ent{q(z_{glob})}}
+\underset{q(\theta)}{\max}~ \E[q(\theta)]{\log p(x,z,\theta)} + \Ent{q(\theta)}
 \end{equation*}
 \end{enumerate}
 \end{frame}
