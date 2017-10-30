@@ -45,7 +45,6 @@ class ProductOfBernoullisGenerator(Generator):
     :param layer_sizes: Size of each layer in the network.
     :param act_type: The activation after each layer.
     """
-
     def __init__(self, data_dims: int, layer_sizes=List[int], act_type=str) -> None:
         super().__init__(data_dims, layer_sizes, act_type)
         self.output_act = "sigmoid"
@@ -60,8 +59,7 @@ class ProductOfBernoullisGenerator(Generator):
         prev_out = None
         for i, hidden in enumerate(self.layer_sizes):
             fc_i = mx.sym.FullyConnected(data=latent_state, num_hidden=hidden, name="gen_fc_{}".format(i))
-            act_i = mx.sym.Activation(data=fc_i, act_type="relu", name="gen_act_{}".format(i))
-            prev_out = act_i
+            prev_out = mx.sym.Activation(data=fc_i, act_type=self.act_type, name="gen_act_{}".format(i))
 
         # The output layer that gives pre_activations for multiple Bernoulli softmax between 0 and 1
         fc_out = mx.sym.FullyConnected(data=prev_out, num_hidden=2 * self.data_dims, name="gen_fc_out")
@@ -103,7 +101,6 @@ class InferenceNetwork(ABC):
     :param layer_sizes: Size of each layer in the network.
     :param act_type: The activation after each layer.
     """
-
     def __init__(self, latent_variable_size: int, layer_sizes: List[int], act_type: str) -> None:
         self.latent_var_size = latent_variable_size
         self.layer_sizes = layer_sizes
@@ -127,7 +124,6 @@ class GaussianInferenceNetwork(InferenceNetwork):
     :param layer_sizes: Size of each layer in the network.
     :param act_type: The activation after each layer.
     """
-
     def __init__(self, latent_variable_size: int, layer_sizes: List[int], act_type: str):
         super().__init__(latent_variable_size, layer_sizes, act_type)
 
@@ -139,19 +135,19 @@ class GaussianInferenceNetwork(InferenceNetwork):
         :return: The mean and standard deviation.
         """
         shared_layer = mx.sym.FullyConnected(data=data, num_hidden=self.layer_sizes[0], name="inf_joint_fc")
-        shared_layer = mx.sym.Activation(data=shared_layer, act_type="relu", name="inf_joint_act")
+        shared_layer = mx.sym.Activation(data=shared_layer, act_type=self.act_type, name="inf_joint_act")
 
         prev_out = shared_layer
         for i, size in enumerate(self.layer_sizes[1:]):
             mean_fc_i = mx.sym.FullyConnected(data=prev_out, num_hidden=size, name="inf_mean_fc_{}".format(i))
-            mean_act_i = mx.sym.Activation(data=mean_fc_i, act_type="relu", name="inf_mean_act_{}".format(i))
+            mean_act_i = mx.sym.Activation(data=mean_fc_i, act_type=self.act_type, name="inf_mean_act_{}".format(i))
             prev_out = mean_act_i
         mean = mx.sym.FullyConnected(data=prev_out, num_hidden=self.latent_var_size, name="inf_mean_compute")
 
         prev_out = shared_layer
         for i, size in enumerate(self.layer_sizes[1:]):
             var_fc_i = mx.sym.FullyConnected(data=prev_out, num_hidden=size, name="rec_var_fc_{}".format(i))
-            var_act_i = mx.sym.Activation(data=var_fc_i, act_type="relu", name="rec_var_act_{}".format(i))
+            var_act_i = mx.sym.Activation(data=var_fc_i, act_type=self.act_type, name="rec_var_act_{}".format(i))
             prev_out = var_act_i
         # soft-relu maps std onto non-negative real line
         std = mx.sym.Activation(
@@ -180,7 +176,6 @@ class VAE(ABC):
     :param generator: A generator network that specifies the likelihood of the model.
     :param inference_net: An inference network that specifies the distribution over latent values.
     """
-
     def __init__(self, generator: Generator, inference_net: InferenceNetwork) -> None:
         self.generator = generator
         self.inference_net = inference_net
@@ -195,7 +190,7 @@ class VAE(ABC):
         """
         raise NotImplementedError()
 
-    def generate_reconstructions(self, data: mx.sym.Symbol, n: int) -> mx.sym.Symbol:
+    def generate_reconstructions(self, data:mx.sym.Symbol, n: int) -> mx.sym.Symbol:
         """
         Generate a number of reconstructions of input data points.
 
@@ -222,7 +217,6 @@ class GaussianVAE(VAE):
     :param generator: A generator network that specifies the likelihood of the model.
     :param inference_net: An inference network that specifies the Gaussian over latent values.
     """
-
     def __init__(self,
                  generator: Generator,
                  inference_net: GaussianInferenceNetwork,
@@ -242,7 +236,7 @@ class GaussianVAE(VAE):
         mean, std = self.inference_net.inference(data=data)
         latent_state = self.inference_net.sample_latent_state(mean, std)
         kl_loss = mx.sym.MakeLoss(self.kl_divergence(mean, std))
-        return mx.sym.Group([self.generator.train(latent_state=latent_state, label=label), kl_loss])
+        return self.generator.train(latent_state=latent_state, label=label)
 
     def generate_reconstructions(self, data: mx.sym.Symbol, n: int) -> mx.sym.Symbol:
         """

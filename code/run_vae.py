@@ -5,7 +5,7 @@ from typing import Optional, List
 from argparse import ArgumentParser
 from os.path import join, exists
 from numpy import genfromtxt
-from .vae import construct_vae
+from code.vae import construct_vae
 
 # from matplotlib import pyplot as plt
 
@@ -58,7 +58,7 @@ def load_data(train: bool = True, logger: Optional[logging.Logger] = logging) ->
         file_name = join(data_dir, "binary_mnist.{}".format(data_set))
         logger.info("Reading {} into memory".format(file_name))
         data[data_set] = mx.nd.array(genfromtxt(file_name))
-        print("{} contains {} data points".format(file_name, data[data_set].shape)[0])
+        logger.info("{} contains {} data points".format(file_name, data[data_set].shape[0]))
 
     return data
 
@@ -71,7 +71,7 @@ def train_model(generator_layers: List[int],
                 learning_rate: float = DEFAULT_LEARNING_RATE,
                 optimiser: str = "adam",
                 ctx: mx.context = mx.cpu(),
-                logger: Optional[logging.logger] = logging):
+                logger: Optional[logging.Logger] = logging):
     """
     Train a variational autoencoder model.
 
@@ -220,7 +220,6 @@ def main():
 #
 #
 # # module.fit(train_data=train_iter, eval_data=val_iter, optimizer=opt, num_epoch=epochs)
-
 
 if __name__ == "__main__":
     main()
