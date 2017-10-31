@@ -148,13 +148,14 @@ FHMMs have several Markov chains over latent variables.
 \node[latent, left= of zt] (zt-1) {$ z_{t-1} $};
 \node[latent, right= of zt] (zt+1) {$ z_{t+1} $};
 
-\node[latent, above= of zt] (st) {$ s_{t} $};
-\node[latent, left= of st] (st-1) {$ s_{t-1} $};
-\node[latent, right= of st] (st+1) {$ s_{t+1} $};
-
 \edge {zt} {xt, zt+1};
 \edge {zt-1} {xt-1, zt};
 \edge {zt+1} {xt+1};
+
+\pause
+\node[latent, above= of zt] (st) {$ s_{t} $};
+\node[latent, left= of st] (st-1) {$ s_{t-1} $};
+\node[latent, right= of st] (st+1) {$ s_{t+1} $};
 
 \edge {st-1} {st};
 \edge {st} {st+1};
@@ -330,11 +331,11 @@ Simply assume that the posterior is in the same family as the prior.
 Assume $ p(z|x) $ is not computable.
 \pause
 \begin{block}{Idea}
-Let's approximate it by an auxiliary distribution $ q(z) $ that is computable!
+Let's approximate it by an auxiliary distribution $ q(z|x) $ that is computable!
 \end{block}
 \pause
 \begin{block}{Requirement}
-Choose $ q(z) $ as close as possible to $ p(z|x) $ to obtain a faithful approximation.
+Choose $ q(z|x) $ as close as possible to $ p(z|x) $ to obtain a faithful approximation.
 \end{block}
 \end{frame}
 
@@ -343,22 +344,22 @@ The Kullback-Leibler divergence (or relative entropy) measures the divergence of
 a distribution $ p $. 
 \begin{itemize}
 \pause
-\item $ \KL{q(z)}{p(z|x)} = \intl{ q(z) \loga{\frac{q(z)}{p(z|x)}}}{z} $ (continuous)
+\item $ \KL{q(z|x)}{p(z|x)} = \intl{ q(z|x) \loga{\frac{q(z|x)}{p(z|x)}}}{z} $ (continuous)
 \pause
-\item $ \KL{q(z)}{p(z|x)} = \sum_{z} q(z) \loga{\frac{q(z)}{p(z|x)}} $ (discrete)
+\item $ \KL{q(z|x)}{p(z|x)} = \sum_{z} q(z|x) \loga{\frac{q(z|x)}{p(z|x)}} $ (discrete)
 \pause
-\item $ \KL{q(z)}{p(z|x)} = \E[q(z)]{\loga{\frac{q(z)}{p(z|x)}}} $ (both)
+\item $ \KL{q(z|x)}{p(z|x)} = \E[q(z|x)]{\loga{\frac{q(z|x)}{p(z|x)}}} $ (both)
 \end{itemize}
 \end{frame}
 
 \begin{frame}{Recap KL divergence}
-Originally known as relative entropy. Read $ \KL{q(z)}{p(z)} $ as the divergence of $ p $ from $ q $ or the entropy of $ p $ relative to $ q $.
+Originally known as relative entropy. Read $ \KL{q(z|x)}{p(z)} $ as the divergence of $ p $ from $ q $ or the entropy of $ p $ relative to $ q $.
 \pause
 \begin{small}
 \begin{block}{Expand $ \KL{q}{p} $}
 \begin{align*}
-\E[q(z)]{\loga{\frac{q(z)}{p(z)}}} &= - \E[q(z)]{\log p(z)} + \E[q(z)]{\log q(z)} \\
-&\onslide<3->{= \text{CE} - \Ent{q(z)}}
+\E[q(z|x)]{\loga{\frac{q(z|x)}{p(z)}}} &= - \E[q(z|x)]{\log p(z)} + \E[q(z|x)]{\log q(z|x)} \\
+&\onslide<3->{= \text{CE} - \Ent{q(z|x)}}
 \end{align*}
 \end{block}
 \onslide<4>
@@ -369,13 +370,13 @@ Bits needed to encode $ p $ once we know $ q $.
 \begin{frame}{Recap KL divergence}
 \begin{block}{Properties}
 \begin{itemize}
-\item $ \KL{q(z)}{p(z|x)} \geq 0 $ with \\ equality iff $ q(z) = p(z|x) $.
+\item $ \KL{q(z|x)}{p(z|x)} \geq 0 $ with \\ equality iff $ q(z|x) = p(z|x) $.
 \pause
-\item $ -\KL{q(z)}{p(z|x)} = \E[q(z)]{\loga{\frac{p(z|x)}{q(z)}}} \leq 0 $.
+\item $ -\KL{q(z|x)}{p(z|x)} = \E[q(z|x)]{\loga{\frac{p(z|x)}{q(z|x)}}} \leq 0 $.
 \pause
-\item $ \KL{q(z)}{p(z|x)} = \infty $ \\ if $ \exists z $ s.t. $ p(z|x) = 0 $ and $ q(z) > 0 $.
+\item $ \KL{q(z|x)}{p(z|x)} = \infty $ \\ if $ \exists z $ s.t. $ p(z|x) = 0 $ and $ q(z|x) > 0 $.
 \pause
-\item In general $ \KL{q(z)}{p(z|x)} \not = \KL{p(z|x)}{q(z)} $.
+\item In general $ \KL{q(z|x)}{p(z|x)} \not = \KL{p(z|x)}{q(z|x)} $.
 \end{itemize}
 \end{block}
 \end{frame}
@@ -388,13 +389,13 @@ Bits needed to encode $ p $ once we know $ q $.
 \begin{aligned}
 \log p(x) &= \loga{\intl{p(x,z)}{z}} \\
 \pause
-&= \loga{\intl{\alert{q(z)}\frac{p(x,z)}{\alert{q(z)}}}{z}} \\
+&= \loga{\intl{\alert{q(z|x)}\frac{p(x,z)}{\alert{q(z|x)}}}{z}} \\
 \pause
-&\geq \intl{ \alert{q(z)} \loga{\frac{p(x,z)}{\alert{q(z)}}}} {z} \\
+&\geq \intl{ \alert{q(z|x)} \loga{\frac{p(x,z)}{\alert{q(z|x)}}}} {z} \\
 \pause
-& = \intl{ \alert{q(z)} \loga{\frac{p(z|x)p(x)}{\alert{q(z)}}}} {z} \\
+& = \intl{ \alert{q(z|x)} \loga{\frac{p(z|x)p(x)}{\alert{q(z|x)}}}} {z} \\
 \pause
-&= \intl{ \alert{q(z)} \loga{\frac{p(z|x)}{\alert{q(z)}}}} {z} + \log p(x)
+&= \intl{ \alert{q(z|x)} \loga{\frac{p(z|x)}{\alert{q(z|x)}}}} {z} + \log p(x)
 \end{aligned}
 \end{equation*}
 \end{small}
@@ -403,23 +404,23 @@ Bits needed to encode $ p $ once we know $ q $.
 \begin{frame}{VI derivation I}
 \begin{equation*}
 \begin{aligned}
-\log p(x) &\geq \intl{ q(z) \loga{\frac{p(z|x)}{q(z)}}}{z} + \log p(x) \\
+\log p(x) &\geq \intl{ q(z|x) \loga{\frac{p(z|x)}{q(z|x)}}}{z} + \log p(x) \\
 \pause
-&= -\KL{q(z)}{p(z|x)} + \log p(x)
+&= -\KL{q(z|x)}{p(z|x)} + \log p(x)
 \end{aligned}
 \end{equation*}
 \pause
-We have derived a lower bound on the log-evidence whose gap is exactly $ \KL{q(z)}{p(z|x)} $.
+We have derived a lower bound on the log-evidence whose gap is exactly $ \KL{q(z|x)}{p(z|x)} $.
 \end{frame}
 
 \subsection{Deriving VI from KL Divergence}
 
 \begin{frame}{VI derivation II}
-Recall that we want to find $ q(z) $ such that $ \KL{q(z)}{p(z|x)} $ is small.
+Recall that we want to find $ q(z|x) $ such that $ \KL{q(z|x)}{p(z|x)} $ is small.
 \pause
 \begin{block}{Formal Objective}
 \begin{equation*}
-\underset{q(z)}{\min} \KL{q(z)}{p(z|x)} \pause = \underset{q(z)}{\max} -\KL{q(z)}{p(z|x)}
+\underset{q(z|x)}{\min} \KL{q(z|x)}{p(z|x)} \pause = \underset{q(z|x)}{\max} -\KL{q(z|x)}{p(z|x)}
 \end{equation*}
 \end{block}
 \end{frame}
@@ -428,16 +429,16 @@ Recall that we want to find $ q(z) $ such that $ \KL{q(z)}{p(z|x)} $ is small.
 \begin{small}
 \begin{equation*}
 \begin{aligned}
-&\underset{q(z)}{\max} -\KL{q(z)}{p(z|x)} \\ 
+&\underset{q(z|x)}{\max} -\KL{q(z|x)}{p(z|x)} \\ 
 \pause
-&= \underset{q(z)}{\max} \intl{ q(z) \loga{\frac{p(z|x)}{q(z)}}}{z} \\
+&= \underset{q(z|x)}{\max} \intl{ q(z|x) \loga{\frac{p(z|x)}{q(z|x)}}}{z} \\
 \pause
-&= \underset{q(z)}{\max} \intl{ q(z) \loga{\frac{p(z,x)}{p(x)q(z)}}} {z} \\
+&= \underset{q(z|x)}{\max} \intl{ q(z|x) \loga{\frac{p(z,x)}{p(x)q(z|x)}}} {z} \\
 \pause
-&= \underset{q(z)}{\max} \intl{ q(z) \loga{p(z,x)}} {z} - \intl{ q(z) \log q(z)} {z} 
+&= \underset{q(z|x)}{\max} \intl{ q(z|x) \loga{p(z,x)}} {z} - \intl{ q(z|x) \log q(z|x)} {z} 
 - \overbrace{\log p(x)}^{constant} \\
 \pause
-&= \underset{q(z)}{\max}~\E[q(z)]{\log p(x,z) } + \Ent{q(z)}
+&= \underset{q(z|x)}{\max}~\E[q(z|x)]{\log p(x,z) } + \Ent{q(z|x)}
 \end{aligned}
 \end{equation*}
 \end{small}
@@ -449,7 +450,7 @@ or \textbf{ELBO} is our optimisation objective.
 \begin{block}{ELBO}
 \center
 \boxed{
-\underset{q(z)}{\max}~\E[q(z)]{\log p(x,z)} + \Ent{q(z)}
+\underset{q(z|x)}{\max}~\E[q(z|x)]{\log p(x,z)} + \Ent{q(z|x)}
 }
 \end{block}
 \end{frame}
@@ -462,12 +463,12 @@ VI in its basic form can be performed via coordinate ascent. This can be done as
 \pause
 \item Maximize (regularised) expected log-density.
 \begin{equation*}
-\underset{q(z)}{\max}~\E[q(z)]{\loga{p(x,z)}} + \Ent{q(z)}
+\underset{q(z|x)}{\max}~\E[q(z|x)]{\loga{p(x,z)}} + \Ent{q(z|x)}
 \end{equation*}
 \pause
 \item Optimise generative model.
 \begin{equation*}
-\underset{p(x,z)}{\max}~ \E[q(z)]{\loga{p(x,z)}} + \underbrace{\Ent{q(z)}}_{\text{constant}}
+\underset{p(x,z)}{\max}~ \E[q(z|x)]{\loga{p(x,z)}} + \underbrace{\Ent{q(z|x)}}_{\text{constant}}
 \end{equation*}
 \end{enumerate}
 \end{frame}
@@ -480,8 +481,8 @@ VI in its basic form can be performed via coordinate ascent. This can be done as
 \pause 
 \begin{block}{EM is variational inference!}
 \begin{align*}
-&q(z) = p(z|x) \\
-&\KL{q(z)}{p(z|x)} = 0
+&q(z|x) = p(z|x) \\
+&\KL{q(z|x)}{p(z|x)} = 0
 \end{align*}
 \end{block}
 \end{frame}
@@ -494,12 +495,12 @@ We have latent variables $ z $ (e.g. POS tags) and $ \theta $ (e.g. model parame
 \begin{enumerate}
 \item Maximise over local variables $ z $.
 \begin{equation*}
-\underset{q(z)}{\max}~\E[q(z)q(\theta)]{\log p(x,z,\theta)} + \Ent{q(z)}
+\underset{q(z|x)}{\max}~\E[q(z|x)q(\theta)]{\log p(x,z,\theta)} + \Ent{q(z|x)}
 \end{equation*}
 \pause
 \item Maximise over global variables $ \theta $.
 \begin{equation*}
-\underset{q(\theta)}{\max}~ \E[q(z)q(\theta)]{\log p(x,z,\theta)} + \Ent{q(\theta)}
+\underset{q(\theta)}{\max}~ \E[q(z|x)q(\theta)]{\log p(x,z,\theta)} + \Ent{q(\theta)}
 \end{equation*}
 \end{enumerate}
 \end{frame}
@@ -516,10 +517,10 @@ We have latent variables $ z $ (e.g. POS tags) and $ \theta $ (e.g. model parame
 
 \begin{frame}{Designing a tractable approximation}
 \begin{itemize}
-\item Recall: The approximation $ q(z) $ needs to be tractable.
-\item Common solution: make \textbf{all} latent variables independent under $ q(z) $.
+\item Recall: The approximation $ q(z|x) $ needs to be tractable.
+\item Common solution: make \textbf{all} latent variables independent under $ q(z|x) $.
 \pause
-\item Formal assumption: $ q(z) = \prod_{i=1}^{N}q(z_{i}) $
+\item Formal assumption: $ q(z|x) = \prod_{i=1}^{N}q(z_{i}) $
 \end{itemize}
 \pause
 This approximation strategy is commonly known as \textbf{mean field} approximation.
@@ -638,10 +639,10 @@ This approximation strategy is commonly known as \textbf{mean field} approximati
 \begin{itemize}
 \item Posterior inference is often \textbf{intractable} because the marginal likelihood (or \textbf{evidence}) 
 $ p(x) $ cannot be computed efficiently.
-\item Variational inference approximates the posterior $ p(z|x) $ with a simpler distribution $ q(z) $.
+\item Variational inference approximates the posterior $ p(z|x) $ with a simpler distribution $ q(z|x) $.
 \item The variational objective is the \textbf{evidence lower bound (ELBO)}:
 \begin{equation*}
-\E[q(z)]{\loga{p(x,z)}} + \Ent{q(z)}
+\E[q(z|x)]{\loga{p(x,z)}} + \Ent{q(z|x)}
 \end{equation*}
 \end{itemize}
 \end{frame}
@@ -649,11 +650,11 @@ $ p(x) $ cannot be computed efficiently.
 \begin{frame}{Summary}
 \begin{itemize}
 \item The \textbf{ELBO} is a lower bound on the log-evidence.
-\item When $ q(z) = p(z|x) $ we recover EM.
+\item When $ q(z|x) = p(z|x) $ we recover EM.
 \item A common approximation is the \textbf{mean field} approximation which assumes that all latent variables
 are independent:
 \begin{equation*}
-q(z) = \prod_{i=1}^{N} q(z_{i})
+q(z|x) = \prod_{i=1}^{N} q(z_{i})
 \end{equation*}
 \end{itemize}
 \end{frame}
