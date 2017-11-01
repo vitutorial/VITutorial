@@ -133,7 +133,9 @@ p(z|x,w) \onslide<2->{= \frac{p(x,z|w)}{p(x|w)}} \onslide<3->{= \frac{p(x,z|w)}{
 \end{block}
 \pause
 \begin{block}{Procedurally}
-\center{E\_count($x,z$) - \{ E\_count($ x,z $) $ \times  \E{X|z,w} $ \}}
+\begin{small}
+\center{E\_count($f(x,z)$) - \{ E\_count($ f(x,z) $) $ \times  \E{f(X,z)|z,w} $ \}}
+\end{small}
 \end{block}
 \end{frame}
 
@@ -457,6 +459,7 @@ Find a transformation $ h: z \mapsto \epsilon $ such that $ \epsilon $ does not 
 \end{frame}
 
 \begin{frame}{Gaussian Transformation}
+\pause
 \textbf{Affine property}
 \begin{equation*}
 Ax + b \sim \NDist{\mu + b}{A\Sigma A^{T}} \text{ for } x \sim \NDist{\mu}{\Sigma}
@@ -501,12 +504,18 @@ $$ h^{-1}(\epsilon, \lambda) = \mu(x,\lambda) + \sigma(x,\lambda) \odot \epsilon
 This gives us 2 gradient paths.
 \pause
 \begin{align*}
-\frac{d}{d\mu(x,\lambda)} = \frac{d}{d\mu(x,\lambda)}\left[ \mu(x,\lambda) + \sigma(x,\lambda) \odot \epsilon \right] = 1 \\
-\frac{d}{d\mu(x,\lambda)} = \frac{d}{d\sigma(x,\lambda)}\left[ \mu(x,\lambda) + \sigma(x,\lambda) \odot \epsilon \right] = \epsilon
+\frac{d h^{-1}(\epsilon, \lambda)}{d\mu(x,\lambda)} = \frac{d}{d\mu(x,\lambda)}\left[ \mu(x,\lambda) + \sigma(x,\lambda) \odot \epsilon \right] = 1 \\
+\frac{d h^{-1}(\epsilon, \lambda)}{d\mu(x,\lambda)} = \frac{d}{d\sigma(x,\lambda)}\left[ \mu(x,\lambda) + \sigma(x,\lambda) \odot \epsilon \right] = \epsilon
 \end{align*}
 \end{frame}
 
 \begin{frame}{Gaussian KL}
+\begin{block}{ELBO}
+\begin{equation*}
+\E[q(z|x,\lambda)]{\log p(x|z,\theta)} - \KL{q(z|x,\lambda)}{p(z)}
+\end{equation*}
+\end{block}
+\pause
 Analytical computation of $ -\KL{q(z|x,\lambda)}{p(z)} $:
 \begin{equation*}
 -\frac{1}{2}\sum_{i=1}^{N}\left(1 + \loga{\sigma^{2}_{i}} - 
