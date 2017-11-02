@@ -1,3 +1,6 @@
+# ignore solutions file
+code/vae_notebook_solutions.ipynb
+
 ## Core latex/pdflatex auxiliary files:
 *.aux
 *.lof
