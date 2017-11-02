@@ -18,7 +18,7 @@
 
 \begin{abstract}
 This note explains in detail the reparametrisation trick presented in \citep{KingmaWelling:2013,RezendeEtAl:2014,TitsiasLazarogredilla:2014}. 
-Our derivation mostly follows that of \citet{TitsiasLazarogredilla:2014}. It also gives some advice how terms such as Jacobians should be distributed.
+Our derivation mostly follows that of \citet{TitsiasLazarogredilla:2014}. It also gives some advice on how terms such as Jacobians should be distributed.
 \end{abstract}
 
 
@@ -26,7 +26,7 @@ We assume a model of some data $ x $ whose log-likelihood is given as
 \begin{equation}
 \log p(x|\theta) = \intl { \log \underbrace{p(x,z|\theta)}_{g(z)} } {z} 
 \end{equation}
-where $ x $ is any set of latent variables and $ \theta $ are the model parameters. The joint likelihood, which we abbreviate as $ g(z) $, can be arbitrarily
+where $ z $ is any set of latent variables and $ \theta $ are the model parameters. The joint likelihood, which we abbreviate as $ g(z) $, can be arbitrarily
 complex; in particular, it can be given by a neural network. Since for complex models exact integration over the latent space is impossible, we employ variational
 inference for parameter optimisation. The variational parameters are called $ \lambda $. The objective is
 \begin{equation} \label{eq:objective}
@@ -45,7 +45,8 @@ In this section we focus on a restricted class of approximate posteriors for whi
 z &= h^{-1}(\epsilon; \lambda) = \mu + C\epsilon ~ .
 \end{align}
 \end{subequations}
-Note that $\phi(\epsilon)$ does not depend on $\lambda = \{\mu, C\}$ which was absorbed in the affine transformation---this in fact restricts the class of approximations $q(z; \lambda)$ to location-scale distributions.\footnote{The vector $\mu$ is called the \emph{location} and $C$ is a positive definite matrix called the \emph{scale}.}
+Note that $\phi(\epsilon)$ does not depend on $\lambda = \{\mu, C\}$ since the affine transformation $ h $ has standardised the
+distribution; i.e. the terms $ C^{-1} $ and $ - \mu $ cancel with the distributions parameters. This in fact restricts the class of approximations $q(z; \lambda)$ to location-scale distributions.\footnote{The vector $\mu$ is called the \emph{location} and $C$ is a positive definite matrix called the \emph{scale}.}
 
 For the sake of generality we take $z$ and $\epsilon$ to be vector valued. 
 Then we write $J_{h(z; \lambda)}$ to denote the Jacobian matrix of the transformation $h(z; \lambda)$, and $J_{h^{-1}(\epsilon; \lambda)}$ to denote the Jacobian matrix of the inverse transformation.\footnote{Recall that a Jacobian matrix $\mathbf J \triangleq J_{f(x)}$ of some vector value function $f(x)$ is such that $J_{i,j} = \pdv{x_j} f_i(x)$.} 
@@ -75,7 +76,7 @@ We start by a change of density
 Note, however, that the variable of integration is still $z$ and therefore we have expressed every integrand---including $\phi(\epsilon)$---as a function of $z$. We now proceed to perform a change of variable
 }
 &= \int \phi(\epsilon) \abs{\det J_{h} \circ h^{-1}(\epsilon; \lambda)} \log \frac{g(h^{-1}(\epsilon; \lambda))}{\phi(\epsilon) \abs{\det J_{h} \circ h^{-1}(\epsilon; \lambda)}} \underbrace{\abs{\det J_{h^{-1}(\epsilon; \lambda)}} \dd \epsilon}_{\dd z} \label{eq:change-variable} \\
-\intertext{which calls for a change of infinitesimal volumes, i.e. $\dd z = \abs{\det J_{h^{-1}}(\epsilon; \lambda)} \dd \epsilon$, and requires expressing every integrand as a function of $\epsilon$ rather than $z$. Note that, to express the Jacobian $J_{h(z; \lambda)}$ as a function of $\epsilon$, we used function composition. At this point we can use the inverse function theorem 
+\intertext{which calls for a change of infinitesimal volumes, i.e. $\dd z = \abs{\det J_{h^{-1}}(\epsilon; \lambda)} \dd \epsilon$, and requires expressing every integrand as a function of $\epsilon$ rather than $z$. Note that, to express the Jacobian $J_{h(z; \lambda)}$ as a function of $\epsilon$, we used function composition. At this point we can use the \href{https://en.wikipedia.org/wiki/Inverse_function_theorem}{inverse function theorem}
 }
 &= \int \phi(\epsilon) \abs{\det J^{-1}_{h^{-1}(\epsilon; \lambda)}} \log \frac{g(h^{-1}(\epsilon; \lambda))}{\phi(\epsilon) \abs{\det J^{-1}_{h^{-1}(\epsilon; \lambda)}}} \abs{\det J_{h^{-1}(\epsilon; \lambda)}} \dd \epsilon \label{eq:inverse-theorem} \\
 \intertext{to rewrite both Jacobian terms of the kind $J_{h} \circ h^{-1}(\epsilon; \lambda)$ as inverse Jacobians. This is convenient because the determinant of invertible matrices is such that $\det A^{-1} = \frac{1}{\det A}$ which we can use to re-arrange the inverse Jacobian terms
