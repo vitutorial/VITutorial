@@ -118,7 +118,7 @@ p(z|x,w) \onslide<2->{= \frac{p(x,z|w)}{p(x|w)}} \onslide<3->{= \frac{p(x,z|w)}{
 &\frac{d}{dw}\E[p(z|x,w)]{\log p(x,z|w)} = \\ 
 &\frac{d}{dw}\sum_{z}p(z|x,w) \log p(x,z|w) = \\
 &\sum_{z}p(z|x,w)  \frac{d}{dw}\log p(x,z|w) = \\
-&\sum_{z}p(z|x,w) \left( \alert{\overbrace{\frac{d}{dw} \log p(x,z|w)}^{\text{We've already solved this!}}} + \overbrace{\frac{d}{dw} p(z)}^{\text{0}} \right)
+&\sum_{z}p(z|x,w) \left( \alert{\overbrace{\frac{d}{dw} \log p(x|z,w)}^{\text{We've already solved this!}}} + \overbrace{\frac{d}{dw} p(z)}^{\text{0}} \right)
 \end{align*}
 \end{small}
 \end{block}
@@ -491,7 +491,7 @@ h^{-1}(\epsilon, \lambda) &= \mu(x,\lambda) + \sigma(x, \lambda) \odot \epsilon~
 \begin{equation*}
 \begin{aligned}
 &= \intl{q(\epsilon) \frac{d}{dz} \log p(x| \overbrace{h^{-1}(\epsilon, \lambda)}^{=z}, \theta) \times \frac{d}{d\lambda} h^{-1}(\epsilon, \lambda)}{\epsilon}  \\ \pause
-&= \E[p(\epsilon)]{\frac{d}{dz} \log p(x| \overbrace{h^{-1}(\epsilon, \lambda)}^{=z}, \theta)\times \frac{d}{d\lambda} h^{-1}(\epsilon, \lambda)}\\ \pause
+&= \E[q(\epsilon)]{\frac{d}{dz} \log p(x| \overbrace{h^{-1}(\epsilon, \lambda)}^{=z}, \theta)\times \frac{d}{d\lambda} h^{-1}(\epsilon, \lambda)}\\ \pause
 &\overset{\text{MC}}{\approx} \frac{1}{S}\sum_{i=1}^{S} \frac{d}{dz} \log p(x| \overbrace{h^{-1}(\epsilon, \lambda)}^{=z}, \theta) \times \frac{d}{d\lambda} h^{-1}(\epsilon, \lambda)
 \end{aligned}
 \end{equation*}
@@ -505,7 +505,7 @@ This gives us 2 gradient paths.
 \pause
 \begin{align*}
 \frac{d h^{-1}(\epsilon, \lambda)}{d\mu(x,\lambda)} = \frac{d}{d\mu(x,\lambda)}\left[ \mu(x,\lambda) + \sigma(x,\lambda) \odot \epsilon \right] = 1 \\
-\frac{d h^{-1}(\epsilon, \lambda)}{d\mu(x,\lambda)} = \frac{d}{d\sigma(x,\lambda)}\left[ \mu(x,\lambda) + \sigma(x,\lambda) \odot \epsilon \right] = \epsilon
+\frac{d h^{-1}(\epsilon, \lambda)}{d\sigma(x,\lambda)} = \frac{d}{d\sigma(x,\lambda)}\left[ \mu(x,\lambda) + \sigma(x,\lambda) \odot \epsilon \right] = \epsilon
 \end{align*}
 \end{frame}
 
