@@ -12,7 +12,7 @@ from code.vae import construct_vae
 DEFAULT_LEARNING_RATE = 0.0003
 
 data_names = ['train', 'valid', 'test']
-train_set = ['train', 'valid']
+train_set = ['train']
 test_set = ['test']
 data_dir = join(os.curdir, "binary_mnist")
 
@@ -86,8 +86,6 @@ def train_model(generator_layers: List[int],
     mnist = load_data(train=True, logger=logger)
     train_iter = mx.io.NDArrayIter(data=mnist['train'], data_name="data", label=mnist["train"], label_name="label",
                                    batch_size=batch_size, shuffle=True)
-    val_iter = mx.io.NDArrayIter(data=mnist['valid'], data_name="data", label=mnist['valid'], label_name="label",
-                                 batch_size=batch_size)
 
     vae = construct_vae(latent_type="gaussian", likelihood="bernoulliProd", generator_layer_sizes=generator_layers,
                         infer_layer_size=inference_layers, latent_variable_size=latent_size,
@@ -95,16 +93,85 @@ def train_model(generator_layers: List[int],
 
     module = mx.module.Module(vae.train(mx.sym.Variable("data"), mx.sym.Variable('label')),
                               data_names=[train_iter.provide_data[0][0]],
-                              label_names=["label"], context=ctx,
+                              label_names=[train_iter.provide_label[0][0]], context=ctx,
                               logger=logger)
 
     logger.info("Starting to train")
+
+    # module.bind(data_shapes=train_iter.provide_data, label_shapes=train_iter.provide_label,
+    #           for_training=True, force_rebind=True)
+    # # if monitor is not None:
+    # #     self.install_monitor(monitor)
+    # module.init_params()
+    # module.init_optimizer(optimizer=optimiser, optimizer_params={"learning_rate" : learning_rate})
+    #
+    # # if not isinstance(eval_metric, metric.EvalMetric):
+    # #     eval_metric = metric.create(eval_metric)
+    #
+    # ################################################################################
+    # # training loop
+    # ################################################################################
+    # import time
+    # for epoch in range(0, epochs):
+    #     tic = time.time()
+    #     #eval_metric.reset()
+    #     nbatch = 0
+    #     data_iter = iter(train_iter)
+    #     end_of_batch = False
+    #     next_data_batch = next(data_iter)
+    #     while not end_of_batch:
+    #         data_batch = next_data_batch
+    #         # if monitor is not None:
+    #         #     monitor.tic()
+    #         module.forward_backward(data_batch)
+    #         module.update()
+    #         try:
+    #             # pre fetch next batch
+    #             next_data_batch = next(data_iter)
+    #             module.prepare(next_data_batch)
+    #         except StopIteration:
+    #             end_of_batch = True
+    #
+    #         # self.update_metric(eval_metric, data_batch.label)
+    #
+    #         # if monitor is not None:
+    #         #     monitor.toc_print()
+    #
+    #         # if batch_end_callback is not None:
+    #         #     batch_end_params = BatchEndParam(epoch=epoch, nbatch=nbatch,
+    #         #                                      eval_metric=eval_metric,
+    #         #                                      locals=locals())
+    #         #     for callback in _as_list(batch_end_callback):
+    #         #         callback(batch_end_params)
+    #         nbatch += 1
+    #         print(nbatch)
+    #
+    #     # one epoch of training is finished
+    #     # for name, val in eval_metric.get_name_value():
+    #     #     module.logger.info('Epoch[%d] Train-%s=%f', epoch, name, val)
+    #     toc = time.time()
+    #     module.logger.info('Epoch[%d] Time cost=%.3f', epoch, (toc - tic))
+    #
+    #     # sync aux params across devices
+    #     arg_params, aux_params = module.get_params()
+    #     module.set_params(arg_params, aux_params)
+    #
+    #     # if epoch_end_callback is not None:
+    #     #     for callback in _as_list(epoch_end_callback):
+    #     #         callback(epoch, self.symbol, arg_params, aux_params)
+    #
+    #     # end of 1 epoch, reset the data-iter for another epoch
+    #     train_iter.reset()
+
+    # print(module.get_outputs())
+    #
     module.fit(train_data=train_iter, optimizer=optimiser, force_init=True, force_rebind=True, num_epoch=epochs,
                optimizer_params={'learning_rate': learning_rate},
                # validation_metric=mx.metric.Perplexity(None),
                # eval_data=val_iter,
-               batch_end_callback=mx.callback.Speedometer(frequent=1, batch_size=batch_size),
-               epoch_end_callback=mx.callback.do_checkpoint('vae'))
+               batch_end_callback=mx.callback.Speedometer(frequent=20, batch_size=batch_size),
+               epoch_end_callback=mx.callback.do_checkpoint('vae'),
+               eval_metric="Loss")
 
 
 def load_model(model_file: str):

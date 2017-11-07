@@ -10,4 +10,4 @@ def diagonal_gaussian_kl(mean, std):
     :return: The KL divergence.
     """
     var = std ** 2
-    return 0.5 * (mx.sym.sum(1 + mx.sym.log(var) - mean ** 2 - var))
+    return -0.5 * (mx.sym.sum(1 + mx.sym.log(var) - mean ** 2 - var, axis=1))
