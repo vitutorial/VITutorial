@@ -57,8 +57,8 @@ class ProductOfBernoullisGenerator(Generator):
         :return: The pre-activation before output activation
         """
         prev_out = None
-        for i, hidden in enumerate(self.layer_sizes):
-            fc_i = mx.sym.FullyConnected(data=latent_state, num_hidden=hidden, name="gen_fc_{}".format(i))
+        for i, size in enumerate(self.layer_sizes):
+            fc_i = mx.sym.FullyConnected(data=latent_state, num_hidden=size, name="gen_fc_{}".format(i))
             prev_out = mx.sym.Activation(data=fc_i, act_type=self.act_type, name="gen_act_{}".format(i))
 
         # The output layer that gives pre_activations for multiple Bernoulli softmax between 0 and 1
