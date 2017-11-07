@@ -62,7 +62,7 @@ class ProductOfBernoullisGenerator(Generator):
             prev_out = mx.sym.Activation(data=fc_i, act_type=self.act_type, name="gen_act_{}".format(i))
 
         # The output layer that gives pre_activations for multiple Bernoulli softmax between 0 and 1
-        fc_out = mx.sym.FullyConnected(data=prev_out, num_hidden=2 * self.data_dims, name="gen_fc_out")
+        fc_out = mx.sym.FullyConnected(data=prev_out, num_hidden=self.data_dims, name="gen_fc_out")
 
         return fc_out
 
@@ -73,11 +73,9 @@ class ProductOfBernoullisGenerator(Generator):
         :param latent_state: The input latent state.
         :return: A vector of Bernoulli draws.
         """
-        act = mx.sym.Activation(data=self._generate(latent_state=latent_state), act_type=self.output_act,
+        act = mx.sym.Activation(data=self._preactivation(latent_state=latent_state), act_type=self.output_act,
                                 name="gen_act_out")
-        act = mx.ndarray(mx.sym.split(data=act, num_outputs=self.data_dims))
-        out = mx.sym.maximum(data=act, axis=0)
-
+        out = act > 0.5
         return out
 
     def train(self, latent_state=mx.sym.Symbol, label=mx.sym.Symbol) -> mx.sym.Symbol:
@@ -88,9 +86,9 @@ class ProductOfBernoullisGenerator(Generator):
         :param label: A binary vector (same as input for inference module)
         :return: The loss symbol used for training
         """
-        output = self._preactivation(latent_state=latent_state)
-        output = mx.sym.reshape(data=output, shape=(-1, 2, self.data_dims))
-        return mx.sym.SoftmaxOutput(data=output, label=label, multi_output=True)
+        output = mx.sym.Activation(data=self._preactivation(latent_state=latent_state), act_type=self.output_act,
+                                   name="output_act")
+        return mx.sym.sum(label * mx.sym.log(output) + (1-label) * mx.sym.log(1-output), axis=[1])
 
 
 class InferenceNetwork(ABC):
@@ -235,8 +233,9 @@ class GaussianVAE(VAE):
         """
         mean, std = self.inference_net.inference(data=data)
         latent_state = self.inference_net.sample_latent_state(mean, std)
-        kl_loss = mx.sym.MakeLoss(self.kl_divergence(mean, std))
-        return self.generator.train(latent_state=latent_state, label=label)
+        kl_term = self.kl_divergence(mean, std)
+        log_likelihood = self.generator.train(latent_state=latent_state, label=label)
+        return mx.sym.MakeLoss(kl_term - log_likelihood, name="Neg_Elbo")
 
     def generate_reconstructions(self, data: mx.sym.Symbol, n: int) -> mx.sym.Symbol:
         """
