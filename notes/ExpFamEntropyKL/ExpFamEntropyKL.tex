@@ -14,7 +14,7 @@
 \begin{abstract}
 This note shows how to compute the entropy and KL divergence (and by extension many other information-theoretic quantities) of 
 exponential family distributions. We use the univariate Gaussian distribution as a running example and encourage the reader to
-apply the learned techniques to distributions in exercises. We expect the reader to be familiar with exponential families 
+apply the learned techniques to other distributions in exercises. We expect the reader to be familiar with exponential families 
 and some of their properties (such as moment computation).
 \end{abstract}
 
@@ -31,7 +31,8 @@ p(x|\overbrace{\theta}^{\substack{\text{canonical} \\ \text{parameters}}}) = \ov
 By default we assume that all terms above are vector-valued. Notice that the canonical parameters may be a function of any conditioning
 context and thus Equation~\eqref{eq:expFam} covers marginal as well as conditional distributions.
 
-\paragraph{Gaussian Distribution} We first write the Gaussian distribution with mean $ \mu $ and variance $ \sigma^{2} $ in its 
+\paragraph{Gaussian Distribution} We first write the univariate Gaussian distribution 
+with mean $ \mu $ and variance $ \sigma^{2} $ in its 
 canonical form. In that case we have $ \theta^{\top} = \begin{bmatrix} \mu & \sigma^{2} \end{bmatrix} $.
 \begin{equation}\label{eq:canonicalGaussian}
 p(x|\mu, \sigma^{2}) = \frac{1}{\sqrt{2\pi}\sigma} \exp \left(-\frac{1}{2}\left(\frac{x - \mu}{\sigma}\right)^{2}\right)
@@ -58,7 +59,7 @@ A(\eta(\theta)) = \log \sigma + \frac{\mu^{2}}{2\sigma^{2}} && \eta(\theta) &= \
 \end{aligned}
 \end{equation}
 
-\paragraph{Exercise} Derive the exponential family form of the exponential and binomial distribution.
+\paragraph{Exercise} Derive the exponential family form of the multivariate Gaussian, exponential and binomial distributions.
 
 \section{Entropy of Exponential Families}
 
@@ -71,19 +72,50 @@ statistics. This means we can split up the expectation term.
 \begin{subequations}
 \begin{align}
 \Ent{X} &= -\E{\log(h(X)) + \eta(\theta))^{\top} t(X) - A(\eta(\theta))} \\
-&=- \E{\log(h(X))} + \eta(\theta))^{\top} \E{t(X)} - A(\eta(\theta))
+&=- \E{\log(h(X))} - \eta(\theta))^{\top} \E{t(X)} + A(\eta(\theta)) \label{eq:expFamEntropy}
 \end{align}
 \end{subequations}
-For most distributions the expectation of the log base measure is a constant because $ h(\cdot) $ does not actually depend on $ X $ (see the Gaussian example above). In order to compute the expected sufficient statistics we exploit another convenient property
+In order to compute the expected sufficient statistics we exploit another convenient property
 of exponential families.
 \begin{equation}
 \E{t(X)} = \frac{d}{d\eta(\theta))}A(\eta(\theta))
 \end{equation}
 
-%\paragraph{Gaussian Entropy} We now compute the entropy of the Gaussian using the above properties. First, we compute the vector
-%of partial derivatives to get the expected sufficient statistics.
-%\begin{align}
-%\frac{\partial}{\partial \frac{\mu}{\sigma^{2}}} \left\{ \log \sigma + \frac{\mu^{2}}{2\sigma^{2}} \right\} = \frac{\mu}{2}
-%\end{align}
+\paragraph{Gaussian Entropy} We now compute the entropy of the Gaussian using the above properties. First, we compute the vector
+of partial derivatives to get the expected sufficient statistics.
+\begin{equation}
+\frac{\partial}{\partial \frac{\mu}{\sigma^{2}}} \left\{ \log \sigma + \frac{\mu^{2}}{2\sigma^{2}} \right\} = 
+\frac{\partial}{\partial \mu} \sigma^{2} \frac{\mu^{2}}{2\sigma^{2}} = \mu
+\end{equation}
+\begin{subequations}
+\begin{align}
+-\frac{\partial}{\partial \frac{1}{2}\sigma^{-2}} \left\{ \log \sigma + \frac{\mu^{2}}{2\sigma^{2}} \right\} &=
+-\frac{\partial}{\partial \sigma^{-2}} 2\log \left(\sigma^{-2\times \left(-\frac{1}{2}\right)} \right) - \frac{\partial}{\partial \sigma^{-2}} \frac{2\mu^{2}}{2\sigma^{2}} \\
+&=\frac{\partial}{\partial \sigma^{-2}} \log \left(\sigma^{-2} \right) - \frac{\partial}{\partial \sigma^{-2}} \mu^{2}\sigma^{-2} =  \sigma^{2} - \mu^{2}
+\end{align}
+\end{subequations}
+
+In the case of the Gaussian we can easily verify that these derivatives are correct by computing the expected sufficient statistics
+directly.
+\begin{align}
+\E{X} = \mu && \E{X^{2}} = \sigma^{2} + \mu^{2}
+\end{align}
+For the second term we have used the equality $ var(X) = \E{X^{2}} - \E{X}^{2} $.
+
+Plugging the expected sufficient statistics into the general entropy term (Equation~\eqref{eq:expFamEntropy}), we get
+\begin{subequations}
+\begin{align}
+\Ent{X} &=- \loga{\frac{1}{\sqrt{2\pi}}} - \begin{bmatrix} \frac{\mu}{\sigma^{2}} & -\frac{1}{2\sigma^{2}} \end{bmatrix} \times 
+\begin{bmatrix} \mu \\ \sigma^{2} + \mu^{2} \end{bmatrix} + \log \sigma + \frac{\mu^{2}}{2\sigma^{2}} \\
+&= -\loga{\frac{1}{\sqrt{2\pi}}} - \frac{\mu^{2}}{\sigma^{2}} + \frac{1}{2} + \frac{\mu^{2}}{2\sigma^{2}} + \log \sigma + \frac{\mu^{2}}{2\sigma^{2}} \\
+&= -\loga{\frac{1}{\sqrt{2\pi}}} - \frac{\mu^{2}}{\sigma^{2}} + \frac{2\mu^{2}}{2\sigma^{2}} + \frac{1}{2} + \log \sigma \\
+&= -\loga{\frac{1}{\sqrt{2\pi}}} + \frac{1}{2} + \log \sigma \\
+&= \frac{1}{2} \log(2\pi) + \frac{1}{2} + \frac{1}{2} \loga{\sigma^{2}} \\
+&= \frac{1}{2} \left(\loga{2\pi\sigma^{2}} + 1\right) \ .
+\end{align}
+\end{subequations}
+As we would expect, the Gaussian entropy only depends on the variance but not on the mean.
+
+\paragraph{Exercise} Follow the steps above to compute the entropy of the multivariate Gaussian, exponential and binomial distributions.
 
 \end{document}
