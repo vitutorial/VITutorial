@@ -391,11 +391,18 @@ a distribution $ p $.
 \pause
 &= \loga{\intl{\alert{q(z)}\frac{p(x,z)}{\alert{q(z)}}}{z}} \\
 \pause
+<<<<<<< Updated upstream
 &\geq \intl{ \alert{q(z)} \loga{\frac{p(x,z)}{\alert{q(z)}}}} {z} \\
 \pause
 & = \intl{ \alert{q(z)} \loga{\frac{p(z|x)p(x)}{\alert{q(z)}}}} {z} \\
 \pause
 &= \intl{ \alert{q(z)} \loga{\frac{p(z|x)}{\alert{q(z)}}}} {z} + \log p(x)
+=======
+&= \loga{\E[q(z)]{\frac{p(x,z)}{\alert{q(z|x)}}}} \\
+&\geq \E[q(z|x)]{  \loga{\frac{p(x,z)}{\alert{q(z|x)}}}} \\
+\pause
+& = \E[q(z|x)] {\loga{\frac{p(z|x)p(x)}{\alert{q(z|x)}}}}
+>>>>>>> Stashed changes
 \end{aligned}
 \end{equation*}
 \end{small}
@@ -404,7 +411,14 @@ a distribution $ p $.
 \begin{frame}{VI derivation I}
 \begin{equation*}
 \begin{aligned}
+<<<<<<< Updated upstream
 \log p(x) &\geq \intl{ q(z) \loga{\frac{p(z|x)}{q(z)}}}{z} + \log p(x) \\
+=======
+\log p(x) &\geq 
+\E[q(z|x)] {\loga{\frac{p(z|x)p(x)}{\alert{q(z|x)}}}} \\
+\pause
+&= \intl{ q(z|x) \loga{\frac{p(z|x)}{q(z|x)}}}{z} + \log p(x) \\
+>>>>>>> Stashed changes
 \pause
 &= -\KL{q(z)}{p(z|x)} + \log p(x)
 \end{aligned}

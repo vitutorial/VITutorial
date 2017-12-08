@@ -5,7 +5,7 @@ from typing import Optional, List
 from argparse import ArgumentParser
 from os.path import join, exists
 from numpy import genfromtxt
-from code.vae import construct_vae
+from code.vae import construct_vae, ElboMetric
 
 # from matplotlib import pyplot as plt
 
@@ -167,7 +167,7 @@ def train_model(generator_layers: List[int],
     #
     module.fit(train_data=train_iter, optimizer=optimiser, force_init=True, force_rebind=True, num_epoch=epochs,
                optimizer_params={'learning_rate': learning_rate},
-               # validation_metric=mx.metric.Perplexity(None),
+               validation_metric=vae.EL,
                # eval_data=val_iter,
                batch_end_callback=mx.callback.Speedometer(frequent=20, batch_size=batch_size),
                epoch_end_callback=mx.callback.do_checkpoint('vae'),

@@ -1,6 +1,6 @@
 import mxnet as mx
 from abc import ABC
-from typing import List, Tuple, Callable
+from typing import List, Tuple, Callable, Optional
 from .kl_divergences import diagonal_gaussian_kl
 
 
@@ -260,6 +260,36 @@ class GaussianVAE(VAE):
         """
         latent_state = mx.sym.random_normal(loc=0, scale=1, shape=(n, self.inference_net.latent_var_size))
         return self.generator.generate_sample(latent_state=latent_state)
+
+
+class ElboMetric(mx.metric.EvalMetric):
+
+    def __init__(self, name: str = "elbo",
+                 output_names: Optional[List[str]] = None,
+                 label_names: Optional[List[str]] = None):
+        super().__init__(name, output_names, label_names)
+
+    def update(self, labels: List[mx.nd.array], preds: List[mx.nd.array]):
+        neg_likelihoods, kl_values, *_ = preds
+        label = labels[0]
+        batch_size = label.shape[0]
+        self.num_inst += batch_size
+        self.sum_metric += -mx.nd.sum(neg_likelihoods).asscalar() - mx.nd.sum(kl_values).asscalar()
+
+
+class KLMetric(mx.metric.EvalMetric):
+
+    def __init__(self, name: str = "kl_divergence",
+                 output_names: Optional[List[str]] = None,
+                 label_names: Optional[List[str]] = None):
+        super().__init__(name, output_names, label_names)
+
+    def update(self, labels: List[mx.nd.array], preds: List[mx.nd.array]):
+        neg_likelihoods, kl_values, *_ = preds
+        label = labels[0]
+        batch_size = label.shape[0]
+        self.num_inst += batch_size
+        self.sum_metric += mx.nd.sum(kl_values).asscalar()
 
 
 def construct_vae(latent_type: str,
