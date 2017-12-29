@@ -3,23 +3,23 @@ This repository stores slides for a tutorial on variational inference for NLP au
 
 # News
 
-* We are now working on mxnet code for variational autoencoders. Soon this will be turned into a jupyter notebook.
-* The tutorial has already been presented in Berlin, where it was given in 2 sessions. The focus was on Deep Generative Models ([Module 6](https://github.com/philschulz/VITutorial/blob/master/modules/M6_DeepGenerativeModels/M6_DeepGenerativeModels.pdf)). The next stop will be Dublin.
+* The [tutorial code](code/vae_notebook.ipynb) is now available! The user still needs to complete the TODOs in order for the code to run.
+Make sure to follow the instructions and read the comments carefully. Also check out the links to the MXNet documention.
 
 # Tour
 **Upcoming**
 
-Below are confirmed venues and dates (if available) for future presentations of the tutorial.
+Below are confirmed venues and dates (if available) for future presentations of the tutorial. Please contact us
+if you interested in hosting the tutorial.
+
+**Past**
+* Monash University
+  1. Basics of Variational Inference: Thu, 16-11-217, 10am-11:30am
+  2. Deep Generative Models: Thu, 16-11-2017, 2:30pm-4pm
 * Melbourne University
   1. Basics of Variational Inference: Tue, 31-10-2017, Doug McDonell Building, room 8.03, 2:00pm-3:15pm
   2. Deep Generative Models: Thu, 02-11-2017, Doug McDonell Building, room 8.03, 2:15pm-3:30pm
   3. Coding Tutorial: Tue, 07-11-2017, Doug McDonell Building, room 8.03, 2:00pm-3:15pm
-* Monash University
-  1. Basics of Variational Inference: Thu, 16-11-217, 10am-11:30am
-  2. Deep Generative Models: Thu, 16-11-2017, 2:30pm-4pm
-* Dublin City University
-
-**Past**
 * Berlin, July 26-27 2017
 
 # Latex Dependencies
@@ -32,8 +32,8 @@ See [here](code/gaussian_vae.pdf.gv.pdf) for what the computation graph of such 
 pretty straightforward to implement.) 
 
 ## Dependencies
-**Framework**: Our code uses mxnet which is a scalable machine learning library that is under active development.
-For more details see [here](https://mxnet.incubator.apache.org/get_started/install.html).
+**Framework**: Our code uses MXNet which is a scalable machine learning library that is under active development.
+For more details on how to install MXNet see [here](https://mxnet.incubator.apache.org/get_started/install.html).
 
 To run the tutorial code and notebook, we recommend that you setup a virtual environment. Your Python version
 should be 3.5 or higher.
