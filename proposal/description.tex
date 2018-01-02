@@ -1,0 +1,50 @@
+\section{Description}
+
+NLP has seen a surge in neural network models in recent years. These models provide state-of-the-art
+performance on many supervised tasks. Unsupervised and semi-supervised learning has only been
+addressed scarcely, however. Deep Generative Models (DGMs) make it possible to integrate neural networks
+with probabilistic graphical models. Using DGMs one can easily design  latent variable models that
+account for missing observations and thereby enable unsupervised and semi-supervised learning
+with neural networks. The method of choice for training these models is variational inference.
+
+This tutorial offers a general introduction to variational inference followed by a thorough and 
+example-driven discussion of how to use variational methods for training DGMs. It provides both 
+the mathematical background necessary for deriving the learning algorithms as well as practical
+implementation guidelines. Moreover, we discuss common pitfalls that one may encounter when using
+DGMs for NLP applications (such as the latent variable being ignored by the model) and discuss
+potential solutions from a theoretical and practical perspective. Importantly, the tutorial
+will cover models with continuous and discrete variables.
+
+The tutorial starts by motivating the need for approximate inference methods from well-known models
+such as LDA \citep{BleiEtAl:2003} and factorial HMMs \citep{GhahramaniJordan:1996}. It then derives the variational objective (evidence lower bound) in
+detail and relates it expectation maximisation. This is done to provide the audience with
+a point of reference as we assume the EM algorithm to be known to most participants.
+
+Next, we present the general idea of a DGM and
+explain why it those models have not been widely used until a couple of years ago. We illustrate
+the problem with a discussion of the wake-sleep algorithm \citep{HintonEtAl:1995}. 
+The next part of the tutorial
+is dedicated to variational autoencoders \citep{KingmaWelling:2013, RezendeEtAl:2014}. We derive the Gaussian reparametrisation that makes
+it possible to sample stochastic gradient estimates and thus use backpropagation for training
+\citep{KingmaWelling:2013, RezendeEtAl:2014, TitsiasLazarogredilla:2014}.
+We them discuss conditions under which this simple training procedure may fail and offer modifications
+\cite[e.g. downscaling the KL-term of the variational objective][]{BowmanEtAl:2016}. 
+
+In the last part of the tutorial, we focus on discrete latent variable models which can generally
+not be trained using a reparametrisation. Instead they use the score-function gradient technique
+\citep{Williams:1992, PaisleyEtAl:2012}.
+This is yet another way of sampling stochastic gradient, however, the variational objective stays
+unchanged. Providing the audience with the necessary tools for constructing DGMs with continuous
+and discrete variable will enable them to conduct research with DGMs without being limited
+to only a few distributions.
+
+The slides used in the tutorial can be viewed and downloaded from \url{https://github.com/philschulz/VITutorial}. The slides for discrete latent variables will be added soon.
+
+The tutorial is complemented by a practical coding exercise. 
+The exercise is implemented
+in a Python notebook and provides the user with a step-by-step walkthrough through the 
+creation of a variational autoencoder. The notebook can be downloaded
+from \url{https://github.com/philschulz/VITutorial/blob/master/code/vae_notebook.ipynb}.
+While we will not have enough
+time to do the coding exercise during the tutorial, the audience will be encouraged to do the
+exercise in their own time and contact us with any questions they may have.
