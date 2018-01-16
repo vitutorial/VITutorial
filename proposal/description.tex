@@ -17,7 +17,7 @@ will cover models with continuous and discrete variables.
 
 The tutorial starts by motivating the need for approximate inference methods from well-known models
 such as LDA \citep{BleiEtAl:2003} and factorial HMMs \citep{GhahramaniJordan:1996}. It then derives the variational objective (evidence lower bound) in
-detail and relates it expectation maximisation. This is done to provide the audience with
+detail and relates it to expectation maximisation. This is done to provide the audience with
 a point of reference as we assume that the EM algorithm will be familiar to most participants.
 
 Next, we present the general idea of a DGM and
@@ -31,7 +31,7 @@ We then discuss conditions under which this simple training procedure may fail a
 \cite[e.g. downscaling the KL-term of the variational objective][]{BowmanEtAl:2016}. 
 
 In the last part of the tutorial, we focus on discrete latent variable models which can generally
-not be trained using a reparametrisation. Instead they use the score-function gradient technique
+not be trained using a reparametrisation. Instead they require the score-function gradient technique
 \citep{Williams:1992, PaisleyEtAl:2012}.
 This is yet another way of sampling a stochastic gradient that works for discrete as well as continuous variables. It does not change the variational objective but does suffer from higher variance than
 the reparametrisation gradient. We will therefore discuss control variates and baselines as basic
