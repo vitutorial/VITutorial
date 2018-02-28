@@ -70,6 +70,6 @@ because it's missing tkinter (`_tkinter` module). In that case run `sudo apt-get
 
 ## Usage
 
-One you have executed the above commands, open a notebook with `jupyter notebook`. Then use your browser to navigate
+Once you have executed the above commands, open a notebook with `jupyter notebook`. Then use your browser to navigate
 to the notebook. The notebook file is: `<path to repo>/VITutorial/code/vae_notebook.ipynb`. Make sure to have activated
 the `vi-tutorial-env` environment before starting the notebook.
