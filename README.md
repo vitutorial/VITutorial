@@ -5,7 +5,25 @@ Want to host our tutorial at your location? Contact one of us!
 * [Wilker Aziz](//wilkeraziz.github.io)
 
 
-# Variational Inference and Deep Generative Models
+**Useful links**
+
+* General information
+  * [The tutorial](#general)
+  * [News](#news)
+  * [Tour](#tour)
+* Slides
+  * [Variational inference](//github.com/philschulz/VITutorial/blob/master/modules/M1_Basics/M1_Basics.pdf)
+  * [Continuous latent variables](//github.com/philschulz/VITutorial/blob/master/modules/M6_DeepGenerativeModels/M6_DeepGenerativeModels.pdf)
+  * Discrete latent variables
+* Lecture notes
+  * [Explaining reparameterisation](//github.com/philschulz/VITutorial/blob/master/modules/M6_DeepGenerativeModels/ExplainingReparametrisationGradients.pdf)
+  * Entropy and KL for exponential families
+* Code
+  * [Dependencies](#code)
+  * [Jupyter notebooks](//github.com/philschulz/VITutorial/tree/master/code)
+  
+
+# <a name="general"> Variational Inference and Deep Generative Models
 
 Neural networks are taking NLP by storm. Yet they are mostly applied to fully supervised tasks. 
 Many real-world NLP problems require unsupervised or semi-supervised models, however, because annotated data is hard to obtain. 
@@ -20,12 +38,12 @@ We then turn to discrete latent variables for which no reparametrisation exists.
 Instead, we explain how to use the score-function or REINFORCE gradient estimator in those cases. 
 We finish by explaining how to combine continuous and discrete variables in semi-supervised modelling problems.
 
-# News
+# <a name="news"> News
 
 * The [tutorial code](code/vae_notebook.ipynb) is now available! The user still needs to complete the TODOs in order for the code to run.
 Make sure to follow the instructions and read the comments carefully. Also check out the links to the MXNet documention.
 
-# Tour
+# <a name="tour"> Tour
 
 **Upcoming**
 
@@ -48,7 +66,7 @@ if you interested in hosting the tutorial.
 # Latex Dependencies
 To compile the slides, latex needs to have access to the [bayesnet tikz library](https://github.com/jluttine/tikz-bayesnet).
 
-# Python Code
+# <a name="code"> Python Code
 
 While we strive to update our code base with new and more complex models, the Gaussian VAE is at the heart of the tutorial.
 See [here](code/gaussian_vae.pdf.gv.pdf) for what the computation graph of such a model looks like. (No worries, it's actually
