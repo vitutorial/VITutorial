@@ -1,4 +1,9 @@
-This repository stores slides for a tutorial on variational inference for NLP audiences. Let us know if you are interested in hosting the tutorial.
+This repository stores material for a *tutorial on variational inference for NLP audiences*. 
+
+Want to host our tutorial at your location? Contact one of us!
+* [Philip Schulz](//philipschulz.org)
+* [Wilker Aziz](//wilkeraziz.github.io)
+
 
 # Variational Inference and Deep Generative Models
 
