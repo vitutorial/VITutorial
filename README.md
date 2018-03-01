@@ -1,8 +1,6 @@
 This repository stores material for a *tutorial on variational inference for NLP audiences*. 
 
-Want to host our tutorial at your location? Contact one of us!
-* [Philip Schulz](//philipschulz.org)
-* [Wilker Aziz](//wilkeraziz.github.io)
+Want to host our tutorial at your location? [Contact](#contact) one of us!
 
 
 **Useful links**
@@ -96,3 +94,11 @@ because it's missing tkinter (`_tkinter` module). In that case run `sudo apt-get
 Once you have executed the above commands, open a notebook with `jupyter notebook`. Then use your browser to navigate
 to the notebook. The notebook file is: `<path to repo>/VITutorial/code/vae_notebook.ipynb`. Make sure to have activated
 the `vi-tutorial-env` environment before starting the notebook.
+
+
+# <a name="contact"> Contact
+
+Want to host our tutorial? Have a suggestion? Contact one of us!
+
+* [Philip](//philipschulz.org)
+* [Wilker](//wilkeraziz.github.io)
