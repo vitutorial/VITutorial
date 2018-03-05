@@ -48,6 +48,7 @@ Make sure to follow the instructions and read the comments carefully. Also check
 Below are confirmed venues and dates (if available) for future presentations of the tutorial. Please contact us
 if you interested in hosting the tutorial.
 
+* Macquarie University Sydney: March 19-20, 2018 (time and location TBA)
 * Uva-ILLC, Amsterdam: March 22, 2018 (room TBA)
 * ACL 2018, Melbourne: July 15th, 2018
 
