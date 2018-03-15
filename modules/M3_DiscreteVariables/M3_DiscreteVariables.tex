@@ -1,0 +1,196 @@
+\documentclass[14pt]{beamer}
+
+\usetheme{Montpellier}
+\usecolortheme{beaver}
+
+\usepackage{amsmath, amssymb, ../../vimacros, hyperref, tikz}
+\usetikzlibrary{positioning, fit, bayesnet}
+\usepackage[round]{natbib}
+
+\hypersetup{breaklinks=true, colorlinks=true, linkcolor=blue, urlcolor=blue, citecolor=blue}
+
+\title{Discrete Variables in DGMs}
+\author{Philip Schulz and Wilker Aziz\\
+\url{https://github.com/philschulz/VITutorial}}
+\date{}
+
+\setbeamertemplate{footline}[frame number]
+
+\begin{document}
+
+\begin{frame}
+\maketitle
+\end{frame}
+
+\begin{frame}{What we know so far}
+\begin{itemize}
+\item Deep Generative Models are probabilistic models where the parameters of the conditional
+distributions are computed by neural networks
+\item Because the $ \ELBO $ cannot be computed exactly, we need to sample latent values
+\item Main problem: the MC estimator is not differentiable
+\item Solution: reparametrisation gradient
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Reparametrisation Gradient}
+\begin{block}{Model Gradient}
+\begin{equation*}
+\frac{\partial}{\partial \theta}\E[q(z|\lambda)]{\log p(x|z,\theta)} - \frac{\partial}{\partial \theta}\KL{q(z|\lambda)}{p(z|\theta)}
+\end{equation*}
+\end{block}
+\begin{block}{Inference Network Gradient}
+\begin{equation*}
+\frac{\partial}{\partial \lambda}\E[q(z|\lambda)]{\log p(x|z,\theta)} - \frac{\partial}{\partial \lambda}\KL{q(z|\lambda)}{p(z|\theta)}
+\end{equation*}
+\end{block}
+\end{frame}
+
+\begin{frame}{Reparametrisation Gradient}
+\begin{equation*}
+\begin{aligned}
+&\frac{\partial}{\partial \lambda}\E[q(z|\lambda)]{\log p(x|z,\theta)} &= \\
+&\frac{\partial}{\partial \lambda}\E[\phi(\epsilon)]{\log p(x|\overbrace{h^{-1}(\epsilon, \lambda)}^{z},\theta)} &= \\
+&\E[\phi(\epsilon)]{\frac{\partial}{\partial z}\log p(x|\overbrace{h^{-1}(\epsilon, \lambda)}^{z},\theta) \times \frac{\partial}{\partial \lambda}
+\overbrace{h^{-1}(\epsilon, \lambda)}^{z}} &
+\end{aligned}
+\end{equation*}
+\end{frame}
+
+\begin{frame}
+\tableofcontents
+\end{frame}
+
+\section{Reparametrisation for Discrete Variables?}
+\begin{frame}
+\tableofcontents[currentsection]
+\end{frame}
+
+\begin{frame}{Reparametrisation}
+In order to tranform variables, we need to compute the Jacobian (matrix of derivatives).
+\begin{equation*}
+p(z) = \phi(h(z))\left|\frac{d}{dz}h(z)\right|
+\end{equation*}
+The Jacobian is generally not available for discrete variables. 
+\end{frame}
+
+\begin{frame}{Cumulative Distribution Function}
+Insert picture here
+\end{frame}
+
+\begin{frame}{Continuity}
+The outcome space of discrete variables is non-continuous. Thus, we cannot take derivatives with
+respect to real variables. 
+\end{frame}
+
+\section{Revisiting the Inference Gradient}
+\begin{frame}
+\tableofcontents[currentsection]
+\end{frame}
+
+\begin{frame}
+\begin{equation*}
+\begin{aligned}
+\frac{\partial}{\partial \lambda}&\E[q(z|\lambda)]{\log p(x|z,\theta)} = \\
+\frac{\partial}{\partial \lambda}&\sum_{z} q(z|\lambda) \log p(x|z,\theta) = \\
+&\sum_{z}\frac{\partial}{\partial \lambda} q(z|\lambda) \log p(x|z,\theta)
+\end{aligned}
+\end{equation*}
+\end{frame}
+
+\begin{frame}{Back to Basic Calculus}
+\begin{equation*}
+\frac{d}{d\lambda}\log f(\lambda) = \frac{\frac{d}{d\lambda}f(\lambda)}{f(\lambda)}
+\end{equation*}
+\begin{block}{Consequence}
+\begin{equation*}
+\frac{d}{d\lambda}f(\lambda) = \frac{d}{d\lambda}\log f(\lambda) \times f(\lambda) 
+\end{equation*}
+\end{block}
+\end{frame}
+
+\begin{frame}{Score Function Estimator}
+\begin{equation*}
+\frac{d}{d\lambda}f(\lambda) = \frac{d}{d\lambda}\log f(\lambda) \times f(\lambda) 
+\end{equation*}
+Apply this to the red derivative.
+\begin{equation*}
+\begin{aligned}
+&\sum_{z}\textcolor{red}{\frac{\partial}{\partial \lambda}q(z|\lambda)\log p(x|z,\theta)} = \\
+&\sum_{z}\textcolor{red}{q(z|\lambda)\frac{\partial}{\partial \lambda}\log q(z|\lambda) \times \log p(x|z,\theta)} = \\
+&\E[q(z|\lambda)]{\frac{\partial}{\partial \lambda}\log q(z|\lambda) \times \log p(x|z,\theta)}
+\end{aligned}
+\end{equation*}
+\end{frame}
+
+\begin{frame}{Comparison Between Estimators}
+\begin{itemize}
+\item Score function gradient
+\begin{equation*}
+\E[q(z|\lambda)]{\frac{\partial}{\partial \lambda}\log q(z|\lambda) \times \log p(x|z,\theta)}
+\end{equation*}
+\item Reparametrisation gradient
+\begin{equation*}
+\E[\phi(\epsilon)]{\frac{\partial}{\partial \lambda} \log p(x|h^{-1}(\epsilon, \lambda),\theta)}
+\end{equation*}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Example Model}
+Let us consider a latent factor model for topic modelling. Each document $ x $ consists of $ n $ i.i.d.
+categorical draws from that model. The categorical distribution in turn depends on the binary latent 
+factors $ z = (z_{1},\ldots,z_{k}) $ which are also i.i.d.
+\begin{equation*}
+\begin{aligned}
+z_{j} &\sim \BerDist{\phi} && (1 \leq j \leq k) \\ 
+x_{i} &\sim \CatDist{g(z)} && (1 \leq i \leq n)
+\end{aligned}
+\end{equation*} 
+Here $ g(\cdot) $ is a function computed by neural network with softmax output.
+\end{frame}
+
+\begin{frame}{Example Model}
+\begin{figure}
+\center
+\begin{tikzpicture}
+\foreach \x in {1,...,4} {
+  \pgfmathtruncatemacro{\y}{\x-1}
+  \ifthenelse{\x=1}{\node[obs] (x\x) {$ x_{\x} $}}{\node[obs, right= of x\y] (x\x) {$ x_{\x} $}};
+}
+\foreach \z in {1,2,3} {
+  \node[latent, above right = of x\z] (z\z) {$ z_{\z} $};
+  \edge{z\z}{x1,x2,x3,x4};
+}
+\end{tikzpicture}
+\end{figure}
+At inference time the latent variables are marginally dependent. For our variational distribution
+we are going to assume that they are not (recall: mean field assumption).
+\end{frame}
+
+\begin{frame}{Inference Network}
+\begin{figure}
+\center
+\begin{tikzpicture}
+\foreach \x in {1,...,4} {
+\pgfmathtruncatemacro{\y}{\x-1}
+\ifthenelse{\x=1}{\node[obs] (x\x) {$ x_{\x} $}}{\node[obs, right= of x\y] (x\x) {$ x_{\x} $}};
+}
+\foreach \z in {1,2,3} {
+  \node[latent, above right = of x\z] (z\z) {$ z_{\z} $};
+  \edge[color=red]{x1,x2,x3,x4}{z\z};
+}
+\end{tikzpicture}
+\end{figure}
+The inference network needs to predict $ k $ Bernoulli parameters $ \psi $. Any neural network with
+sigmoid output will do that job.
+\end{frame}
+
+\begin{frame}{Computation Graph}
+\begin{figure}
+\center
+\begin{tikzpicture}
+
+\end{tikzpicture}
+\end{figure}
+\end{frame}
+
+\end{document}
