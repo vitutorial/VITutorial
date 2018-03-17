@@ -2,8 +2,6 @@
 
 \usepackage{amsmath, amssymb, xifthen, xstring}
 
-\DeclareMathOperator{\KullbackLeibler}{KL}
-
 % Expectation (optional arg: distribution)
 \newcommand{\E}[2][]{\ifthenelse{\equal{#1}{}}{\mathbb{E}\left[#2\right]}{\mathbb{E}_{#1}\left[#2\right]}}
 
@@ -11,6 +9,7 @@
 \newcommand{\Ent}[1]{\mathbb{H}\left(#1\right)}
 
 % KL divergence
+\DeclareMathOperator{\KullbackLeibler}{KL}
 \newcommand{\KL}[2]{\KullbackLeibler\left(#1\mid\mid #2\right)}
 
 % Normal distribution
@@ -44,3 +43,11 @@
 {exp}{\exp\left(\eta(#3)^{\top}t(#2) - a(\eta(#3))\right)}
 {log}{\eta(#3)^{\top}t(#2) - a(\eta(#3))}
 {dot}{\eta(#3)^{\top}t(#2)}}}
+
+% Bernoulli Distribution
+\DeclareMathOperator{\Bernoulli}{Bernoulli}
+\newcommand{\BerDist}[1]{\Bernoulli\left(#1\right)}
+
+% Categorical Distribution
+\DeclareMathOperator{\Categorical}{Categorical}
+\newcommand{\CatDist}[1]{\Categorical\left(#1\right)}
