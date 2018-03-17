@@ -112,22 +112,22 @@ respect to real variables.
 \pause
 \begin{block}{Consequence}
 \begin{equation*}
-\frac{d}{d\lambda}f(\lambda) = \frac{d}{d\lambda}\log f(\lambda) \times f(\lambda) 
+\frac{d}{d\lambda}f(\lambda) = \textcolor{blue}{\frac{d}{d\lambda}\log f(\lambda) \times f(\lambda)}
 \end{equation*}
 \end{block}
 \end{frame}
 
 \begin{frame}{Score Function Estimator}
 \begin{equation*}
-\frac{d}{d\lambda}f(\lambda) = \frac{d}{d\lambda}\log f(\lambda) \times f(\lambda) 
+\frac{d}{d\lambda}f(\lambda) = \textcolor{blue}{\frac{d}{d\lambda}\log f(\lambda) \times f(\lambda)}
 \end{equation*}
 \pause
 Apply this to the ELBO derivative.
 \begin{equation*}
 \begin{aligned}
-&\sum_{z}\frac{\partial}{\partial \lambda}q(z|\lambda)\log p(x|z,\theta) = \\
+&\sum_{z}\textcolor{blue}{\frac{\partial}{\partial \lambda}q(z|\lambda)}\times\log p(x|z,\theta) = \\
 \pause
-&\sum_{z}q(z|\lambda)\frac{\partial}{\partial \lambda}\log q(z|\lambda) \times \log p(x|z,\theta) = \\
+&\sum_{z}\textcolor{blue}{q(z|\lambda)\frac{\partial}{\partial \lambda}\log q(z|\lambda)} \times \log p(x|z,\theta) = \\
 \pause
 &\E[q(z|\lambda)]{\frac{\partial}{\partial \lambda}\log q(z|\lambda) \times \log p(x|z,\theta)}
 \end{aligned}
