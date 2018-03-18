@@ -552,9 +552,9 @@ Analytical computation of $ -\KL{q(z|x,\lambda)}{p(z)} $:
 \draw[->, thick] (epsilon) edge (var);
 
 \pause
-\node[above= of mu] (KLmu) {$ \KullbackLeibler $};
+\node[above= of mu, rectangle, fill=blue!20, thick, rounded corners, draw,] (KLmu) {$ \KullbackLeibler $};
 \draw[->, thick] (mu) edge (KLmu);
-\node[above= of var] (KLvar) {$ \KullbackLeibler $};
+\node[above= of var, rectangle, fill=blue!20, thick, rounded corners, draw,] (KLvar) {$ \KullbackLeibler $};
 \draw[->, thick] (var) edge (KLvar);
 \end{tikzpicture}
 \end{figure}
