@@ -5,6 +5,8 @@
 \usepackage{amsmath, amssymb, ../../vimacros, hyperref, enumerate}
 \usepackage[round]{natbib}
 
+\usepackage{multicol}
+
 \hypersetup{breaklinks=true, colorlinks=true, linkcolor=blue, citecolor=blue, urlcolor=blue}
 
 \usepackage{tikz}
@@ -192,7 +194,7 @@ The probability of an observation $X=x$ is given by some \alert{differentiable} 
 Example: $K$ classes
 \begin{small}
 \begin{equation*}
-\Cat(X=x|f_w(\phi)) = \prod_{i=1}^K f_w(\phi)^{[x=i]} 
+\Cat(X=x|\underbrace{f_1^K := f_w(\phi)}_{\text{class probabilities}}) = \prod_{i=1}^K f_i^{[x=i]} 
 \end{equation*}
 %\begin{equation*}
 %\mathcal N(X=x|\mu_w(\phi), \sigma_w(\phi)^2) = \frac{1}{\sqrt{2\pi\sigma_w(\phi)^2}}\exp\left(-\frac{(x - \mu_w(\phi))^2}{2\sigma_w(\phi)^2}\right)
@@ -245,7 +247,7 @@ Given a dataset of i.i.d. observations, SGD gives us a local optimum of the log-
 
 \begin{frame}{Tractability is central}
 
-Likelihood gives you a differentiable objective to optimise for
+Likelihood gives us a differentiable objective to optimise for
 \begin{itemize}
 	\item but we need to stick with \alert{tractable} likelihood functions
 \end{itemize}
@@ -261,7 +263,7 @@ Likelihood gives you a differentiable objective to optimise for
 
 \end{frame}
 
-\begin{frame}{When do have intractable likelihood?}
+\begin{frame}{When do we have intractable likelihood?}
 
 Latent variables: assessing the likelihood requires marginalisation
 \begin{itemize}
@@ -286,14 +288,16 @@ Latent variables: assessing the likelihood requires marginalisation
 
 Beam-search % for discrete latent variables
 \begin{itemize}
-	\item stochastic optimisation requires \alert{unbiased gradient estimates}
+	\item \alert{biased gradient estimates}\\
+	bye bye stochastic optimisation!
 \end{itemize}
 
 ~
 
 Monte Carlo sampling
 \begin{itemize}
-	\item \alert{breaks differentiability} (bye bye backprop)
+	\item \alert{breaks differentiability}\\
+	bye bye backprop!
 \end{itemize}
 
 \end{frame}
@@ -316,16 +320,20 @@ Vast majority of papers published at ACL
 }
 \end{figure}
 \end{small}
-\begin{itemize}
-	\item encode more and more inductive bias through the design of the architecture
+encode more and more inductive bias through the design of the architecture alone
+\begin{small}
+\begin{multicols}{2}
 	\begin{itemize}
-		\item and what if we want to learn clusters?
+		\item what if we want to learn clusters?
 		\item or segmentation?
-		\item or sparse embeddings?
+		%\item or sparse embeddings?
 		\item or sparse models?
 		\item or latent factors?
+		\item or learn from incomplete supervision?
+		\item or Bayesian NNs?
 	\end{itemize}
-\end{itemize}
+\end{multicols}
+\end{small}
 
 \end{frame}
 
