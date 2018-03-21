@@ -288,7 +288,7 @@ sigmoid output will do that job.
 We attempt to centre the gradient estimate. To do this we learn a quantity $ C $ that we subtract
 from the reconstruction loss.
 \begin{equation*}
-\log q(z|\lambda) \left( p(x|z,\theta) - C \right)
+\log q(z|\lambda) \left( \log p(x|z,\theta) - C \right)
 \end{equation*}
 We call $ C $ a baseline. It does not change the expected gradient \citep{Williams:1992}.
 \end{frame}
@@ -296,7 +296,7 @@ We call $ C $ a baseline. It does not change the expected gradient \citep{Willia
 \begin{frame}{Baselines}
 We can make baselines input-depdendent to make them more flexible.
 \begin{equation*}
-\log q(z|\lambda) \left( p(x|z,\theta) - C(x) \right)
+\log q(z|\lambda) \left( \log p(x|z,\theta) - C(x) \right)
 \end{equation*}
 However, baselines may not depend on the random value $ z $! Quantities that may depend on the
 random value ($ C(z) $) are called \textbf{control variates}. See \cite{PaisleyEtAl:2012, RanganathEtAl:2014,GregorEtAl:2014}.
@@ -306,7 +306,7 @@ random value ($ C(z) $) are called \textbf{control variates}. See \cite{PaisleyE
 Baselines are predicted by a regression model (e.g. a neural net). The model is trained using 
 an $ L_{2} $-loss.
 \begin{equation*}
-\min \left(C(x) - p(x|z,\theta)\right)^{2}
+\min \left(C(x) - \log p(x|z,\theta)\right)^{2}
 \end{equation*}
 \end{frame}
 
