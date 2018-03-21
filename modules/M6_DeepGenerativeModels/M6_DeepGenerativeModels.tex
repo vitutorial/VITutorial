@@ -265,7 +265,7 @@ This is simply supervised learning with imputed latent data!
 \begin{frame}{Sleep Phase Objective}
 Assumes fake data $ \tilde{x} $ and latent variables $ z $ to be fixed random draw from $ p(x,z|\theta) $.
 \begin{equation*}
-\min_{\lambda}~  \E[q(z|\tilde{x},\lambda)]{\log p(\tilde{x},z|\theta)} + \Ent{q(z|\tilde{x},\lambda)}
+\max_{\lambda}~  \E[q(z|\tilde{x},\lambda)]{\log p(\tilde{x},z|\theta)} + \Ent{q(z|\tilde{x},\lambda)}
 \end{equation*}
 \end{frame}
 

@@ -83,24 +83,24 @@ $$ p(x) = \intl{ p(x,z) }{z} $$
 which is often \textbf{intractable}. This problem motivates the use of \textbf{approximate inference} techniques.
 \end{frame}
 
-\begin{frame}{Bayesian Inference}
-Model parameters $ \theta $ are also random. The generative model becomes
-\begin{itemize}
-\item $ p(x,\theta) $ for fully observed data (supervised learning)
-\item $ p(x,z,\theta) $ for observed and latent data \\ (unsupervised learning)
-\end{itemize}
-\end{frame}
-
-\begin{frame}{Bayesian Inference}
-The evidence becomes even harder to compute because $ \theta $ is often high-dimensional
-(just think of neural nets!).
-\begin{itemize}
-\item $ p(x) = \intl{ p(x, \theta)}{\theta} $ (supervised learning)
-\item $ p(x) = \intl{ \intl{ p(x, z, \theta)} {z}}{\theta} $ (unsupervised learning)
-\end{itemize}
-\pause
-Again, approximate inference is needed.
-\end{frame}
+%\begin{frame}{Bayesian Inference}
+%Model parameters $ \theta $ are also random. The generative model becomes
+%\begin{itemize}
+%\item $ p(x,\theta) $ for fully observed data (supervised learning)
+%\item $ p(x,z,\theta) $ for observed and latent data \\ (unsupervised learning)
+%\end{itemize}
+%\end{frame}
+%
+%\begin{frame}{Bayesian Inference}
+%The evidence becomes even harder to compute because $ \theta $ is often high-dimensional
+%(just think of neural nets!).
+%\begin{itemize}
+%\item $ p(x) = \intl{ p(x, \theta)}{\theta} $ (supervised learning)
+%\item $ p(x) = \intl{ \intl{ p(x, z, \theta)} {z}}{\theta} $ (unsupervised learning)
+%\end{itemize}
+%\pause
+%Again, approximate inference is needed.
+%\end{frame}
 
 \section{Examples}
 \frame{\tableofcontents[currentsection]}
@@ -375,8 +375,8 @@ a distribution $ p $.
 \item $ -\KL{q(z)}{p(z|x)} = \E[q(z)]{\loga{\frac{p(z|x)}{q(z)}}} \leq 0 $.
 \pause
 \item $ \KL{q(z)}{p(z|x)} = \infty $ \\ if $ \exists z $ s.t. $ p(z|x) = 0 $ and $ q(z) > 0 $.
-\pause
-\item In general $ \KL{q(z)}{p(z|x)} \not = \KL{p(z|x)}{q(z)} $.
+%\pause
+%\item In general $ \KL{q(z)}{p(z|x)} \not = \KL{p(z|x)}{q(z)} $.
 \end{itemize}
 \end{block}
 \end{frame}
@@ -490,29 +490,29 @@ VI in its basic form can be performed via coordinate ascent. This can be done as
 \end{frame}
 
 
-\subsection{Variational Bayes}
-
-\begin{frame}{Performing VI (Bayesian Case)}
-We have latent variables $ z $ (e.g. POS tags) and $ \theta $ (e.g. model parameters).
-\begin{enumerate}
-\item Maximise over local variables $ z $.
-\begin{equation*}
-\underset{q(z)}{\max}~\E[q(z)q(\theta)]{\log p(x,z,\theta)} + \Ent{q(z)}
-\end{equation*}
-\pause
-\item Maximise over global variables $ \theta $.
-\begin{equation*}
-\underset{q(\theta)}{\max}~ \E[q(z)q(\theta)]{\log p(x,z,\theta)} + \Ent{q(\theta)}
-\end{equation*}
-\end{enumerate}
-\end{frame}
-
-\begin{frame}{Differences between frequentist VI and VB (Variational Bayes)}
-\begin{itemize}
-\item Frequentist VI optimises two sets of parameters, VB only optimises variational parameters
-\item Entropy term matters in the M-step for VB but not for VI
-\end{itemize}
-\end{frame}
+%\subsection{Variational Bayes}
+%
+%\begin{frame}{Performing VI (Bayesian Case)}
+%We have latent variables $ z $ (e.g. POS tags) and $ \theta $ (e.g. model parameters).
+%\begin{enumerate}
+%\item Maximise over local variables $ z $.
+%\begin{equation*}
+%\underset{q(z)}{\max}~\E[q(z)q(\theta)]{\log p(x,z,\theta)} + \Ent{q(z)}
+%\end{equation*}
+%\pause
+%\item Maximise over global variables $ \theta $.
+%\begin{equation*}
+%\underset{q(\theta)}{\max}~ \E[q(z)q(\theta)]{\log p(x,z,\theta)} + \Ent{q(\theta)}
+%\end{equation*}
+%\end{enumerate}
+%\end{frame}
+%
+%\begin{frame}{Differences between frequentist VI and VB (Variational Bayes)}
+%\begin{itemize}
+%\item Frequentist VI optimises two sets of parameters, VB only optimises variational parameters
+%\item Entropy term matters in the M-step for VB but not for VI
+%\end{itemize}
+%\end{frame}
 
 \section{Mean Field Inference}
 \frame{\tableofcontents[currentsection]}
