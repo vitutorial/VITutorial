@@ -50,11 +50,13 @@ Make sure to follow the instructions and read the comments carefully. Also check
 Below are confirmed venues and dates (if available) for future presentations of the tutorial. Please contact us
 if you interested in hosting the tutorial.
 
-* Macquarie University Sydney: March 19-20, 2018 (time and location TBA)
-* Uva-ILLC, Amsterdam: March 22, 2018 (room TBA)
 * ACL 2018, Melbourne: July 15th, 2018
 
 **Past**
+* Naver Labs, Grenoble, France: April 3 and April 6, 2018
+  1. Deep Generative Models
+* Uva-ILLC, Amsterdam: March 22, 2018 (room TBA)
+* Macquarie University Sydney: March 19-20, 2018 (time and location TBA)
 * Monash University
   1. Basics of Variational Inference: Thu, 16-11-217, 10am-11:30am
   2. Deep Generative Models: Thu, 16-11-2017, 2:30pm-4pm
