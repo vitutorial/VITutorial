@@ -1,5 +1,5 @@
 # iOS stuff
-.DS_Store
+*/.DS_Store
 
 # ignore solutions file
 code/vae_notebook_solutions.ipynb

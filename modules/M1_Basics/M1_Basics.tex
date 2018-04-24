@@ -112,25 +112,24 @@ which is often \textbf{intractable}. This problem motivates the use of \textbf{a
 \end{enumerate}
 \end{frame}
 
-\begin{frame}{Bayesian Logistic Regression}
+\begin{frame}{Bayesian Log-Linear POS Tagger}
 \begin{figure}
 \begin{tikzpicture}
 \node[obs] (x) {$ y $};
 \node[latent, left=of x] (w) {$ w $};
 \node[obs,right=of x] (f) {$ x $};
+\plate {data} {(x)(f)} {$ N $};
+\edge{w,f}{x};
+\pause
 \node[above left= of w] (mu) {$ \mu $};
 \node[above right=of w] (sigma) {$ \Sigma $};
-
-\edge{w,f}{x};
 \edge{mu,sigma}{w};
-
-\plate {data} {(x)(f)} {$ N $};
 \end{tikzpicture}
 \end{figure}
 The Normal distribution is not conjugate to the Gibbs distribution. The form of the posterior is unknown.
 \end{frame}
 
-\begin{frame}{Bayesian Logistic Regression}
+\begin{frame}{Bayesian Log-Linear POS Tagger}
 \begin{block}{Intuition}
 Simply assume that the posterior is Gaussian.
 \end{block}
@@ -406,7 +405,7 @@ a distribution $ p $.
 \log p(x) &\geq 
 \E[q(z|x)] {\loga{\frac{p(z|x)p(x)}{q(z)}}} \\
 \pause
-&= \intl{ q(z|x) \loga{\frac{p(z|x)}{q(z|x)}}}{z} + \log p(x) \\
+&= \intl{ q(z) \loga{\frac{p(z|x)}{q(z)}}}{z} + \log p(x) \\
 \pause
 &= -\KL{q(z)}{p(z|x)} + \log p(x)
 \end{aligned}

@@ -40,6 +40,9 @@ We finish by explaining how to combine continuous and discrete variables in semi
 
 # <a name="news"> News
 
+* We have added a [module on discrete latent variables](modules/M3b_DGMs_DiscreteVariables/M3b_DGMs_DiscreteLatentVariables.pdf).
+This also led to a change in the module structure. The DGM part (M3) now consists of 2 interdependent modules. One presents
+continuous latent variable models and the other discrete latent variable models.
 * The [tutorial code](code/vae_notebook.ipynb) is now available! The user still needs to complete the TODOs in order for the code to run.
 Make sure to follow the instructions and read the comments carefully. Also check out the links to the MXNet documention.
 
@@ -55,8 +58,11 @@ if you interested in hosting the tutorial.
 **Past**
 * Naver Labs, Grenoble, France: April 3 and April 6, 2018
   1. Deep Generative Models
-* Uva-ILLC, Amsterdam: March 22, 2018 (room TBA)
-* Macquarie University Sydney: March 19-20, 2018 (time and location TBA)
+* Uva-ILLC, Amsterdam: March 22, 2018
+* Macquarie University Sydney: March 19-20, 2018
+  1. Basics of Variational Inference
+  2. Deep Generative Models
+  3. Coding Tutorial
 * Monash University
   1. Basics of Variational Inference: Thu, 16-11-217, 10am-11:30am
   2. Deep Generative Models: Thu, 16-11-2017, 2:30pm-4pm
@@ -85,7 +91,7 @@ should be 3.5 or higher.
 **Warning**: If you are using linux and Python3.6 or higher you need to run `sudo apt-get install libssl-dev` before
 building Python. Otherwise, there is a chance that your virtualenv will not be able to download packages.
 ```
-virtualenv -p python3.5 vi-tutorial-env
+virtualenv -p python3 vi-tutorial-env
 source vi-tutorial-env/bin/activate
 pip install mxnet # cpu installation
 pip install mxnet-cu80 # gpu installation with cuda 8
