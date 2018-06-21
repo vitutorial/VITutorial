@@ -6,6 +6,8 @@
 \usepackage[round]{natbib}
 
 \usepackage{multicol}
+\usepackage{physics}
+\usepackage{xfrac}
 
 \hypersetup{breaklinks=true, colorlinks=true, linkcolor=blue, citecolor=blue, urlcolor=blue}
 
@@ -29,7 +31,7 @@
 \begin{block}{Wilker Aziz}
 \begin{itemize}
 \item Research associate at UvA
-\item Sampling, VI, Machine Translation
+\item VI, Sampling methods, Machine Translation
 \end{itemize}
 \end{block}
 
@@ -58,7 +60,7 @@ Unsupervised problems: \alert{``learn a distribution over observed and unobserve
 
 
 
-\begin{frame}{Maximum likelihood estimation}
+\begin{frame}{Supervised problems}
 
 \small
 
@@ -111,7 +113,7 @@ and proceed to \alert{estimate parameters} that assign maximum likelihood to obs
 \end{columns}
 
 \begin{tabular}{p{2cm} p{4cm} p{4cm}}
- & $\phi$ & $x$ \\
+ & Side information ($\phi$) & Observation ($x$) \\
 Parsing &   \textcolor{gray}{a sentence} & \textcolor{black}{its syntactic/semantic parse tree/graph} \\
 &&\\
 Translation &  \textcolor{gray}{a sentence} & \textcolor{black}{its translation} \\
@@ -133,7 +135,7 @@ Let $\phi$ be all side information available\\
 
 Have neural networks predict parameters of our probabilistic model
 	\begin{align*}
-    X|\phi \sim \Cat(\pi_{\alert w}(\phi)) & & \text{or} & & X|\phi \sim \mathcal N(\mu_{\alert w}(\phi), \sigma_{\alert w}(\phi)^2)
+    X|\phi \sim \Cat(\pi_{\alert \theta}(\phi)) & & \text{or} & & X|\phi \sim \mathcal N(\mu_{\alert \theta}(\phi), \sigma_{\alert \theta}(\phi)^2)
     \end{align*}
 ~ and proceed to \alert{estimate parameters} $w$ of the NNs %via MLE % that assign maximum likelihood to observations
 
@@ -186,29 +188,93 @@ Prediction is done by a decision rule outside the statistical model
 \end{frame}
 
 
-\begin{frame}{MLE via gradient-based optimisation}
 
-The probability of an observation $X=x$ is given by some \alert{differentiable} probability function
-\begin{itemize}
-	\item the parameters of which are predicted by $f_w$\\
-	\emph{(also differentiable)}
-\end{itemize}
-\pause
-Example: $K$ classes
-\begin{small}
+\begin{frame}[plain]{Maximum likelihood estimation}
+
+Let $p(x|\theta)$ be the probability of an observation $x$\\
+~and $\theta$ refer to all of its parameters \\
+~e.g. parameters of NNs involved
+
+~ \pause
+
+Given a dataset $x^{(1)}, \ldots, x^{(N)}$ of i.i.d. observations\pause
+
+~
+
+Likelihood function quantifies the {\bf fitness} of our model to data
 \begin{equation*}
-\Cat(X=x|\underbrace{f_1^K := f_w(\phi)}_{\text{class probabilities}}) = \prod_{i=1}^K f_i^{[x=i]} 
-\end{equation*}
-%\begin{equation*}
-%\mathcal N(X=x|\mu_w(\phi), \sigma_w(\phi)^2) = \frac{1}{\sqrt{2\pi\sigma_w(\phi)^2}}\exp\left(-\frac{(x - \mu_w(\phi))^2}{2\sigma_w(\phi)^2}\right)
-%\end{equation*}
-\end{small}
-
-\pause
-Given a dataset of i.i.d. observations, SGD gives us a local optimum of the log-likelihood %surface %via stochastic optimisation
+\begin{aligned}
+\mathcal L(\theta|x^{(1:N)}) &= \log \prod_{s=1}^N p(x^{(s)}|\theta) \\ \pause
+ &= \sum_{s=1}^N \log p(x^{(s)}|\theta)
+\end{aligned}
+\end{equation*} 
 
 
 \end{frame}
+
+\begin{frame}[plain]{MLE via gradient-based optimisation}
+
+If the log-likelihood is {\bf differentiable} and  {\bf tractable}\\
+~then backpropagation can give us the gradient
+\begin{small}
+\begin{equation*}
+\begin{aligned}
+\grad_\theta \mathcal L(\theta|x^{(1:N)}) &= \grad_\theta \sum_{s=1}^N \log p(x^{(s)}|\theta) \\ \pause
+ &=  \sum_{s=1}^N \grad_\theta \log p(x^{(s)}|\theta)
+\end{aligned}
+\end{equation*}
+\end{small}  \pause
+
+and we can update $\theta$ in the direction
+\begin{equation*}
+\gamma \grad_\theta \mathcal L(\theta|x^{(1:N)})
+\end{equation*}
+to attain a local optimum of the likelihood function
+
+\end{frame}
+
+\begin{frame}[plain]{Big Data}
+
+For large \alert{$N$}, computing the gradient is inconvenient
+\begin{small}
+\begin{equation*}
+\begin{aligned}
+\grad_\theta \mathcal L(\theta|x^{(1:N)}) &=   \underbrace{\sum_{s=1}^{\alert{N}} \grad_\theta \log p(x^{(s)}|\theta)}_{\text{too many terms}} \\ \pause
+&=   \sum_{s=1}^{\alert{N}} \textcolor{blue}{\frac{1}{ N} } N \grad_\theta \log p(x^{(s)}|\theta) \\ \pause
+&= \sum_{s=1}^{\alert{N}}\textcolor{blue}{\mathcal U(s|\sfrac{1}{N})}  N \grad_\theta \log p(x^{(s)}|\theta) \\ \pause
+&= \mathbb E_{S\sim \mathcal U(\sfrac{1}{N})}\left[ N \grad_\theta  \log p(x^{(S)}|\theta)\right]
+\end{aligned}
+\end{equation*} 
+\end{small}
+\pause
+
+$S$ selects data points uniformly at random
+
+
+\end{frame}
+
+\begin{frame}[plain]{Stochastic optimisation}
+
+For large $\alert{N}$, we can use a gradient estimate 
+\begin{small}
+\begin{equation*}
+\begin{aligned}
+\grad_\theta \mathcal L(\theta|x^{(1:N)}) 
+ &=  \underbrace{\mathbb E_{S\sim \mathcal U(\sfrac{1}{N})}\left[ N \grad_\theta  \log p(x^{(S)}|\theta)\right]}_{\text{expected gradient :)}} \\ \pause
+ &\overset{\text{MC}}{\approx} \frac{1}{M} \sum_{m=1}^M N  \grad_\theta \log p(x^{(s_i)}|\theta) \\
+ &S_i \sim \mathcal U(\sfrac{1}{N})
+\end{aligned}
+\end{equation*}
+\end{small}  \pause
+and take a step in the direction
+\begin{equation*}
+\gamma \frac{N}{M} \grad_\theta \mathcal L(\theta|x^{(s_1:s_M)})
+\end{equation*}
+where $x^{(s_1:s_M)}$ is a random mini-batch of size $M$
+
+
+\end{frame}
+
 
 
 
@@ -267,89 +333,70 @@ Likelihood gives us a differentiable objective to optimise for
 
 \end{frame}
 
+
 \begin{frame}{When do we have intractable likelihood?}
 
-Latent variables: assessing the likelihood requires marginalisation
-\begin{itemize}
-	\item too many forward passes
-	\begin{small}
-	\begin{equation*}
-	P_X(x) = \sum_{c=1}^K \Cat(c|\pi_1, \ldots, \pi_K) \underbrace{\mathcal N(x|\mu_w(c), \sigma_w(c)^2)}_{\text{forward pass}}
-	\end{equation*}
-	\end{small}
-	\pause
-	\item even infinitely many
-	\begin{small}
-	\begin{equation*}
-	P_X(x) = \int \mathcal N(z|0, I) \underbrace{\Cat(x|\pi_w(z))}_{\text{forward pass}} \mathrm{d}z
-	\end{equation*}
-	\end{small}
-\end{itemize}
-
-\end{frame}
-
-
-\begin{frame}{Can we approximate the marginal?}
-
-Beam-search % for discrete latent variables
-\begin{itemize}
-	\item \alert{biased gradient estimates}\\
-	bye bye stochastic optimisation!
-\end{itemize}
-
-~\pause
-
-Monte Carlo sampling
-\begin{itemize}
-	\item \alert{breaks differentiability}\\
-	bye bye backprop!
-\end{itemize}
-
-\end{frame}
-
-
-\begin{frame}{What do we do then?}
-
-\begin{small}
-\begin{figure}
-\scalebox{0.8}{
-\begin{tikzpicture}
-\node[obs] (x) {$ x $};
-\node[left=of x] (phi) {$ \phi $};
-\factor[left=of x] {f} {below:$f_w$} {phi} {x} ; 
-%\edge{phi}{x} ;
-\plate {data} {(x)(phi)} {$ N $};
-\end{tikzpicture}
-}
-\end{figure}
-\end{small}
-We know how to encode inductive bias through the design of the architecture 
+{\bf Unsupervised problems} contain unobserved random variables\\ 
+\begin{equation*}
+p(x, z|\theta) = \overbrace{p(z)}^{\text{prior}} \underbrace{p(x|z, \theta)}_{\text{observation model}}
+\end{equation*}
 
 ~ \pause
 
-But what if
-\begin{small}
-\begin{multicols}{2}
-	\begin{itemize}
-		\item we want to learn clusters?
-		\item or segmentation?
-		%\item or sparse embeddings?
-		\item or sparse models?
-		\item or latent factors?
-		\item or learn from incomplete supervision?
-		\item or Bayesian NNs?
-	\end{itemize}
-\end{multicols}
-\end{small}
+thus assessing the marginal likelihood requires \alert{marginalisation of latent variables} 
+\begin{equation*}
+p(x|\theta) = \int p(x, z|\theta) \dd{z} = \int p(z)p(x|z, \theta) \dd{z} 
+\end{equation*}
 
 \end{frame}
+
+
+\begin{frame}{Examples of latent variable models}
+
+Discrete latent variable, continuous observation
+	\begin{small}
+	\begin{equation*}
+	p(x|\theta) = \underbrace{\sum_{c=1}^K \Cat(c|\pi_1, \ldots, \pi_K) \underbrace{\mathcal N(x|\mu_\theta(c), \sigma_\theta(c)^2)}_{\text{forward pass}}}_{\text{{\bf too many forward passes}}}
+	\end{equation*}
+	\end{small} 
+
+	\pause
+	
+Continuous latent variable, discrete observation
+	\begin{small}
+	\begin{equation*}
+	p(x|\theta) = \underbrace{\int \mathcal N(z|0, I) \underbrace{\Cat(x|\pi_\theta(z))}_{\text{forward pass}} \mathrm{d}z }_{\text{\alert{{\bf infinitely many forward passes}}}}
+	\end{equation*}
+	\end{small}
+
+\end{frame}
+
+
+\begin{frame}{But why latent variable modelling?}
+
+Some reasons
+
+\begin{itemize}
+	\item organise a massive collection of data\\
+	e.g. LDA	 \pause
+	\item learn from unlabelled data\\
+	e.g. semi-supervised learning \pause
+	\item learn from little data\\
+	e.g. Bayesian NNs \pause
+	\item induce discrete representations\\
+	e.g. parse trees, dependency graphs, permutations, alignments
+	%e.g. derivatives are not defined for discontinuous functions
+\end{itemize}
+
+\end{frame}
+
 
 \begin{frame}{Deep Generative Models}
 
 Probabilistic models parametrised by neural networks
 \begin{itemize}
 	\pause
-	\item better modelling assumptions\\
+	\item explicit modelling assumptions\\
 	one of the reasons why there's so much interest	
 	\pause
 	\item but requires efficient inference\\
