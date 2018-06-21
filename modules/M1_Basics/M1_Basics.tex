@@ -9,6 +9,7 @@
 
 \usepackage{tikz}
 \usetikzlibrary{bayesnet}
+\beamertemplatenavigationsymbolsempty
 
 \title{Variational Inference: The Basics}
 \date{}
@@ -526,6 +527,212 @@ VI in its basic form can be performed via coordinate ascent. This can be done as
 \pause
 This approximation strategy is commonly known as \textbf{mean field} approximation.
 \end{frame}
+
+
+
+\begin{frame}{Example Model}
+Let us consider a latent factor model for topic modelling: \pause
+
+\begin{itemize}
+	\item a document $ x = (x_{1},\ldots,x_{N})$ consists of $ n $ i.i.d. categorical draws from that model \pause
+	\item the categorical distribution in turn depends on Gaussian latent factors $ z = (z_{1},\ldots,z_{K}) $ which are also i.i.d. \pause
+\end{itemize}
+
+\begin{equation*}
+\begin{aligned}
+z_{j} &\sim \mathcal N(0, 1) && (1 \leq j \leq K) \\ 
+x_{i} &\sim \CatDist{f_\theta(z)} && (1 \leq i \leq N)
+\end{aligned}
+\end{equation*} 
+$ f_\theta(\cdot) $ is computed by a NN with softmax output.
+\end{frame}
+
+\begin{frame}{Example Model}
+\textcolor{blue}{Joint distribution:} latent variables are marginally independent a priori
+\begin{figure}
+\center
+\begin{tikzpicture}
+\foreach \x in {1,...,4} {
+  \pgfmathtruncatemacro{\y}{\x-1}
+  \ifthenelse{\x=1}{\node[obs] (x\x) {$ x_{\x} $}}{\node[obs, right= of x\y] (x\x) {$ x_{\x} $}};
+}
+\foreach \z in {1,2,3} {
+  \node[latent, above right = of x\z] (z\z) {$ z_{\z} $};
+  \only<1>{\edge[blue]{z\z}{x1,x2,x3,x4};}
+}
+\foreach \z in {1,2,3} {
+  \only<2>{\edge[red]{x1,x2,x3,x4}{z\z};}
+}
+\uncover<2->{
+\edge[-,red]{z1}{z2};
+\edge[-,red,bend left]{z1}{z3};
+\edge[-,red]{z2}{z3};
+}
+\end{tikzpicture}
+\end{figure}
+
+~
+
+\uncover<2>{\alert{Posterior: } latent variables are marginally dependent given observations}
+
+%At inference time the latent variables are marginally dependent. For our variational distribution
+%we are going to assume that they are not (recall: mean field assumption).
+\end{frame}
+
+
+
+\begin{frame}{Mean field assumption}
+
+We have $K$ latent variables\\
+\begin{itemize}
+	\item assume the posterior factorises as $K$ independent terms
+\end{itemize}
+
+
+\begin{equation*}
+q(z_1, \ldots, z_K) = \underbrace{\prod_{j=1}^K q_{\alert{\lambda_j}}(z_j)}_{\text{mean field}}
+\end{equation*} \pause
+
+with independent sets of parameters $\lambda_j = \{u_j, s_j\}$
+$$Z_j \sim \mathcal N(u_j, s_j^2)$$
+
+\end{frame}
+
+\begin{frame}{Mean field: example}
+\begin{figure}
+\center
+\begin{tikzpicture}
+\foreach \x in {1,...,4} {
+\pgfmathtruncatemacro{\y}{\x-1}
+\ifthenelse{\x=1}{\node[obs] (x\x) {$ x_{\x} $}}{\node[obs, right= of x\y] (x\x) {$ x_{\x} $}};
+}
+\foreach \z in {1,2,3} {
+  \node[latent, above right = of x\z] (z\z) {$ z_{\z} $};
+  \edge[color=red]{x1,x2,x3,x4}{z\z};
+  \node[above = of z\z] (lambda\z) {$ \lambda_{\z} $};
+  \edge[color=red]{lambda\z}{z\z};
+}
+\end{tikzpicture}
+\end{figure}
+
+\end{frame}
+
+
+\begin{frame}{Amortised variational inference}
+
+Amortise the cost of inference using NNs
+\begin{equation*}
+q(z_1, \ldots, z_K|x) = \prod_{j=1}^K q_{\alert{\lambda}}(z_j|x)
+\end{equation*} \pause
+~ still mean field
+$$Z_j|x \sim \mathcal N(u_j, s_j^2)$$\\  \pause
+~ but with a shared set of parameters
+\begin{itemize}
+	\item where $u_1^K = \mu_{\alert{\lambda}}(x)$ 
+	\item and $s_1^K = \sigma_{\alert{\lambda}}(x)$
+\end{itemize}
+
+\end{frame}
+
+
+\begin{frame}{Amortised VI: example}
+\begin{figure}
+\center
+\begin{tikzpicture}
+\foreach \x in {1,...,4} {
+\pgfmathtruncatemacro{\y}{\x-1}
+\ifthenelse{\x=1}{\node[obs] (x\x) {$ x_{\x} $}}{\node[obs, right= of x\y] (x\x) {$ x_{\x} $}};
+}
+\foreach \z in {1,2,3} {
+  \node[latent, above right = of x\z] (z\z) {$ z_{\z} $};
+  \edge[color=red]{x1,x2,x3,x4}{z\z};
+}
+\node[above = of z2] (lambda) {$ \lambda $};
+\foreach \z in {1,2,3} {
+  \edge[color=red]{lambda}{z\z};
+}
+\end{tikzpicture}
+\end{figure}
+
+\end{frame}
+
+\begin{frame}[plain]{Overview}
+
+	\begin{minipage}[b][.35\textheight][t]{.47\textwidth}
+	Joint\,distribution
+	
+	\vspace{10pt}
+	
+	\scalebox{0.9}{
+	\begin{tikzpicture}
+	\foreach \x in {1,...,4} {
+	  \pgfmathtruncatemacro{\y}{\x-1}
+	  \ifthenelse{\x=1}{\node[obs] (x\x) {$ x_{\x} $}}{\node[obs, right= of x\y] (x\x) {$ x_{\x} $}};
+	}
+	\foreach \z in {1,2,3} {
+	  \node[latent, above right = of x\z] (z\z) {$ z_{\z} $};
+	  \edge[blue]{z\z}{x1,x2,x3,x4};
+	}
+	\end{tikzpicture}}
+	\end{minipage}\hfill%
+    \begin{minipage}[b][.35\textheight][t]{.47\textwidth}
+    Posterior
+    \scalebox{0.9}{
+    \begin{tikzpicture}
+	\foreach \x in {1,...,4} {
+	  \pgfmathtruncatemacro{\y}{\x-1}
+	  \ifthenelse{\x=1}{\node[obs] (x\x) {$ x_{\x} $}}{\node[obs, right= of x\y] (x\x) {$ x_{\x} $}};
+	}
+	\foreach \z in {1,2,3} {
+	  \node[latent, above right = of x\z] (z\z) {$ z_{\z} $};
+	  \edge[red]{x1,x2,x3,x4}{z\z};
+	}
+	\edge[-,red]{z1}{z2};
+	\edge[-,red,bend left]{z1}{z3};
+	\edge[-,red]{z2}{z3};
+	\end{tikzpicture}
+    }
+    \end{minipage}\\[0.5em]
+    \begin{minipage}[b][.35\textheight][t]{.47\textwidth}
+    Mean\,field
+    \scalebox{0.9}{
+	\begin{tikzpicture}
+	\foreach \x in {1,...,4} {
+	\pgfmathtruncatemacro{\y}{\x-1}
+	\ifthenelse{\x=1}{\node[obs] (x\x) {$ x_{\x} $}}{\node[obs, right= of x\y] (x\x) {$ x_{\x} $}};
+	}
+	\foreach \z in {1,2,3} {
+	  \node[latent, above right = of x\z] (z\z) {$ z_{\z} $};
+	  \edge[color=red]{x1,x2,x3,x4}{z\z};
+	  \node[above = of z\z] (lambda\z) {$ \lambda_{\z} $};
+	  \edge[color=red]{lambda\z}{z\z};
+	}
+	\end{tikzpicture}}
+    \end{minipage}\hfill
+    \begin{minipage}[b][.35\textheight][t]{.47\textwidth}
+    Amortised\,VI
+    \scalebox{0.9}{
+	\begin{tikzpicture}
+	\foreach \x in {1,...,4} {
+	\pgfmathtruncatemacro{\y}{\x-1}
+	\ifthenelse{\x=1}{\node[obs] (x\x) {$ x_{\x} $}}{\node[obs, right= of x\y] (x\x) {$ x_{\x} $}};
+	}
+	\foreach \z in {1,2,3} {
+	  \node[latent, above right = of x\z] (z\z) {$ z_{\z} $};
+	  \edge[color=red]{x1,x2,x3,x4}{z\z};
+	}
+	\node[above = of z2] (lambda) {$ \lambda $};
+	\foreach \z in {1,2,3} {
+	  \edge[color=red]{lambda}{z\z};
+	}
+	\end{tikzpicture}}
+    \end{minipage}%
+\end{frame}
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 
 \begin{frame}{Original FHHM Inference} 
 \begin{figure}
