@@ -646,8 +646,8 @@ This approximation strategy is commonly known as \textbf{mean field} approximati
 
 
 
-\begin{frame}{Example Model}
-Let us consider a latent factor model for topic modelling: \pause
+\begin{frame}{Latent Factor Document Model}
+Let us consider a latent factor model for document modelling: \pause
 
 \begin{itemize}
 	\item a document $ x = (x_{1},\ldots,x_{N})$ consists of $ n $ i.i.d. categorical draws from that model \pause
@@ -663,7 +663,7 @@ x_{i} &\sim \CatDist{f_\theta(z)} && (1 \leq i \leq N)
 $ f_\theta(\cdot) $ is computed by a NN with softmax output.
 \end{frame}
 
-\begin{frame}{Example Model}
+\begin{frame}{Original LFDM Inference}
 \textcolor{blue}{Joint distribution:} latent variables are marginally independent a priori
 \begin{figure}
 \center
