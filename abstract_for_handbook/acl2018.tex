@@ -1,0 +1,101 @@
+%
+% File acl2018.tex
+%
+%% Based on the style files for ACL-2017, with some changes, which were, in turn,
+%% Based on the style files for ACL-2015, with some improvements
+%%  taken from the NAACL-2016 style
+%% Based on the style files for ACL-2014, which were, in turn,
+%% based on ACL-2013, ACL-2012, ACL-2011, ACL-2010, ACL-IJCNLP-2009,
+%% EACL-2009, IJCNLP-2008...
+%% Based on the style files for EACL 2006 by 
+%%e.agirre@ehu.es or Sergi.Balari@uab.es
+%% and that of ACL 08 by Joakim Nivre and Noah Smith
+
+\documentclass[11pt,a4paper]{article}
+\usepackage[hyperref]{acl2018}
+\usepackage{times, enumitem}
+\usepackage{latexsym}
+
+\usepackage{url}
+
+\aclfinalcopy % Uncomment this line for the final submission
+\def\aclpaperid{27} %  Enter the acl Paper ID here
+
+%\setlength\titlebox{5cm}
+% You can expand the titlebox if you need extra space
+% to show all the authors. Please do not make the titlebox
+% smaller than 5cm (the original size); we will check this
+% in the camera-ready version and ask you to change it back.
+
+\newcommand\BibTeX{B{\sc ib}\TeX}
+
+\title{Variational Inference and Deep Generative Models}
+
+\author{Wilker Aziz \\
+  ILLC \\
+  University of Amsterdam \\
+  {\tt w.aziz@uva.nl} \\\And
+  Philip Schulz \\
+  Amazon Research \\
+  {\tt phschulz@amazon.com} \\}
+
+\date{}
+
+\begin{document}
+\maketitle
+
+\section{Tutorial Contents}
+
+Neural networks are taking NLP by storm. Yet they are mostly applied to fully supervised tasks. Many real-world NLP problems require unsupervised or semi-supervised models, however, because annotated data is hard to obtain. This is where generative models shine. Through the use of latent variables they can be applied in missing data settings. Furthermore they can complete missing entries in partially annotated data sets.
+
+This tutorial is about how to use neural networks inside generative models, thus giving us Deep Generative Models (DGMs). The training method of choice for these models is variational inference (VI). We start out by introducing VI on a basic level. From there we turn to DGMs. We justify them theoretically and give concrete advise on how to implement them. For continuous latent variables, we review the variational autoencoder and use Gaussian reparametrisation to show how to sample latent values from it. We then turn to discrete latent variables for which no reparametrisation exists. Instead, we explain how to use the score-function or REINFORCE gradient estimator in those cases. We finish by explaining how to combine continuous and discrete variables in semi-supervised modelling problems.
+
+\section{Schedule}
+
+\begin{enumerate}
+\item Introduction (20 minutes)
+\begin{itemize}
+\item Maximum likelihood learning
+\item Stochastic gradient estimates
+\item Unsupervised learning
+\end{itemize}
+\item Basics of Variational Inference (45 minutes)
+\begin{itemize}
+\item Review of posterior inference and intractable marginal likelihoods
+\item NLP examples
+\item Derivation of  variational inference
+\item Mean field approximation
+\end{itemize}
+\end{enumerate}
+
+\textbf{20 minutes break}
+
+\begin{enumerate}[resume]
+\item DGMs with Continuous Latent Variables (45 minutes)
+\begin{itemize}
+\item Wake-sleep algorithm
+\item Variational autoencoder
+\item Gaussian reparametrisation
+\end{itemize}
+\item DGMs with Discrete Latent Variables (30 minutes)
+\begin{itemize}
+\item Latent factor model
+\item Why discrete variables cannot be reparametrised
+\item Score function gradient estimator
+\item Comparison of reparametrisation and score function estimators
+\item Semi-supervised learning
+\end{itemize}
+\item Q\&A
+\end{enumerate}
+
+\section{About the Presenters}
+
+\paragraph{Wilker Aziz} is a research associate at the University of Amsterdam (UvA) working on natural language processing problems such as machine translation, textual entailment, and paraphrasing. 
+His research interests include statistical learning, probabilistic models, and methods for approximate inference.
+Before joining UvA, Wilker worked on exact sampling and optimisation for statistical machine translation at the University of Sheffield (UK) and at the University of Wolverhampton (UK) where he obtained his PhD. 
+Wilker's background is in Computer Engineering which he studied at the Engineering School of the University of S\~ao Paulo (Brazil). 
+ 
+
+\paragraph{Philip Schulz} is an applied scientist at Amazon Research. Before joining Amazon, Philip did his PhD at the University of Amsterdam. During the last months of his PhD trajectory, he visited the University of Melbourne. Philip's background is in Linguistics which he studied at the University of T\"ubingen and UCL in London. These days, his research interests revolve around statistical learning. He has worked on Bayesian graphical models for machine translation. More recently he has extended this line of work towards deep generative models. More broadly, Philip is interested in probabilistic modeling, approximate inference methods and statistical theory.
+
+\end{document}

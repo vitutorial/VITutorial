@@ -2,6 +2,10 @@
 
 This repository stores material for a *tutorial on variational inference for NLP audiences*. 
 
+<<<<<<< HEAD
+* The [tutorial code](code/vae_notebook.ipynb) is now available! The user still needs to complete the TODOs in order for the code to run.
+Make sure to follow the instructions and read the comments carefully. Also check out the links to the MXNet documention.
+=======
 Want to host our tutorial at your location? [Contact](#contact) one of us!
 
 
@@ -47,12 +51,16 @@ continuous latent variable models and the other discrete latent variable models.
 Make sure to follow the instructions and read the comments carefully. Also check out the links to the MXNet documention.
 
 # <a name="tour"> Tour
+>>>>>>> 2c82f0daf246c544fb20ecdbddadbed2ba89437e
 
 **Upcoming**
 
 Below are confirmed venues and dates (if available) for future presentations of the tutorial. Please contact us
 if you interested in hosting the tutorial.
 
+<<<<<<< HEAD
+**Past**
+=======
 * ACL 2018, Melbourne: July 15th, 2018
 
 **Past**
@@ -63,6 +71,7 @@ if you interested in hosting the tutorial.
   1. Basics of Variational Inference
   2. Deep Generative Models
   3. Coding Tutorial
+>>>>>>> 2c82f0daf246c544fb20ecdbddadbed2ba89437e
 * Monash University
   1. Basics of Variational Inference: Thu, 16-11-217, 10am-11:30am
   2. Deep Generative Models: Thu, 16-11-2017, 2:30pm-4pm
