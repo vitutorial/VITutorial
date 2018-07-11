@@ -406,7 +406,7 @@ $ p(x) = \intl{\alert{\underbrace{p(x|z,\theta)}_{\substack{\text{highly} \\  \t
 \end{block}
 \end{frame}
 
-\begin{frame}{Generation Network Gradient}
+\begin{frame}{Generator Network Gradient}
 \begin{equation*}
 \begin{aligned}
 &\frac{d}{d\theta}\E[q(z|x,\lambda)]{\log p(x|z,\theta)} - \overbrace{\KL{q(z|x,\lambda)}{p(z)}}^{constant} \\ \pause 
@@ -618,6 +618,15 @@ Variational approximation factorises over latent dimensions.
 	  \end{itemize}
     \end{column}
     \end{columns}
+\end{frame}
+
+\begin{frame}{Aside}
+If your likelihood model is able to express dependencies between the output variables (e.g. an RNN), the model may simply ignore the latent code.
+In that case one often scales the KL term. The scale factor is increased gradually.
+\begin{equation*}
+\E[q(z|x,\lambda)]{\log p(x|z,\theta)} - \beta \KL{q(z|x,\lambda)}{p(z)}
+\end{equation*}
+where $ \beta \rightarrow 1 $.
 \end{frame}
 
 \begin{frame}{Variational Autoencoder}
