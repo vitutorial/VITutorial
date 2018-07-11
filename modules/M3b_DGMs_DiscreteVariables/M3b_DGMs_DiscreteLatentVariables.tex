@@ -4,10 +4,27 @@
 \usecolortheme{beaver}
 
 \usepackage{amsmath, amssymb, ../../vimacros, hyperref, tikz}
-\usetikzlibrary{positioning, fit, bayesnet, shapes.misc}
+\usetikzlibrary{positioning, fit, bayesnet, shapes.misc, patterns}
 \usepackage[round]{natbib}
 
 \hypersetup{breaklinks=true, colorlinks=true, linkcolor=blue, urlcolor=blue, citecolor=blue}
+
+\pgfdeclarepatternformonly{stripes}
+{\pgfpointorigin}{\pgfpoint{.4cm}{.4cm}}
+{\pgfpoint{.4cm}{.4cm}}
+{
+	\pgfpathmoveto{\pgfpoint{0cm}{0cm}}
+	\pgfpathlineto{\pgfpoint{.4cm}{.4cm}}
+	\pgfpathlineto{\pgfpoint{.4cm}{.2cm}}
+	\pgfpathlineto{\pgfpoint{.2cm}{0cm}}
+	\pgfpathclose
+	\pgfusepath{fill}
+	\pgfpathmoveto{\pgfpoint{0cm}{0.2cm}}
+	\pgfpathlineto{\pgfpoint{0cm}{.4cm}}
+	\pgfpathlineto{\pgfpoint{0.2cm}{.4cm}}
+	\pgfpathclose
+	\pgfusepath{fill}
+}
 
 \title{Deep Generative Models:\\
 Discrete Latent Variables}
@@ -324,9 +341,122 @@ an $ L_{2} $-loss.
 \end{itemize}
 \end{frame}
 
+\section{Semisupervised Learning}
+
+\begin{frame}{Putting it all together}
+We now know how to handle continuous and discrete latent variables. Let us combine these two treat partially observed data.
+\pause
+\begin{block}{Morphological Reinflection}
+Transform an inflected form of a verb into another.
+\begin{itemize}
+\pause
+\item plays $ \rightarrow $ played
+\pause
+\item walking $ \rightarrow $ walks
+\end{itemize}
+\end{block}
+\end{frame}
+
+\begin{frame}{A Simple Model \citep{ZhouNeubig:2017}}
+What do we need to correctly inflect a word?
+\pause
+\begin{itemize}
+\item lemma \pause (real vector)
+\pause
+\item morphological information \pause (discrete vector)
+\end{itemize}
+\end{frame}
+
+\begin{frame}{A Simple Model \citep{ZhouNeubig:2017}}
+\begin{figure}
+\center
+\begin{tikzpicture}
+\node[obs] (input) {$t$};
+\node[latent, above left = of input] (lemma) {$ z $};
+\node[circle, above right = of input, pattern=stripes, draw=black, pattern color=gray!25, radius=1cm] (morph)  {$ y $};
+\node[obs, left = of lemma] (base) {$ b $};
+\edge{lemma, morph}{input};
+\end{tikzpicture}
+\end{figure}
+\begin{itemize}
+\item $ z $ = lemma (continuous)
+\item $ y $ = morphological features (discrete)
+\item $ b $ = base form (inflected)
+\item $ t $ = target form (inflected)
+\end{itemize}
+\end{frame}
+
+\begin{frame}{A Simple Model \citep{ZhouNeubig:2017}}
+\begin{figure}
+\center
+\begin{tikzpicture}
+\node[obs] (input) {$t$};
+\node[latent, above left = of input] (lemma) {$ z $};
+\node[circle, above right = of input, pattern=stripes, draw=black, pattern color=gray!25, radius=1cm] (morph)  {$ y $};
+\node[obs, left = of lemma] (base) {$ b $};
+\edge{lemma, morph}{input};
+\path (input) edge[bend right=45, color=red, ->, thick] (morph);
+\path (base) edge[color=red, ->, thick] (lemma);
+\end{tikzpicture}
+\end{figure}
+\begin{itemize}
+\item $ z $ = lemma (continuous)
+\item $ y $ = morphological features (discrete)
+\item $ b $ = base form (inflected)
+\item $ t $ = target form (inflected)
+\end{itemize}
+\end{frame}
+
+\begin{frame}{A Simple Model \citep{ZhouNeubig:2017}}
+\begin{figure}
+\center
+\begin{tikzpicture}
+\node[obs] (input) {$t$};
+\node[latent, above left = of input] (lemma) {$ z $};
+\node[circle, above right = of input, pattern=stripes, draw=black, pattern color=gray!25, radius=1cm] (morph)  {$ y $};
+\node[obs, left = of lemma] (base) {$ b $};
+\edge{lemma, morph}{input};
+\path (input) edge[bend right=45, color=red, ->, thick] (morph);
+\path (base) edge[color=red, ->, thick] (lemma);
+\path (lemma) edge[color=green, ->, thick] (morph);
+\end{tikzpicture}
+\end{figure}
+\begin{itemize}
+\item $ z $ = lemma (continuous)
+\item $ y $ = morphological features (discrete)
+\item $ b $ = base form (inflected)
+\item $ t $ = target form (inflected)
+\end{itemize}
+\end{frame}
+
 \begin{frame}[allowframebreaks]
 \bibliographystyle{plainnat}
 \bibliography{../../VI}
+\end{frame}
+
+\begin{frame}{Goodbye and thank you!}
+\begin{block}{What we covered today}
+\begin{itemize}
+\item Derivation of VI
+\item Continuous VAE
+\item Discrete VAE
+\item Semisupervised Models
+\end{itemize}
+\end{block}
+\end{frame}
+
+\begin{frame}{Goodbye and thank you!}
+\begin{block}{Next steps}
+\begin{itemize}
+\item Do the coding tutorial (\href{https://github.com/philschulz/VITutorial/blob/master/code/vae_notebook.ipynb}{\url{https://github.com/philschulz/VITutorial/blob/master/code/vae_notebook.ipynb}})
+\item Come to our talk on Tuesday (10:30am, ROOM 203/204)
+\item Stay in touch
+\begin{itemize}
+\item w.aziz@uva.nl
+\item phschulz@amazon.com
+\end{itemize}
+\end{itemize}
+\end{block}
 \end{frame}
 
 \end{document}
