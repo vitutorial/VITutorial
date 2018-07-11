@@ -656,8 +656,8 @@ Let us consider a latent factor model for document modelling: \pause
 
 \begin{equation*}
 \begin{aligned}
-z_{j} &\sim \Bernoulli(\alpha) && (1 \leq j \leq K) \\ 
-x_{i} &\sim \CatDist{f_\theta(z)} && (1 \leq i \leq N)
+Z_{j} &\sim \Bernoulli(\alpha) && (1 \leq j \leq K) \\ 
+X_{i}|z &\sim \CatDist{f_\theta(z)} && (1 \leq i \leq N)
 \end{aligned}
 \end{equation*} 
 $ f_\theta(\cdot) $ is computed by a NN with softmax output.
