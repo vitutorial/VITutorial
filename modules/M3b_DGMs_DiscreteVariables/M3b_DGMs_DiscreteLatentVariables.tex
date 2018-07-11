@@ -329,4 +329,49 @@ an $ L_{2} $-loss.
 \bibliography{../../VI}
 \end{frame}
 
+\section{Semisupervised Learning}
+
+\begin{frame}{Putting it all together}
+We now know how to handle continuous and discrete latent variables. Let us combine these two treat partially observed data.
+\pause
+\begin{block}{Morphological Reinflection}
+Transform an inflected form of a verb into another.
+\begin{itemize}
+\pause
+\item played $ \rightarrow $ played
+\pause
+\item walking $ \rightarrow $ walks
+\end{itemize}
+\end{block}
+\end{frame}
+
+\begin{frame}{A Simple Model \citep{ZhouNeubig:2017}}
+What do we need to correctly inflect a word?
+\pause
+\begin{itemize}
+\item lemma \pause (real vector)
+\pause
+\item morphological information \pause (discrete vector)
+\end{itemize}
+\end{frame}
+
+\begin{frame}{A Simple Model \citep{ZhouNeubig:2017}}
+\begin{figure}
+\center
+\begin{tikzpicture}
+\node[obs] (input) {$t$};
+\node[latent, above left = of input] (lemma) {$ z $};
+\node[latent, above right = of input] (morph) {$ y $};
+\node[obs, left = of lemma] (base) {$ b $};
+\edge{lemma, morph}{input};
+\end{tikzpicture}
+\end{figure}
+\begin{itemize}
+\item $ z $ = lemma (continuous)
+\item $ y $ = morphological features (discrete)
+\item $ b $ = base form (inflected)
+\item $ t $ = target form (inflected)
+\end{itemize}
+\end{frame}
+
 \end{document}
