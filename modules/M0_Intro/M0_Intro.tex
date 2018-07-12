@@ -37,7 +37,6 @@
 
 \begin{block}{Philip Schulz}
 \begin{itemize}
-\item PhD candidate at UvA
 \item Applied Scientist at Amazon
 \item VI, Machine Translation, Bayesian Models
 \end{itemize}
@@ -137,7 +136,7 @@ Have neural networks predict parameters of our probabilistic model
 	\begin{align*}
     X|\phi \sim \Cat(\pi_{\alert \theta}(\phi)) & & \text{or} & & X|\phi \sim \mathcal N(\mu_{\alert \theta}(\phi), \sigma_{\alert \theta}(\phi)^2)
     \end{align*}
-~ and proceed to \alert{estimate parameters} $w$ of the NNs %via MLE % that assign maximum likelihood to observations
+~ and proceed to \alert{estimate parameters} $\theta$ of the NNs %via MLE % that assign maximum likelihood to observations
 
  
 
@@ -189,19 +188,16 @@ Prediction is done by a decision rule outside the statistical model
 
 
 
-\begin{frame}[plain]{Maximum likelihood estimation}
+\begin{frame}{Maximum likelihood estimation}
 
 Let $p(x|\theta)$ be the probability of an observation $x$\\
 ~and $\theta$ refer to all of its parameters \\
-~e.g. parameters of NNs involved
+%~e.g. parameters of NNs involved
 
 ~ \pause
 
-Given a dataset $x^{(1)}, \ldots, x^{(N)}$ of i.i.d. observations\pause
-
-~
-
-Log-likelihood function gives us a criterion for parameter estimation
+Given a dataset $x^{(1)}, \ldots, x^{(N)}$ of i.i.d. observations, \pause
+the log-likelihood function gives us a criterion for parameter estimation
 \begin{equation*}
 \begin{aligned}
 \mathcal L(\theta|x^{(1:N)}) &= \log \prod_{s=1}^N p(x^{(s)}|\theta) \\ \pause
@@ -212,14 +208,14 @@ Log-likelihood function gives us a criterion for parameter estimation
 
 \end{frame}
 
-\begin{frame}[plain]{MLE via gradient-based optimisation}
+\begin{frame}{MLE via gradient-based optimisation}
 
 If the log-likelihood is {\bf differentiable} and  {\bf tractable}\\
 ~then backpropagation can give us the gradient
 \begin{small}
 \begin{equation*}
 \begin{aligned}
-\grad_\theta \mathcal L(\theta|x^{(1:N)}) &= \grad_\theta \sum_{s=1}^N \log p(x^{(s)}|\theta) \\ \pause
+\grad_\theta \mathcal L(\theta|x^{(1:N)}) &= \grad_\theta \sum_{s=1}^N \log p(x^{(s)}|\theta) \pause
  &=  \sum_{s=1}^N \grad_\theta \log p(x^{(s)}|\theta)
 \end{aligned}
 \end{equation*}
@@ -233,7 +229,8 @@ to attain a local maximum of the likelihood function
 
 \end{frame}
 
-\begin{frame}[plain]{Big Data}
+
+\begin{frame}{Big Data}
 
 For large \alert{$N$}, computing the gradient is inconvenient
 \begin{small}
@@ -252,7 +249,7 @@ $S$ selects data points uniformly at random
 
 \end{frame}
 
-\begin{frame}[plain]{Stochastic optimisation}
+\begin{frame}{Stochastic optimisation}
 
 For large $\alert{N}$, we can use a gradient estimate 
 \begin{small}
@@ -367,6 +364,25 @@ Continuous latent variable, discrete observation
 	p(x|\theta) = \underbrace{\int \mathcal N(z|0, I) \underbrace{\Cat(x|\pi_\theta(z))}_{\text{forward pass}} \mathrm{d}z }_{\text{\alert{{\bf infinitely many forward passes}}}}
 	\end{equation*}
 	\end{small}
+
+\end{frame}
+
+\begin{frame}{Gradient}
+
+Exact gradient is intractable
+\begin{small}
+\begin{equation*}
+\begin{aligned}
+\grad_\theta \log p(x|\theta) \pause &= \grad_\theta \log \underbrace{\int p(x, z|\theta) \dd{z}}_{\text{marginal}} \\ \pause
+&= \underbrace{\frac{1}{\int p(x, z|\theta) \dd{z}} \int \grad_\theta p(x,z|\theta) \dd{z}}_{\text{chain rule}} \\ \pause
+&= \frac{1}{p(x|\theta)} \int \underbrace{p(x,z|\theta) \grad_\theta \log p(x,z|\theta)}_{\text{log-identity for derivatives}} \dd{z} \\ \pause
+&= \int p(z|x, \theta) \grad_\theta \log p(x,z|\theta) \dd{z} \\ \pause
+&= \mathbb E_{p(z|x, \theta)} \left[ \grad_\theta \log p(x,Z|\theta) \right]
+\end{aligned}
+\end{equation*}
+\end{small}
+
+
 
 \end{frame}
 
