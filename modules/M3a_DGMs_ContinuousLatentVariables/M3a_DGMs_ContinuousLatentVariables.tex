@@ -443,13 +443,13 @@ h(z, \lambda) &= \frac{z - \mu(\phi,\lambda)}{ \sigma(\phi, \lambda) } = \epsilo
 
 \begin{frame}{Derivatives of Gaussian transformation}
 Recall:
-$$ h^{-1}(\epsilon, \lambda) = \mu(x,\lambda) + \sigma(x,\lambda) \odot \epsilon \ . $$
+$$ h^{-1}(\epsilon, \lambda) = \mu(\phi,\lambda) + \sigma(\phi,\lambda) \odot \epsilon \ . $$
 \pause
 This gives us 2 gradient paths.
 \pause
 \begin{align*}
-\frac{d h^{-1}(\epsilon, \lambda)}{d\mu(x,\lambda)} = \frac{d}{d\mu(x,\lambda)}\left[ \mu(x,\lambda) + \sigma(x,\lambda) \odot \epsilon \right] = 1 \\
-\frac{d h^{-1}(\epsilon, \lambda)}{d\sigma(x,\lambda)} = \frac{d}{d\sigma(x,\lambda)}\left[ \mu(x,\lambda) + \sigma(x,\lambda) \odot \epsilon \right] = \epsilon
+\frac{d h^{-1}(\epsilon, \lambda)}{d\mu(\phi,\lambda)} = \frac{d}{d\mu(\phi,\lambda)}\left[ \mu(\phi,\lambda) + \sigma(\phi,\lambda) \odot \epsilon \right] = 1 \\
+\frac{d h^{-1}(\epsilon, \lambda)}{d\sigma(\phi,\lambda)} = \frac{d}{d\sigma(\phi,\lambda)}\left[ \mu(\phi,\lambda) + \sigma(\phi,\lambda) \odot \epsilon \right] = \epsilon
 \end{align*}
 \end{frame}
 
