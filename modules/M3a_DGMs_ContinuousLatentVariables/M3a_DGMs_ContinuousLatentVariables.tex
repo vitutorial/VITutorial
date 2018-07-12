@@ -62,51 +62,7 @@ p(x|\theta) = \int p(x, z|\theta) \dd{z} = \int p(z)p(x|z, \theta) \dd{z}
 \end{frame}
 
 
-\begin{frame}[plain]{Gradient}
-
-Exact gradient is intractable
-\begin{small}
-\begin{equation*}
-\begin{aligned}
-\grad_\theta \log p(x|\theta) \pause &= \grad_\theta \log \underbrace{\int p(x, z|\theta) \dd{z}}_{\text{marginal}} \\ \pause
-&= \underbrace{\frac{1}{\int p(x, z|\theta) \dd{z}} \int \grad_\theta p(x,z|\theta) \dd{z}}_{\text{chain rule}} \\ \pause
-&= \frac{1}{p(x|\theta)} \int \underbrace{p(x,z|\theta) \grad_\theta \log p(x,z|\theta)}_{\text{log-identity for derivatives}} \dd{z} \\ \pause
-&= \int p(z|x, \theta) \grad_\theta \log p(x,z|\theta) \dd{z} \\ \pause
-&= \underbrace{\mathbb E_{p(z|x, \theta)} \left[ \grad_\theta \log p(x,Z|\theta) \right]}_{\text{expected gradient :)}}
-\end{aligned}
-\end{equation*}
-\end{small}
-
-
-
-\end{frame}
-
-\begin{frame}{Can we get an estimate?}
-
-\begin{equation*}
-\begin{aligned}
-\grad_\theta \log p(x|\theta) 
- &= \mathbb E_{p(z|x, \theta)} \left[ \grad_\theta \log p(x,Z|\theta) \right] \\ \pause
- &\overset{\text{MC}}{\approx} \frac{1}{K} \sum_{k=1}^K \grad_\theta \log p(x,z^{(k)}|\theta)  \\
- & Z^{(k)} \sim p(z|x, \theta)
-\end{aligned}
-\end{equation*}
-
-
- \pause
-
-MC estimate requires sampling from posterior
-\begin{small}
-\begin{equation*}
-p(z|x, \theta) = \frac{p(z)p(x|z, \theta)}{\alert{p(x|\theta)}}
-\end{equation*}
-\end{small}
-unavailable due to the intractability of the marginal
-
-\end{frame}
-
-
-\begin{frame}{Summary}
+\begin{frame}{Goals}
 
 We want
 \begin{itemize}
@@ -363,43 +319,38 @@ $ p(x) = \intl{\alert{\underbrace{p(x|z,\theta)}_{\substack{\text{highly} \\  \t
 \end{block}
 \end{frame}
 
-\begin{frame}{Generative Model with NN Likelihood}
-\begin{block}{Solution: VI}
+\begin{frame}{Solution: Variational Inference}
+
+\vspace{-10pt}
 \begin{small}
 \begin{equation*}
 \begin{aligned}
-\log p(x) &\geq \overbrace{\E[q(z|x,\lambda)]{\log p(x,z|\theta)} + \Ent{q(z|x,\lambda)}}^{\ELBO} \\ 
+\log p(x|\theta) &\geq \overbrace{\E[q(z|x, \lambda)]{\log p(x,Z|\theta)} + \Ent{q(z|x, \lambda)}}^{\ELBO} \\ 
 \pause
-&= \E[q(z|x,\lambda)]{\log p(x|z,\theta) + \log p(z)} + \Ent{q(z|x,\lambda)} \\ \pause
-&= \E[q(z|x,\lambda)]{\log p(x|z,\theta)} - \KL{q(z|x,\lambda)}{p(z)}
+&= \E[q(z|x, \lambda)]{\log p(x|Z, \theta) + \log p(Z)} + \Ent{q(z|x, \lambda)} \\ \pause
+&= \E[q(z|x, \lambda)]{\log p(x|Z, \theta)} - \KL{q(z|x, \lambda)}{p(z)}
 \end{aligned}
 \end{equation*}
 \end{small}
-\end{block}
-\end{frame}
 
-\begin{frame}{Generative Model with NN Likelihood}
-\begin{block}{Solution: VI}
-\begin{small}
-\begin{align*}
-\log p(x) &\geq \overbrace{\E[q(z|x,\lambda)]{\log p(x,z|\theta)} + \Ent{q(z|x,\lambda)}}^{\ELBO} \\
-&= \E[q(z|x,\lambda)]{\log p(x|z,\theta) + \log p(z)} + \Ent{q(z|x,\lambda)} \\
-&= \E[q(z|x,\lambda)]{\log p(x|z,\theta)} - \alert{\underbrace{\KL{q(z|x,\lambda)}{p(z)}}_{\substack{\text{assume analytical} \\ \text{(true for exponential families)}}}}
-\end{align*}
-\end{small}
-\end{block}
-\end{frame}
+\pause
 
-\begin{frame}{Generative Model with NN Likelihood}
-\begin{block}{Solution: VI}
-\begin{small}
-\begin{align*}
-\log p(x) &\geq \overbrace{\E[q(z|x,\lambda)]{\log p(x,z|\theta)} + \Ent{q(z|x,\lambda)}}^{\ELBO} \\
-&= \E[q(z|x,\lambda)]{\log p(x|z,\theta) + \log p(z)} + \Ent{q(z|x,\lambda)} \\ 
-&= \alert{\underbrace{\E[q(z|x,\lambda)]{\log p(x|z,\theta)}}_{\text{approximate by sampling}}} - \underbrace{\KL{q(z|x,\lambda)}{p(z)}}_{\substack{\text{assume analytical} \\ \text{(true for exponential families)}}}
-\end{align*}
-\end{small}
-\end{block}
+\vspace{-20pt}
+\begin{equation*}
+\argmax_{\theta,\lambda} ~ \E[q(z|x, \lambda)]{\log p(x|Z, \theta)} - \KL{q(z|x, \lambda)}{p(z)}
+\end{equation*}
+
+
+\pause
+
+\begin{itemize}
+	\item assume $\KL{q(z|x, \lambda)}{p(z)}$  analytical\\
+	true for exponential families \pause
+	\item approximate $\E[q(z|x, \lambda)]{\log p(x|z, \theta)}$ by sampling\\
+	feasible because  $q(z|x, \lambda)$ is simple
+\end{itemize}
+
+
 \end{frame}
 
 \begin{frame}{Generator Network Gradient}
@@ -427,19 +378,15 @@ $ p(x) = \intl{\alert{\underbrace{p(x|z,\theta)}_{\substack{\text{highly} \\  \t
 \end{frame}
 
 \begin{frame}{Inference Network Gradient}
-\begin{align*}
-&\frac{d}{d\lambda}\E[q(z|x,\lambda)]{\log p(x|z,\theta)} \\
-&= \frac{d}{d\lambda} \intl{q(z|x,\lambda)\log p(x|z,\theta)}{z}
-\end{align*}
+\begin{equation*}
+\begin{aligned}
+&\frac{d}{d\lambda}\E[q(z|x,\lambda)]{\log p(x|z,\theta)} \\ \pause
+&= \frac{d}{d\lambda} \intl{q(z|x,\lambda)\log p(x|z,\theta)}{z} \\ \pause
+&= \intl{\alert{\frac{d}{d\lambda} q(z|x,\lambda)}\log p(x|z,\theta)}{z}
+\end{aligned}
+\end{equation*}
 \pause
-\begin{block}{MC estimator non-differentiable}
-\begin{itemize}
-\pause
-\item Sampling $ z $ neglects $ \frac{d}{d\lambda} q(z|x,\lambda) $
-\pause
-\item Differentiating $ q(z|x,\lambda) $ breaks the expectation
-\end{itemize}
-\end{block}
+Not an expected gradient!
 \end{frame}
 
 \begin{frame}{Inference Network Gradient}
@@ -459,18 +406,18 @@ Find a transformation $ h: z \mapsto \epsilon $ such that $ \epsilon $ does not 
 \pause
 \textbf{Affine property}
 \begin{equation*}
-Ax + b \sim \NDist{\mu + b}{A\Sigma A^{T}} \text{ for } x \sim \NDist{\mu}{\Sigma}
+Az + b \sim \NDist{\mu + b}{A\Sigma A^{T}} \text{ for } z \sim \NDist{\mu}{\Sigma}
 \end{equation*}
 \pause
 \textbf{Special case}
 \begin{equation*}
-Ax + b \sim \NDist{b}{A A^{T}} \text{ for } x \sim \NDist{0}{\IMatrix}
+Az + b \sim \NDist{b}{A A^{T}} \text{ for } z \sim \NDist{0}{\IMatrix}
 \end{equation*}
 \pause
 \textbf{Gaussian transformation}
 \begin{align*}
-h(z, \lambda) &= \frac{z - \mu(x,\lambda)}{ \sigma(x, \lambda) } = \epsilon \sim \NDist{0}{\IMatrix} \\
-h^{-1}(\epsilon, \lambda) &= \mu(x,\lambda) + \sigma(x, \lambda) \odot \epsilon~~~\epsilon \sim \NDist{0}{\IMatrix}
+h(z, \lambda) &= \frac{z - \mu(\phi,\lambda)}{ \sigma(\phi, \lambda) } = \epsilon \sim \NDist{0}{\IMatrix} \\
+\underbrace{h^{-1}(\epsilon, \lambda)}_{=z} &= \mu(\phi,\lambda) + \sigma(\phi, \lambda) \odot \epsilon~~~\epsilon \sim \NDist{0}{\IMatrix}
 \end{align*}
 \end{frame}
 
@@ -487,9 +434,9 @@ h^{-1}(\epsilon, \lambda) &= \mu(x,\lambda) + \sigma(x, \lambda) \odot \epsilon~
 \begin{frame}{Inference Network Gradient}
 \begin{equation*}
 \begin{aligned}
-&= \intl{q(\epsilon) \frac{d}{dz} \log p(x| \overbrace{h^{-1}(\epsilon, \lambda)}^{=z}, \theta) \times \frac{d}{d\lambda} h^{-1}(\epsilon, \lambda)}{\epsilon}  \\ \pause
-&= \E[q(\epsilon)]{\frac{d}{dz} \log p(x| \overbrace{h^{-1}(\epsilon, \lambda)}^{=z}, \theta)\times \frac{d}{d\lambda} h^{-1}(\epsilon, \lambda)}\\ \pause
-&\overset{\text{MC}}{\approx} \frac{1}{S}\sum_{i=1}^{S} \frac{d}{dz} \log p(x| \overbrace{h^{-1}(\epsilon, \lambda)}^{=z}, \theta) \times \frac{d}{d\lambda} h^{-1}(\epsilon, \lambda)
+&\E[q(\epsilon)]{\frac{d}{d\lambda} \log p(x| \overbrace{h^{-1}(\epsilon, \lambda)}^{=z}, \theta)} \\ \pause
+= &\E[q(\epsilon)]{\frac{d}{dz} \log p(x| \overbrace{h^{-1}(\epsilon, \lambda)}^{=z}, \theta)\times \frac{d}{d\lambda} h^{-1}(\epsilon, \lambda)}\\ \pause
+\overset{\text{MC}}{\approx} &\frac{1}{S}\sum_{i=1}^{S} \frac{d}{dz} \log p(x| \overbrace{h^{-1}(\epsilon, \lambda)}^{=z}, \theta) \times \frac{d}{d\lambda} h^{-1}(\epsilon, \lambda)
 \end{aligned}
 \end{equation*}
 \end{frame}
@@ -660,7 +607,7 @@ where $ \beta \rightarrow 1 $.
 \nocite{HintonEtAl:1995}
 \nocite{RezendeEtAl:2014}
 \nocite{TitsiasLazarogredilla:2014}
-\nocite{BergkirkpatrickEtAl:2010}
+%\nocite{BergkirkpatrickEtAl:2010}
 \nocite{KucukelbirEtAl:2017}
 
 \bibliographystyle{plainnat}
