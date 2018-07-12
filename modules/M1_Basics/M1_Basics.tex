@@ -392,9 +392,9 @@ a distribution $ p $.
 &= \loga{\intl{\alert{q(z)}\frac{p(x,z)}{\alert{q(z)}}}{z}} \\
 \pause
 &= \loga{\E[q(z)]{\frac{p(x,z)}{\alert{q(z)}}}} \\
-&\geq \E[q(z|x)]{  \loga{\frac{p(x,z)}{\alert{q(z)}}}} \\
+&\geq \E[q(z)]{  \loga{\frac{p(x,z)}{\alert{q(z)}}}} \\
 \pause
-& = \E[q(z|x)] {\loga{\frac{p(z|x)p(x)}{\alert{q(z)}}}}
+& = \E[q(z)] {\loga{\frac{p(z|x)p(x)}{\alert{q(z)}}}}
 \end{aligned}
 \end{equation*}
 \end{small}
@@ -477,7 +477,7 @@ VI in its basic form can be performed via coordinate ascent. This can be done as
 
 \begin{frame}{Recap: EM Algorithm}
 \begin{itemize}
-\item[\alert{E-step}] Compute: $ \E[p(z|x)]{\loga{p(x,z)}} $. \\ Same as: $ \underset{p(z|x)}{\max}~ \E[p(z|x)]{\log p(x,z)} $
+\item[\alert{E-step}] Compute: $ \E[p(z|x)]{\loga{p(x,z)}} $. \\ Same as: $ \underset{p(z|x)}{\max}~ \E[p(z|x)]{\log p(x,z)} $ \pause
 \item[\alert{M-step}] $ \underset{p(x,z)}{\max}~\E[p(z|x)]{\log p(x,z)} + \underbrace{\Ent{p(z|x)}}_{\text{constant}} $
 \end{itemize}
 \pause 
@@ -664,7 +664,8 @@ $ f_\theta(\cdot) $ is computed by a NN with softmax output.
 \end{frame}
 
 \begin{frame}{Original LFDM Inference}
-\textcolor{blue}{Joint distribution:} latent variables are marginally independent a priori
+\textcolor{blue}{Joint distribution:} latent variables are marginally independent a priori\\
+$$\text{for example, }K=3, N=4$$
 \begin{figure}
 \center
 \begin{tikzpicture}
