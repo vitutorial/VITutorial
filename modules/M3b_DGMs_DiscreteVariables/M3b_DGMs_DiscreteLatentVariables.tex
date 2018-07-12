@@ -7,6 +7,8 @@
 \usetikzlibrary{positioning, fit, bayesnet, shapes.misc, patterns}
 \usepackage[round]{natbib}
 
+\beamertemplatenavigationsymbolsempty
+
 \hypersetup{breaklinks=true, colorlinks=true, linkcolor=blue, urlcolor=blue, citecolor=blue}
 
 \pgfdeclarepatternformonly{stripes}
@@ -171,8 +173,8 @@ categorical draws from that model. The categorical distribution in turn depends 
 factors $ z = (z_{1},\ldots,z_{k}) $ which are also i.i.d.
 \begin{equation*}
 \begin{aligned}
-z_{j} &\sim \BerDist{\phi} && (1 \leq j \leq k) \\ 
-x_{i} &\sim \CatDist{g(z)} && (1 \leq i \leq n)
+Z_{j} &\sim \BerDist{\phi} && (1 \leq j \leq k) \\ 
+X_{i}|z &\sim \CatDist{g(z)} && (1 \leq i \leq n)
 \end{aligned}
 \end{equation*} 
 Here $ g(\cdot) $ is a function computed by neural network with softmax output.
@@ -233,7 +235,7 @@ sigmoid output will do that job.
 \draw[->, thick] (psi) edge (kl);
 
 \pause
-\node[rectangle, fill=blue!20, thick, above of= psi, rounded corners, draw, node distance=2cm] (scorefunction) {$ \log q(z|\psi) p(x|z,\theta) $};
+\node[rectangle, fill=blue!20, thick, above of= psi, rounded corners, draw, node distance=2cm] (scorefunction) {$ \log q(z|\psi) \textcolor{red}{\log p(x|z,\theta)} $};
 \node[rectangle, fill=blue!20, thick, above right= of input, rounded corners, draw] (loss) {$ x $};
 \draw[->, thick] (psi) edge (scorefunction);
 \draw[->, thick] (loss) edge node[strike out,draw,-,red,double]{} (scorefunction);
@@ -314,7 +316,7 @@ We call $ C $ a baseline. It does not change the expected gradient \citep{Willia
 \begin{frame}{Baselines}
 We can make baselines input-depdendent to make them more flexible.
 \begin{equation*}
-\log q(z|\lambda) \left( \log p(x|z,\theta) - C(x) \right)
+\log q(z|\lambda) \left( \log p(x|z,\theta) - C(x; \omega) \right)
 \end{equation*}
 However, baselines may not depend on the random value $ z $! Quantities that may depend on the
 random value ($ C(z) $) are called \textbf{control variates}. See \cite{PaisleyEtAl:2012, RanganathEtAl:2014,GregorEtAl:2014}.
@@ -324,7 +326,7 @@ random value ($ C(z) $) are called \textbf{control variates}. See \cite{PaisleyE
 Baselines are predicted by a regression model (e.g. a neural net). The model is trained using 
 an $ L_{2} $-loss.
 \begin{equation*}
-\min \left(C(x) - \log p(x|z,\theta)\right)^{2}
+\min_\omega \left(C(x; \omega) - \log p(x|z,\theta)\right)^{2}
 \end{equation*}
 \end{frame}
 
@@ -374,14 +376,14 @@ What do we need to correctly inflect a word?
 \node[obs] (input) {$t$};
 \node[latent, above left = of input] (lemma) {$ z $};
 \node[circle, above right = of input, pattern=stripes, draw=black, pattern color=gray!25, radius=1cm] (morph)  {$ y $};
-\node[obs, left = of lemma] (base) {$ b $};
+\node[obs, left = of lemma] (base) {$ s $};
 \edge{lemma, morph}{input};
 \end{tikzpicture}
 \end{figure}
 \begin{itemize}
 \item $ z $ = lemma (continuous)
 \item $ y $ = morphological features (discrete)
-\item $ b $ = base form (inflected)
+\item $ s $ = source form (inflected)
 \item $ t $ = target form (inflected)
 \end{itemize}
 \end{frame}
@@ -393,7 +395,7 @@ What do we need to correctly inflect a word?
 \node[obs] (input) {$t$};
 \node[latent, above left = of input] (lemma) {$ z $};
 \node[circle, above right = of input, pattern=stripes, draw=black, pattern color=gray!25, radius=1cm] (morph)  {$ y $};
-\node[obs, left = of lemma] (base) {$ b $};
+\node[obs, left = of lemma] (base) {$ s $};
 \edge{lemma, morph}{input};
 \path (input) edge[bend right=45, color=red, ->, thick] (morph);
 \path (base) edge[color=red, ->, thick] (lemma);
@@ -402,7 +404,7 @@ What do we need to correctly inflect a word?
 \begin{itemize}
 \item $ z $ = lemma (continuous)
 \item $ y $ = morphological features (discrete)
-\item $ b $ = base form (inflected)
+\item $ s $ = source form (inflected)
 \item $ t $ = target form (inflected)
 \end{itemize}
 \end{frame}
@@ -414,7 +416,7 @@ What do we need to correctly inflect a word?
 \node[obs] (input) {$t$};
 \node[latent, above left = of input] (lemma) {$ z $};
 \node[circle, above right = of input, pattern=stripes, draw=black, pattern color=gray!25, radius=1cm] (morph)  {$ y $};
-\node[obs, left = of lemma] (base) {$ b $};
+\node[obs, left = of lemma] (base) {$ s $};
 \edge{lemma, morph}{input};
 \path (input) edge[bend right=45, color=red, ->, thick] (morph);
 \path (base) edge[color=red, ->, thick] (lemma);
@@ -424,7 +426,7 @@ What do we need to correctly inflect a word?
 \begin{itemize}
 \item $ z $ = lemma (continuous)
 \item $ y $ = morphological features (discrete)
-\item $ b $ = base form (inflected)
+\item $ s $ = source form (inflected)
 \item $ t $ = target form (inflected)
 \end{itemize}
 \end{frame}
@@ -448,8 +450,10 @@ What do we need to correctly inflect a word?
 \begin{frame}{Goodbye and thank you!}
 \begin{block}{Next steps}
 \begin{itemize}
-\item Do the coding tutorial (\href{https://github.com/philschulz/VITutorial/blob/master/code/vae_notebook.ipynb}{\url{https://github.com/philschulz/VITutorial/blob/master/code/vae_notebook.ipynb}})
-\item Come to our talk on Tuesday (10:30am, ROOM 203/204)
+\item Do the coding tutorial (\href{https://github.com/philschulz/VITutorial/blob/master/code/vae_notebook.ipynb}{\url{https://github.com/philschulz/VITutorial/blob/master/code/vae_notebook.ipynb}}) \pause
+\item Follow the repository for updates \pause
+\item Come to our talk on Tuesday \\
+10:30am, ROOM 203/204 \pause
 \item Stay in touch
 \begin{itemize}
 \item w.aziz@uva.nl
