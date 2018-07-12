@@ -2,6 +2,10 @@
 
 \usepackage{amsmath, amssymb, xifthen, xstring}
 
+% Optimisation
+\DeclareMathOperator*{\argmin}{arg\,min}
+\DeclareMathOperator*{\argmax}{arg\,max}
+
 % Expectation (optional arg: distribution)
 \newcommand{\E}[2][]{\ifthenelse{\equal{#1}{}}{\mathbb{E}\left[#2\right]}{\mathbb{E}_{#1}\left[#2\right]}}
 
