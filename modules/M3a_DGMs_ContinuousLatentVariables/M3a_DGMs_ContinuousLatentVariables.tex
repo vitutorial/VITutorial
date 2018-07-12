@@ -6,11 +6,15 @@
 \usepackage{amsmath, amssymb, ../../vimacros, hyperref, tikz}
 \usetikzlibrary{positioning, fit, bayesnet}
 \usepackage[round]{natbib}
+\usepackage{physics}
+\usepackage{verbatim}
 
 \hypersetup{breaklinks=true, colorlinks=true, linkcolor=blue, urlcolor=blue, citecolor=blue}
 
+\beamertemplatenavigationsymbolsempty
+
 \title{Deep Generative Models: \\
-Continous Latent Variables}
+Continuous Latent Variables}
 \author{Philip Schulz and Wilker Aziz\\
 \url{https://github.com/philschulz/VITutorial}}
 \date{}
@@ -25,18 +29,105 @@ Continous Latent Variables}
 
 \frame{\tableofcontents}
 
-\section{Generative Models}
+\section{Deep Generative Models}
 \frame{\tableofcontents[currentsection]}
 
-\begin{frame}{Recap: Generative Models}
+\begin{frame}{Generative Models}
 Joint distribution over observed data $ x $ and latent variables $ Z $.
 \begin{equation*}
-p(x,z|\alpha) = \overbrace{p(x|z,\alpha)}^{\text{likelihood}} \underbrace{p(z|\alpha)}_{\text{prior}}
+p(x,z|\theta) =  \underbrace{p(z)}_{\text{prior}} \underbrace{p(x|z,\theta)}_{\text{likelihood}}
 \end{equation*} 
 The likelihood and prior are often standard distributions (Gaussian, Bernoulli) with simple dependence on conditioning
 information.
 \end{frame}
 
+\begin{frame}{Deep generative models}
+
+Joint distribution with {\bf deep observation model}
+\begin{equation*}
+p(x, z|\theta) = \underbrace{p(z)}_{\text{prior}} \underbrace{p(x|z, \theta)}_{\text{likelihood}}
+\end{equation*}
+~ {\small mapping from $z$ to $p(x|z, \theta)$ is a NN with parameters $\theta$}
+
+~ \pause
+
+Marginal likelihood 
+\begin{equation*}
+p(x|\theta) = \int p(x, z|\theta) \dd{z} = \int p(z)p(x|z, \theta) \dd{z} 
+\end{equation*}
+~ \alert{intractable} in general
+
+
+
+\end{frame}
+
+
+\begin{frame}[plain]{Gradient}
+
+Exact gradient is intractable
+\begin{small}
+\begin{equation*}
+\begin{aligned}
+\grad_\theta \log p(x|\theta) \pause &= \grad_\theta \log \underbrace{\int p(x, z|\theta) \dd{z}}_{\text{marginal}} \\ \pause
+&= \underbrace{\frac{1}{\int p(x, z|\theta) \dd{z}} \int \grad_\theta p(x,z|\theta) \dd{z}}_{\text{chain rule}} \\ \pause
+&= \frac{1}{p(x|\theta)} \int \underbrace{p(x,z|\theta) \grad_\theta \log p(x,z|\theta)}_{\text{log-identity for derivatives}} \dd{z} \\ \pause
+&= \int p(z|x, \theta) \grad_\theta \log p(x,z|\theta) \dd{z} \\ \pause
+&= \underbrace{\mathbb E_{p(z|x, \theta)} \left[ \grad_\theta \log p(x,Z|\theta) \right]}_{\text{expected gradient :)}}
+\end{aligned}
+\end{equation*}
+\end{small}
+
+
+
+\end{frame}
+
+\begin{frame}{Can we get an estimate?}
+
+\begin{equation*}
+\begin{aligned}
+\grad_\theta \log p(x|\theta) 
+ &= \mathbb E_{p(z|x, \theta)} \left[ \grad_\theta \log p(x,Z|\theta) \right] \\ \pause
+ &\overset{\text{MC}}{\approx} \frac{1}{K} \sum_{k=1}^K \grad_\theta \log p(x,z^{(k)}|\theta)  \\
+ & Z^{(k)} \sim p(z|x, \theta)
+\end{aligned}
+\end{equation*}
+
+
+ \pause
+
+MC estimate requires sampling from posterior
+\begin{small}
+\begin{equation*}
+p(z|x, \theta) = \frac{p(z)p(x|z, \theta)}{\alert{p(x|\theta)}}
+\end{equation*}
+\end{small}
+unavailable due to the intractability of the marginal
+
+\end{frame}
+
+
+\begin{frame}{Summary}
+
+We want
+\begin{itemize}
+	\item richer probabilistic models  \pause
+	\item complex observation models \\
+	parameterised by NNs 
+	%\item but we cannot use backprop for parameter estimation \\
+	%due to intractability of log-marginal and its gradient
+\end{itemize}
+\pause
+but we can't perform gradient-based MLE
+
+~
+
+\pause
+
+We need \alert{approximate inference} techniques!
+
+\end{frame}
+
+\begin{comment}  % TODO: move this closer to VAE
 \begin{frame}{Recap: Variational Inference}
 \begin{block}{Objective}
 \begin{equation*}
@@ -48,113 +139,10 @@ information.
 \end{itemize}
 \end{block}
 \end{frame}
+\end{comment}
 
-\section{First Attempt: Log-linear Models}
-\frame{\tableofcontents[currentsection]}
 
-\begin{frame}{Feature-rich Generative Models}
-Let us assume that $ z $ has internal structure (features). How can we exploit that?
-\begin{block}{First Idea}
-Make $ p(x|z,\alpha) $ a log-linear model.
-\begin{itemize}
-\item Only discrete data
-\item Trainable with EM if we can efficiently enumerate $ \mathcal{X} $ and $ \mathcal{Z} $.
-\end{itemize}
-\end{block}
-\end{frame}
-
-\begin{frame}{Log-linear Model}
-Let us treat $ z $ as observed.
-\begin{equation*}
-p(x|z,\alpha\alert{=w}) = \frac{\exp\left(w^{\top}f(x,z)\right)}{\sum_{x\in \mathcal{X}}\exp\left(w^{\top}f(x,z)\right)}
-\end{equation*}
-\pause
-\begin{block}{Weight Gradient}
-\begin{equation*}
-\frac{d}{dw}\log p(x|z,w) = f(x,z) - \E{f(X,z)|z,w} 
-\end{equation*}
-\pause
-Updates need to be performed iteratively.
-\end{block}
-\end{frame}
-
-\begin{frame}{Log-linear model with latent variables}
-Now let us treat $ z $ as latent.
-\pause
-\begin{block}{Model}
-\begin{equation*}
-p(x,z|w) = \underbrace{\frac{\exp\left(w^{\top}f(x,z)\right)}{\sum_{x\in \mathcal{X}}\exp\left(w^{\top}f(x,z)\right)}}_{p(x|z, w)} 
-\times \underbrace{p(z)}_{arbitrary}
-\end{equation*}
-\end{block}
-\end{frame}
-
-\begin{frame}{Log-linear model with latent variables}
-\begin{block}{Posterior}
-\begin{align*}
-p(z|x,w) \onslide<2->{= \frac{p(x,z|w)}{p(x|w)}} \onslide<3->{= \frac{p(x,z|w)}{\sum_{z} p(x,z|w)} =} \\
-\onslide<4>{\dfrac{\frac{\exp\left(w^{\top}f(x,z)\right)}{\sum_{x\in \mathcal{X}}\exp\left(w^{\top}f(x,z)\right)} \times p(z)}
-{\sum_{z} \frac{\exp\left(w^{\top}f(x,z)\right)}{\sum_{x\in \mathcal{X}}\exp\left(w^{\top}f(x,z)\right)} \times p(z)}}
-\end{align*}
-\end{block}
-\end{frame}
-
-\begin{frame}{Log-linear model with latent variables}
-\begin{block}{Weight Gradient (treat $ p(z|x,w) $ as fixed)}
-\begin{small}
-\begin{align*}
-&\frac{d}{dw}\E[p(z|x,w)]{\log p(x,z|w)} = \\ 
-&\onslide<2->{\frac{d}{dw}\sum_{z}p(z|x,w) \log p(x,z|w) =} \\
-&\onslide<3->{\sum_{z}p(z|x,w)  \frac{d}{dw}\log p(x,z|w) =} \\
-&\onslide<4>{\sum_{z}p(z|x,w) \left( \frac{d}{dw}\log p(x|z,w) + \frac{d}{dw} p(z) \right)}
-\end{align*}
-\end{small}
-\end{block}
-\end{frame}
-
-\begin{frame}{Log-linear model with latent variables}
-\begin{block}{Weight Gradient (treat $ p(z|x,w) $ as fixed)}
-\begin{small}
-\begin{align*}
-&\frac{d}{dw}\E[p(z|x,w)]{\log p(x,z|w)} = \\ 
-&\frac{d}{dw}\sum_{z}p(z|x,w) \log p(x,z|w) = \\
-&\sum_{z}p(z|x,w)  \frac{d}{dw}\log p(x,z|w) = \\
-&\sum_{z}p(z|x,w) \left( \alert{\overbrace{\frac{d}{dw} \log p(x|z,w)}^{\text{We've already solved this!}}} + \overbrace{\frac{d}{dw} p(z)}^{\text{0}} \right)
-\end{align*}
-\end{small}
-\end{block}
-\end{frame}
-
-\begin{frame}{Log-linear model with latent variables}
-\begin{block}{Weight Gradient (treat $ p(z|x,w) $ as fixed)}
-\begin{align*}
-&\frac{d}{dw}\E[p(z|x,w)]{\log p(x,z|w)} = \\ 
-&\E[p(z|x,w)]{f(x,Z)|x,w} - \E[p(z|x,w)]{\E{(f(X,Z)|Z,w}}
-\end{align*}
-\end{block}
-\pause
-\begin{block}{Procedurally}
-\begin{small}
-\center{E\_count($f(x,z)$) - \{ E\_count($ f(x,z) $) $ \times  \E{f(X,z)|z,w} $ \}}
-\end{small}
-\end{block}
-\end{frame}
-
-\begin{frame}{EM}
-\begin{itemize}
-\item[E-step] $ p(z|x,w) = \frac{p(x,z|w)}{\sum_{z} p(x,z|w)} $
-in $ \mathcal{O}(|\mathcal{X}|\times |\mathcal{Z}|) $
-\item[M-step] Iteratively optimise $ w $ to match E\_count($x,z$) with E\_count($ x,z $) $ \times  \E{X|z,w} $ 
-\end{itemize}
-\begin{block}{Restrictions}
-\begin{itemize}
-\item Only log-linear models
-\item Scales badly
-\end{itemize}
-\end{block}
-\end{frame}
-
-\section{Second Attempt: Wake-Sleep}
+\section{First Attempt: Wake-Sleep}
 \frame{\tableofcontents[currentsection]}
 
 \begin{frame}{Wake-sleep Algorithm}
@@ -195,9 +183,13 @@ in $ \mathcal{O}(|\mathcal{X}|\times |\mathcal{Z}|) $
 
 \begin{frame}{Wake Phase Objective}
 Assumes latent state $ z $ to be fixed random draws from $ q(z|x,\lambda) $.
+
 \begin{equation*}
-\max_{\theta}~ \log p(x|z,\theta) 
-\end{equation*}
+\begin{aligned}
+&\max_{\theta}~ \mathbb E_{q(z|x, \lambda)}\left[ \log p(z, x| \theta) \right] + \mathbb H[q(z|x, \lambda)]  \pause \\
+&\overset{\text{MC}}{\approx} \max_{\theta}~  \log p(z, x| \theta) 
+\end{aligned}
+\end{equation*} \pause
 This is simply supervised learning with imputed latent data!
 \end{frame}
 
@@ -266,8 +258,12 @@ This is simply supervised learning with imputed latent data!
 \begin{frame}{Sleep Phase Objective}
 Assumes fake data $ \tilde{x} $ and latent variables $ z $ to be fixed random draw from $ p(x,z|\theta) $.
 \begin{equation*}
-\max_{\lambda}~  \E[q(z|\tilde{x},\lambda)]{\log p(\tilde{x},z|\theta)} + \Ent{q(z|\tilde{x},\lambda)}
-\end{equation*}
+\begin{aligned}
+&\max_{\lambda}~  \E[p(\tilde x, z|\theta)]{\log q(z|\tilde x, \lambda)} + \mathbb E_{p(\tilde x)}\left[\Ent{p(z|\tilde{x},\theta)}\right] \pause \\
+&\overset{\text{MC}}{\approx} \max_{\lambda}~ \log q(z|\tilde x, \lambda)
+\end{aligned}
+\end{equation*} 
+
 \end{frame}
 
 \begin{frame}{Sleep Phase Sampling}
@@ -647,8 +643,8 @@ where $ \beta \rightarrow 1 $.
 
 \begin{frame}{Summary}
 \begin{itemize}
-\item When $ |\mathcal{X}| $ and $ |\mathcal{Z}| $ are not too large, we can do EM with features
-\item Otherwise use VI with simple approximation
+%\item When $ |\mathcal{X}| $ and $ |\mathcal{Z}| $ are not too large, we can do EM with features
+%\item Otherwise use VI with simple approximation
 \item Wake-Sleep: train inference and generation networks with separate objectives
 \item VAE: train both networks with same objective
 \item Reparametrisation
