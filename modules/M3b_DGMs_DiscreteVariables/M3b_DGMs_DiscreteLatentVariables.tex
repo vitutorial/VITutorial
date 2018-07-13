@@ -222,13 +222,9 @@ sigmoid output will do that job.
 \begin{tikzpicture}[node distance=1cm]
 \node[rectangle, draw, rounded corners, thick] (input) {$x$};
 \node[rectangle, draw, rounded corners, thick, above left=of input] (psi) {$ \psi $};
-\node[rectangle, fill=blue!20, thick, above right= of input, rounded corners, draw] (loss) {$ x $};
 \draw[->, thick] (input) -- (psi) node[midway, above, rotate=145] {$ \lambda $};
-\draw[->, thick] (input) -- (loss) node[midway, above, rotate=225] {$ \theta $};
 \node[draw=orange, thick, rectangle, fit= (input) (psi), rounded corners] {};
 \node[below left= of input] (inference) {\textcolor{orange}{inference model}};
-\node[draw=blue!50, thick, rectangle, fit= (input) (loss), rounded corners] {};
-\node[below right= of input] (generation) {\textcolor{blue!50}{generation model}};
 
 \pause
 \node[rectangle, draw, fill=blue!20, thick, rounded corners, thick, left=of psi] (kl) {$ \KullbackLeibler $};
@@ -236,15 +232,17 @@ sigmoid output will do that job.
 
 \pause
 \node[rectangle, fill=blue!20, thick, above of= psi, rounded corners, draw, node distance=2cm] (scorefunction) {$ \log q(z|\psi) \textcolor{red}{\log p(x|z,\theta)} $};
-\node[rectangle, fill=blue!20, thick, above right= of input, rounded corners, draw] (loss) {$ x $};
 \draw[->, thick] (psi) edge (scorefunction);
-\draw[->, thick] (loss) edge node[strike out,draw,-,red,double]{} (scorefunction);
 
 \pause
 \node[circle, draw, thick, right= of scorefunction] (z) {$ z $};
+\node[rectangle, fill=blue!20, thick, below = of z, rounded corners, draw] (loss) {$ x $};
+\node[draw=blue!50, thick, rectangle, fit= (z) (loss), rounded corners] {};
+\node[below right= of input] (generation) {\textcolor{blue!50}{generation model}};
 \node[right = of z, xshift=-1cm] (random) {$ \sim \BerDist{\psi} $};
-\draw[->, thick] (z) edge (loss);
+\draw[->, thick] (z) -- (loss) node[midway, above, rotate=225] {$ \theta $};
 \draw[->, thick] (z) edge (scorefunction);
+\draw[->, thick] (loss) edge node[strike out,draw,-,red,double]{} (scorefunction);
 \end{tikzpicture}
 \end{figure}
 \end{frame}
@@ -305,12 +303,33 @@ sigmoid output will do that job.
 \end{frame}
 
 \begin{frame}{Baselines}
+\begin{block}{Fact}
+The Expectation of the score function is 0. 
+\pause
+\begin{equation*}
+\E[q(z|x,\lambda)]{\frac{d}{d\lambda} \log q(z|x,\lambda)} = 0
+\end{equation*}
+\end{block}
+\end{frame}
+
+\begin{frame}{Baselines}
 We attempt to centre the gradient estimate. To do this we learn a quantity $ C $ that we subtract
 from the reconstruction loss.
 \begin{equation*}
-\log q(z|\lambda) \left( \log p(x|z,\theta) - C \right)
+\E[q(z|\lambda) ]{\log q(z|\lambda) \left( \log p(x|z,\theta) - C \right)}
 \end{equation*}
 We call $ C $ a baseline. It does not change the expected gradient \citep{Williams:1992}.
+\end{frame}
+
+\begin{frame}{Baselines}
+ \begin{equation*}
+\begin{aligned}
+&\E[q(z|\lambda)]{\frac{d}{d\lambda}\log q(z|\lambda) \left( \log p(x|z,\theta) - C \right)} = \pause \\
+&\underbrace{\E[q(z|\lambda)]{\frac{d}{d\lambda}\log q(z|\lambda)  \log p(x|z,\theta)}}_{\text{score function gradient}}  -
+\pause \\
+&\underbrace{\E[q(z|\lambda)]{\frac{d}{d\lambda}\log q(z|\lambda)}}_{0}C
+\end{aligned}
+\end{equation*}
 \end{frame}
 
 \begin{frame}{Baselines}
