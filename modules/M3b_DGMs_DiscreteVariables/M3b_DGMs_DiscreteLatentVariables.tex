@@ -4,6 +4,7 @@
 \usecolortheme{beaver}
 
 \usepackage{amsmath, amssymb, ../../vimacros, hyperref, tikz}
+\usepackage{physics}
 \usetikzlibrary{positioning, fit, bayesnet, shapes.misc, patterns}
 \usepackage[round]{natbib}
 
@@ -92,11 +93,15 @@ distributions are computed by neural networks
 \end{frame}
 
 \begin{frame}{Reparametrisation}
-In order to tranform variables, we need to compute the Jacobian (matrix of derivatives).
+In order to tranform variables, we need to compute the Jacobian (matrix of partial derivatives).
 \begin{equation*}
-p(z) = \phi(h(z))\left|\frac{d}{dz}h(z)\right|
+p(z) = \phi(h(z))\left|\det J_{h(z)}\right|
 \end{equation*}
-The Jacobian is generally not available for discrete variables. 
+The Jacobian 
+\begin{equation}
+	J_{ij} = \pdv{h_i(z)}{z_j}
+\end{equation}
+is generally not available for discrete variables. 
 \end{frame}
 
 %\begin{frame}{Cumulative Distribution Function}
@@ -127,19 +132,19 @@ respect to real variables.
 
 \begin{frame}{Back to Basic Calculus}
 \begin{equation*}
-\frac{d}{d\lambda}\log f(\lambda) \pause = \frac{\frac{d}{d\lambda}f(\lambda)}{f(\lambda)}
+\dv{\lambda}\log f(\lambda) \pause = \frac{\dv{\lambda}f(\lambda)}{f(\lambda)}
 \end{equation*}
 \pause
 \begin{block}{Consequence}
 \begin{equation*}
-\frac{d}{d\lambda}f(\lambda) = \textcolor{blue}{\frac{d}{d\lambda}\log f(\lambda) \times f(\lambda)}
+\dv{\lambda}f(\lambda) = \textcolor{blue}{\dv{\lambda}\log f(\lambda) \times f(\lambda)}
 \end{equation*}
 \end{block}
 \end{frame}
 
 \begin{frame}{Score Function Estimator}
 \begin{equation*}
-\frac{d}{d\lambda}f(\lambda) = \textcolor{blue}{\frac{d}{d\lambda}\log f(\lambda) \times f(\lambda)}
+\dv{\lambda}f(\lambda) = \textcolor{blue}{\dv{\lambda}\log f(\lambda) \times f(\lambda)}
 \end{equation*}
 \pause
 Apply this to the ELBO derivative.
@@ -307,7 +312,7 @@ sigmoid output will do that job.
 The Expectation of the score function is 0. 
 \pause
 \begin{equation*}
-\E[q(z|x,\lambda)]{\frac{d}{d\lambda} \log q(z|x,\lambda)} = 0
+\E[q(z|x,\lambda)]{\pdv{\lambda} \log q(z|x,\lambda)} = 0
 \end{equation*}
 \end{block}
 \end{frame}
@@ -324,25 +329,36 @@ We call $ C $ a baseline. It does not change the expected gradient \citep{Willia
 \begin{frame}{Baselines}
  \begin{equation*}
 \begin{aligned}
-&\E[q(z|\lambda)]{\frac{d}{d\lambda}\log q(z|\lambda) \left( \log p(x|z,\theta) - C \right)} = \pause \\
-&\underbrace{\E[q(z|\lambda)]{\frac{d}{d\lambda}\log q(z|\lambda)  \log p(x|z,\theta)}}_{\text{score function gradient}}  -
+&\E[q(z|\lambda)]{\pdv{\lambda}\log q(z|\lambda) \left( \log p(x|z,\theta) - C \right)} = \pause \\
+&\underbrace{\E[q(z|\lambda)]{\pdv{\lambda}\log q(z|\lambda)  \log p(x|z,\theta)}}_{\text{score function gradient}}  -
 \pause \\
-&\underbrace{\E[q(z|\lambda)]{\frac{d}{d\lambda}\log q(z|\lambda)}}_{0}C
+&\underbrace{\E[q(z|\lambda)]{\pdv{\lambda}\log q(z|\lambda)}}_{0}C
 \end{aligned}
 \end{equation*}
 \end{frame}
 
 \begin{frame}{Baselines}
-We can make baselines input-depdendent to make them more flexible.
+We can make baselines input-dependent to make them more flexible.
 \begin{equation*}
 \log q(z|\lambda) \left( \log p(x|z,\theta) - C(x; \omega) \right)
 \end{equation*}
+
+\pause
+
 However, baselines may not depend on the random value $ z $! Quantities that may depend on the
-random value ($ C(z) $) are called \textbf{control variates}. See \cite{PaisleyEtAl:2012, RanganathEtAl:2014,GregorEtAl:2014}.
+random value ($ C(z) $) are called \textbf{control variates}. \\
+
+~
+
+See \cite{PaisleyEtAl:2012, RanganathEtAl:2014,GregorEtAl:2014}.
 \end{frame}
 
 \begin{frame}{Baselines}
-Baselines are predicted by a regression model (e.g. a neural net). The model is trained using 
+Baselines are predicted by a regression model (e.g. a neural net). \\
+
+~
+
+The model is trained using 
 an $ L_{2} $-loss.
 \begin{equation*}
 \min_\omega \left(C(x; \omega) - \log p(x|z,\theta)\right)^{2}
