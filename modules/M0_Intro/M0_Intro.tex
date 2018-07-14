@@ -44,22 +44,47 @@
 \end{block}
 \end{frame}
 
-\begin{frame}{Keywords}
+\begin{frame}{Why are we here today?}
 
+Because NN models work
 \begin{itemize}
-	\item supervised vs unsupervised learning
-	\item density estimation
-	\item probabilistic modelling
-	\item deep learning
-	\item maximum likelihood estimation
-	\item gradient-based optimisation
-	\item stochastic gradients
-	\item latent variable models
-	\item posterior inference
-	\item variational inference
+	\item at least one drawback is low data efficiency
+\end{itemize}
+\pause
+
+We usually turn to probabilistic models to deal with
+\begin{itemize}
+	\item lack of supervision
+	\item partial supervision
+	\item lack of inductive bias
+\end{itemize}
+\pause
+
+But it turns out NNs and probabilistic modelling do not go along very well
+\begin{itemize}
+	\item well... \pause that's no longer true!
 \end{itemize}
 
 \end{frame}
+
+\begin{frame}{What are you getting out of this today?}
+
+As we progress we will
+\begin{itemize}
+	\item develop a shared vocabulary to talk about generative models powered by NNs
+	\item deriving crucial results step by step
+\end{itemize}
+
+\pause
+
+Goal
+\begin{itemize}
+	\item you should be able to navigate through fresh literature
+	\item and start combining probabilistic models and NNs
+\end{itemize}
+
+\end{frame}
+
 
 \begin{frame}{Problems}
 Supervised problems: \alert{``learn a distribution over observed data''}
@@ -288,9 +313,11 @@ For large $\alert{N}$, we can use a gradient estimate
 \end{equation*}
 \end{small}  \pause
 and take a step in the direction
+\begin{small}
 \begin{equation*}
-\gamma \frac{N}{M} \grad_\theta \mathcal L(\theta|x^{(s_1:s_M)})
+\gamma \frac{N}{M} \underbrace{\grad_\theta \mathcal L(\theta|x^{(s_1:s_M)})}_{\text{\alert{stochastic gradient}}}
 \end{equation*}
+\end{small}
 where $x^{(s_1:s_M)}$ is a random mini-batch of size $M$
 
 
