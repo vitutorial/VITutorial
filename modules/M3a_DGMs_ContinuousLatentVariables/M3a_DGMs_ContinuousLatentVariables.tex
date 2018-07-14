@@ -4,6 +4,7 @@
 \usecolortheme{beaver}
 
 \usepackage{amsmath, amssymb, ../../vimacros, hyperref, tikz}
+\usepackage{../../pdfpcnotes}
 \usetikzlibrary{positioning, fit, bayesnet}
 \usepackage[round]{natbib}
 \usepackage{physics}
@@ -63,6 +64,8 @@ p(x|\theta) = \int p(x, z|\theta) \dd{z} = \int p(z)p(x|z, \theta) \dd{z}
 
 
 \begin{frame}{Goals}
+
+\pnote{Q: Why is gradient-based MLE not possible?}
 
 We want
 \begin{itemize}
@@ -354,12 +357,14 @@ $ p(x) = \intl{\alert{\underbrace{p(x|z,\theta)}_{\substack{\text{highly} \\  \t
 \end{frame}
 
 \begin{frame}{Generator Network Gradient}
+\vspace{-10pt}
 \begin{equation*}
 \begin{aligned}
-&\frac{d}{d\theta}\E[q(z|x,\lambda)]{\log p(x|z,\theta)} - \overbrace{\KL{q(z|x,\lambda)}{p(z)}}^{constant} \\ \pause 
-&=\E[q(z|x,\lambda)]{\frac{d}{d\theta}\log p(x|z,\theta)} \\ \pause
+&\dv{\theta}\E[q(z|x,\lambda)]{\log p(x|z,\theta)} - \overbrace{\KL{q(z|x,\lambda)}{p(z)}}^{constant} \\ \pause 
+&=\E[q(z|x,\lambda)]{\dv{\theta}\log p(x|z,\theta)} \\ \pause
 &\overset{\text{MC}}{\approx} \frac{1}{S}\sum_{i=1}^{S}
-\frac{d}{d\theta} \log p(x|z_{i},\theta)
+\dv{\theta} \log p(x|z_{i},\theta) \\
+&\textcolor{gray}{\text{where }z_i \sim q(z|x, \lambda)}
 \end{aligned}
 \end{equation*}
 \pause
@@ -369,8 +374,8 @@ $ p(x) = \intl{\alert{\underbrace{p(x|z,\theta)}_{\substack{\text{highly} \\  \t
 \begin{frame}{Inference Network Gradient}
 \begin{equation*}
 \begin{aligned}
-&\frac{d}{d\lambda}\left[\E[q(z|x,\lambda)]{\log p(x|z,\theta)} - \KL{q(z|x,\lambda)}{p(z)} \right] \\ \pause
-=&\frac{d}{d\lambda}\E[q(z|x,\lambda)]{\log p(x|z,\theta)} - \underbrace{\frac{d}{d\lambda}\KL{q(z|x,\lambda)}{p(z)}}_{\text{analytical computation}} \\
+&\dv{\lambda}\left[\E[q(z|x,\lambda)]{\log p(x|z,\theta)} - \KL{q(z|x,\lambda)}{p(z)} \right] \\ \pause
+=&\dv{\lambda}\E[q(z|x,\lambda)]{\log p(x|z,\theta)} - \underbrace{\dv{\lambda}\KL{q(z|x,\lambda)}{p(z)}}_{\text{analytical computation}} \\
 \end{aligned}
 \end{equation*}
 \pause
@@ -378,11 +383,14 @@ $ p(x) = \intl{\alert{\underbrace{p(x|z,\theta)}_{\substack{\text{highly} \\  \t
 \end{frame}
 
 \begin{frame}{Inference Network Gradient}
+
+\pnote{Q: What can we do about this expression?}
+
 \begin{equation*}
 \begin{aligned}
-&\frac{d}{d\lambda}\E[q(z|x,\lambda)]{\log p(x|z,\theta)} \\ \pause
-&= \frac{d}{d\lambda} \intl{q(z|x,\lambda)\log p(x|z,\theta)}{z} \\ \pause
-&= \intl{\alert{\frac{d}{d\lambda} q(z|x,\lambda)}\log p(x|z,\theta)}{z}
+&\dv{\lambda}\E[q(z|x,\lambda)]{\log p(x|z,\theta)} \\ \pause
+&= \dv{\lambda} \intl{q(z|x,\lambda)\log p(x|z,\theta)}{z} \\ \pause
+&= \intl{\alert{\dv{\lambda} q(z|x,\lambda)}\log p(x|z,\theta)}{z}
 \end{aligned}
 \end{equation*}
 \pause
@@ -422,35 +430,42 @@ h(z, \lambda) &= \frac{z - \mu(\phi,\lambda)}{ \sigma(\phi, \lambda) } = \epsilo
 \end{frame}
 
 \begin{frame}{Inference Network Gradient}
+
 \begin{equation*}
 \begin{aligned}
-&= \frac{d}{d\lambda} \intl{q(z|x,\lambda)\log p(x|z,\theta)}{z} \\ \pause
-&= \frac{d}{d\lambda} \intl{\alert{q(\epsilon)} \loga{ p(x | \alert{\overbrace{h^{-1}(\epsilon, \lambda)}^{=z}},\theta)}}{\alert{\epsilon}} \\ \pause
-&= \intl{q(\epsilon) \frac{d}{d\lambda} \left[ \log p(x| \overbrace{h^{-1}(\epsilon, \lambda)}^{=z}, \theta)\right] }{\epsilon}
+&= \dv{\lambda} \intl{q(z|x,\lambda)\log p(x|z,\theta)}{z} \\ \pause
+&= \dv{\lambda} \intl{\alert{q(\epsilon)} \loga{ p(x | \alert{\overbrace{h^{-1}(\epsilon, \lambda)}^{=z}},\theta)}}{\alert{\epsilon}} \\ \pause
+&= \intl{q(\epsilon) \dv{\lambda} \left[ \log p(x| \overbrace{h^{-1}(\epsilon, \lambda)}^{=z}, \theta)\right] }{\epsilon}
 \end{aligned}
 \end{equation*}
 \end{frame}
 
 \begin{frame}{Inference Network Gradient}
+\vspace{-10pt}
 \begin{equation*}
 \begin{aligned}
-&\E[q(\epsilon)]{\frac{d}{d\lambda} \log p(x| \overbrace{h^{-1}(\epsilon, \lambda)}^{=z}, \theta)} \\ \pause
-= &\E[q(\epsilon)]{\frac{d}{dz} \log p(x| \overbrace{h^{-1}(\epsilon, \lambda)}^{=z}, \theta)\times \frac{d}{d\lambda} h^{-1}(\epsilon, \lambda)}\\ \pause
-\overset{\text{MC}}{\approx} &\frac{1}{S}\sum_{i=1}^{S} \frac{d}{dz} \log p(x| \overbrace{h^{-1}(\epsilon, \lambda)}^{=z}, \theta) \times \frac{d}{d\lambda} h^{-1}(\epsilon, \lambda)
+&\E[q(\epsilon)]{\dv{\lambda} \log p(x| \overbrace{h^{-1}(\epsilon, \lambda)}^{=z}, \theta)} \\ \pause
+\overset{\text{MC}}{\approx} &\frac{1}{S}\sum_{i=1}^{S} \dv{\lambda} \log p(x| \overbrace{h^{-1}(\epsilon_i, \lambda)}^{=z}, \theta) \\
+&\textcolor{gray}{\text{where }\epsilon_i \sim q(\epsilon)} \\ \pause
+\overset{\text{MC}}{\approx} &\frac{1}{S}\sum_{i=1}^{S} \underbrace{\dv{z} \log p(x| \overbrace{h^{-1}(\epsilon_i, \lambda)}^{=z}, \theta) \times \dv{\lambda} h^{-1}(\epsilon_i, \lambda)}_{\text{chain rule}}
+%= &\E[q(\epsilon)]{\frac{d}{dz} \log p(x| \overbrace{h^{-1}(\epsilon, \lambda)}^{=z}, \theta)\times \frac{d}{d\lambda} h^{-1}(\epsilon, \lambda)}\\ \pause
+%\overset{\text{MC}}{\approx} &\frac{1}{S}\sum_{i=1}^{S} \frac{d}{dz} \log p(x| \overbrace{h^{-1}(\epsilon, \lambda)}^{=z}, \theta) \times \frac{d}{d\lambda} h^{-1}(\epsilon, \lambda)
 \end{aligned}
 \end{equation*}
 \end{frame}
 
 \begin{frame}{Derivatives of Gaussian transformation}
-Recall:
-$$ h^{-1}(\epsilon, \lambda) = \mu(\phi,\lambda) + \sigma(\phi,\lambda) \odot \epsilon \ . $$
-\pause
-This gives us 2 gradient paths.
-\pause
-\begin{align*}
-\frac{d h^{-1}(\epsilon, \lambda)}{d\mu(\phi,\lambda)} = \frac{d}{d\mu(\phi,\lambda)}\left[ \mu(\phi,\lambda) + \sigma(\phi,\lambda) \odot \epsilon \right] = 1 \\
-\frac{d h^{-1}(\epsilon, \lambda)}{d\sigma(\phi,\lambda)} = \frac{d}{d\sigma(\phi,\lambda)}\left[ \mu(\phi,\lambda) + \sigma(\phi,\lambda) \odot \epsilon \right] = \epsilon
-\end{align*}
+Recall: $$\quad h^{-1}(\epsilon, \lambda) = \mu(\phi,\lambda) + \sigma(\phi,\lambda) \odot \epsilon \ . $$
+
+We get two gradient paths! \pause \\
+
+\begin{itemize}
+	\item one is \alert{deterministic}\\
+	$\pdv{h^{-1}(\epsilon, \lambda)}{\mu(\phi,\lambda)} = \pdv{\mu(\phi,\lambda)}[\mu(\phi,\lambda) + \sigma(\phi,\lambda) \odot \epsilon] = 1$ \pause
+	\item the other is  \alert{stochastic}\\
+	$\pdv{h^{-1}(\epsilon, \lambda)}{\sigma(\phi,\lambda)} = \pdv{\sigma(\phi,\lambda)}[ \mu(\phi,\lambda) + \sigma(\phi,\lambda) \odot \epsilon] = \epsilon$
+\end{itemize}
+
 \end{frame}
 
 \begin{frame}{Gaussian KL}
@@ -504,28 +519,11 @@ Analytical computation of $ -\KL{q(z|x,\lambda)}{p(z)} $:
 \end{figure}
 \end{frame}
 
-\begin{frame}{Example}
-\begin{itemize}
-\item Data: binary mnist
-\item Likelihood: product of Bernoullis
-\begin{itemize}
-\item Let $ \phi = \sigma(\text{NN}(z)) $
-\item $ \prod_{i=1}^{N} p(x_{i}|\phi) = \prod_{i=1}^{N} \phi^{x_{i}} \times (1-\phi)^{1-x_{i}} $
-\end{itemize}
-\item Prior over $ z $: $\NDist{0}{1}$
-\item $ q(z|x,\lambda) = \NDist{\mu(x,\lambda)}{\sigma(x,\lambda)^{2}} $
-\item $ \mu(x, \lambda) = \text{NN}_{\mu}(x; \lambda) $
-\item $ \sigma(x, \lambda) = \text{NN}_{\sigma}(x; \lambda) $
-\end{itemize}
-\pause
-\begin{block}{Mean Field assumption}
-Variational approximation factorises over latent dimensions.
-\end{block}
-\end{frame}
 
-\begin{frame}{Graphical Model}
-	
-	\begin{columns}
+\begin{frame}{Example: Unigram Document Model}
+
+
+\begin{columns}
 	\begin{column}{0.2\textwidth}
 	\begin{tikzpicture}
     % Define nodes
@@ -537,30 +535,240 @@ Variational approximation factorises over latent dimensions.
     \edge{z,theta}{x};
     
     % add plates
-    \plate {x-sentence} {(x)(z)} {$ m $};
+    \plate {x-sentence} {(x)} {$ N $};
    
-    \node[right = of z]		(lambda)		{$ \lambda $};   
-    \edge[dashed, bend right]{x}{z};
-    \edge{lambda}{z};
+    %\node[right = of z]		(lambda)		{$ \lambda $};   
+    %\edge[dashed, bend right]{x}{z};
+    %\edge{lambda}{z};
     \end{tikzpicture}
     \end{column}
-    \begin{column}{0.7\textwidth}
+    \begin{column}{0.75\textwidth}
+    	Generative story 
     	\begin{itemize}
-			\item approximate posterior \\ 
-			\begin{small}
-			$q(z|x,\lambda) = \NDist{\mu(x,\lambda)}{\sigma(x,\lambda)^{2}}$
-			\end{small} \pause
-			\item where 
-			\begin{itemize}
-				\item $\mu(x, \lambda) = \text{NN}_{\mu}(x; \lambda) $ \\
-				e.g. $\mu(x, \lambda) = W^{(u)} x + b^{(u)}$ \pause
-				\item $\sigma(x, \lambda) = \exp(\text{NN}_{\sigma}(x; \lambda))$ \\
-				e.g. $\sigma(x, \lambda) = \loga{ 1 + \exp \left( W^{(v)} x + b^{(v)} \right)}$ \pause
-			  \item $\lambda=(W^{(u)}, W^{(v)}, b^{(u)}, b^{(v)})$
-		   \end{itemize}
-	  \end{itemize}
+			\item Draw a document embedding $Z \sim \mathcal N(0, I)$
+			\item Draw $N$ words\\
+			$X_i|z \sim \Cat(f(z, \theta))$
+		\end{itemize}
     \end{column}
     \end{columns}
+    \pause
+    
+    ~
+    
+    Designing $f(z, \theta)$    \pause
+    \begin{equation*}
+	\begin{aligned}						
+		h &= \relu(W_1z+b_1) \\ \pause
+		f(z, \theta) &= \alert{\softmax}(W_2h + b_2) \\		\pause
+		\theta &= \{W_1, b_1, W_2, b_2\}
+	\end{aligned}
+	\end{equation*}
+	
+	\pnote{Q: Why do we need a softmax?}
+
+\end{frame}
+
+\begin{frame}{Example: Unigram Document Model}
+
+
+\begin{columns}
+	\begin{column}{0.2\textwidth}
+	\begin{tikzpicture}
+    % Define nodes
+    \node[latent]		(z)		{$ z $};
+    \node[obs, below = of z]		(x)		{$ x $};
+    \node[right = of x]		(theta)		{$ \theta $};
+    
+    % Connect nodes
+    \edge{z,theta}{x};
+    
+    % add plates
+    \plate {x-sentence} {(x)} {$ N $};
+   
+    %\node[right = of z]		(lambda)		{$ \lambda $};   
+    %\edge[dashed, bend right]{x}{z};
+    %\edge{lambda}{z};
+    \end{tikzpicture}
+    \end{column}
+    \begin{column}{0.75\textwidth}
+    	Generative story 
+    	\begin{itemize}
+			\item Draw a document embedding $Z \sim \mathcal N(0, I)$
+			\item Draw $N$ words\\
+			$X_i|z \sim \Cat(f(z, \theta))$
+		\end{itemize}
+    \end{column}
+    \end{columns}
+    
+    
+    ~
+    
+	Likelihood \pause
+	\begin{small}
+    \begin{equation*}
+	\begin{aligned}						
+		p(x_1^N|z, \theta) &= \prod_{i=1}^N p(x_i|z, \theta) \pause = \prod_{i=1}^N \Cat(x_i|\underbrace{f(z, \theta)}_{=\psi}) \\ \pause
+		&= \prod_{i=1}^N \psi_{x_i}
+	\end{aligned}
+	\end{equation*}
+	\end{small}
+
+\end{frame}
+
+
+\begin{frame}{Example: Unigram Document Model}
+
+
+\begin{columns}
+	\begin{column}{0.2\textwidth}
+	\begin{tikzpicture}
+    % Define nodes
+    \node[latent]		(z)		{$ z $};
+    \node[obs, below = of z]		(x)		{$ x $};
+    \node[right = of x]		(theta)		{$ \theta $};
+    
+    % Connect nodes
+    \edge{z,theta}{x};
+    
+    % add plates
+    \plate {x-sentence} {(x)} {$ N $};
+   
+    %\node[right = of z]		(lambda)		{$ \lambda $};   
+    %\edge[dashed, bend right]{x}{z};
+    %\edge{lambda}{z};
+    \end{tikzpicture}
+    \end{column}
+    \begin{column}{0.75\textwidth}
+    	Generative story 
+    	\begin{itemize}
+			\item Draw a document embedding $Z \sim \mathcal N(0, I)$
+			\item Draw $N$ words\\
+			$X_i|z \sim \Cat(f(z, \theta))$
+		\end{itemize}
+    \end{column}
+    \end{columns}
+    
+    
+    ~
+    
+	Marginal \pause
+	\begin{small}
+    \begin{equation*}
+	\begin{aligned}						
+		p(x_1^N|\theta) &= \int p(z) \prod_{i=1}^N p(x_i|z, \theta) \dd{z} \pause \\
+		&= \alert{\int \mathcal N(z|0, I)} \prod_{i=1}^N \Cat(x_i|\alert{f(z, \theta)}) \alert{\dd{z}}
+	\end{aligned}
+	\end{equation*}
+	\end{small}
+
+\end{frame}
+
+\begin{frame}{Example: Unigram Document Model}
+
+
+\begin{columns}
+	\begin{column}{0.75\textwidth}  
+   		\textcolor{blue}{Inference model}
+		\begin{itemize}
+			\item $Z|x_1^N \sim \mathcal N(\mu(x_1^N, \lambda), \sigma(x_1^n, \lambda)^2)$
+		\end{itemize}
+    \end{column}
+	\begin{column}{0.2\textwidth}
+	\begin{tikzpicture}
+    % Define nodes
+    \node[latent]		(z)		{$ z $};
+    \node[obs, below = of z]		(x)		{$ x $};
+    \node[right = of x]		(theta)		{$ \theta $};
+    
+    % Connect nodes
+    \edge{z,theta}{x};
+    
+    % add plates
+    \plate {x-sentence} {(x)} {$ N $};
+   
+    \node[right = of z]		(lambda)		{$ \lambda $};   
+    \edge[dashed, blue, bend right]{x}{z};
+    \edge[blue]{lambda}{z};
+    \end{tikzpicture}
+    \end{column}    
+    \end{columns}
+    \pause
+    
+    Designing the \emph{inference network}\pause
+    \vspace{-10pt}
+    \begin{columns}
+    \begin{column}{0.35\textwidth}
+    \begin{equation*}
+	\begin{aligned}		
+		s &= \sum_{i=1}^N E_{x_i} \pause \\
+		h &= \relu(M_1s+c_1)  \pause 		
+	\end{aligned}
+	\end{equation*}
+	\end{column}
+	\begin{column}{0.6\textwidth}
+	\begin{equation*}
+	\begin{aligned}		
+		\mu(x_1^N, \lambda) &= M_2h + c_2  \pause \\
+		\sigma(x_1^N, \lambda) &= \alert{\softplus}(M_3h + c_3)  \pause \\
+		\lambda &= \{E, M_1^3, c_1^3\}
+	\end{aligned}
+	\end{equation*}
+	\end{column}
+	\end{columns}
+	
+	\pnote{Q: Why do we need softplus?}
+
+\end{frame}
+
+
+\begin{frame}{Example: Unigram Document Model}
+
+\begin{columns}
+	\begin{column}{0.75\textwidth}  
+
+		Generative Model
+		\begin{itemize}
+			\item Prior: $Z \sim \mathcal N(0, I)$
+			\item Likelihood: $X_i|z \sim \Cat(f(z, \theta))$
+		\end{itemize}
+   		Inference Model
+		\begin{itemize}
+			\item $Z|x_1^N \sim \mathcal N(\mu(x_1^N, \lambda), \sigma(x_1^n, \lambda)^2)$
+		\end{itemize}
+    \end{column}
+	\begin{column}{0.2\textwidth}
+	\begin{tikzpicture}
+    % Define nodes
+    \node[latent]		(z)		{$ z $};
+    \node[obs, below = of z]		(x)		{$ x $};
+    \node[right = of x]		(theta)		{$ \theta $};
+    
+    % Connect nodes
+    \edge{z,theta}{x};
+    
+    % add plates
+    \plate {x-sentence} {(x)} {$ N $};
+   
+    \node[right = of z]		(lambda)		{$ \lambda $};   
+    \edge[dashed, blue, bend right]{x}{z};
+    \edge[blue]{lambda}{z};
+    \end{tikzpicture}
+    \end{column}    
+    \end{columns}
+    \pause
+    
+    \vspace{10pt}
+    
+    \alert{ELBO}
+    \vspace{-10pt}
+	\begin{equation*}
+	\begin{aligned}		
+		\log p(x_1^N|\theta) &\ge \mathbb E_{\frac{z - u}{s} \sim \mathcal N(0, I)}\left[ \textstyle\sum_{i=1}^N \log \psi_{x_i}\right] \\
+		&- \KL{\mathcal N(z|u, s^2)}{\mathcal N(z|0, I)}
+	\end{aligned}
+	\end{equation*}
+	\textcolor{gray}{{\small where $u = \mu(x_1^N, \lambda)$, $s = \sigma(x_1^N, \lambda)$, and $\psi = f(z, \theta)$ }}
+
 \end{frame}
 
 \begin{frame}{Aside}
