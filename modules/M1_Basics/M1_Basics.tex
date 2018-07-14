@@ -88,8 +88,8 @@ which is often \textbf{intractable}. This problem motivates the use of \textbf{a
 The evidence becomes even harder to compute because $ \theta $ is often high-dimensional
 (just think of neural nets!).
 \begin{itemize}
-\item $ p(x) = \intl{ p(x, \theta)}{\theta} $ (supervised learning)
-\item $ p(x) = \intl{ \intl{ p(x, z, \theta)} {z}}{\theta} $ (unsupervised learning)
+\item $ p(x) = \intl{ p(x, z| \theta)}{z} $ (frequentist)
+\item $ p(x) = \intl{ \intl{ p(x, z, \theta)} {z}}{\theta} $ (Bayesian)
 \end{itemize}
 \pause
 \alert{Today we will only treat the frequentist case!}
