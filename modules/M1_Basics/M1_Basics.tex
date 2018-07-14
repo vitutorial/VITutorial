@@ -84,24 +84,16 @@ $$ p(x) = \intl{ p(x,z) }{z} $$
 which is often \textbf{intractable}. This problem motivates the use of \textbf{approximate inference} techniques.
 \end{frame}
 
-%\begin{frame}{Bayesian Inference}
-%Model parameters $ \theta $ are also random. The generative model becomes
-%\begin{itemize}
-%\item $ p(x,\theta) $ for fully observed data (supervised learning)
-%\item $ p(x,z,\theta) $ for observed and latent data \\ (unsupervised learning)
-%\end{itemize}
-%\end{frame}
-%
-%\begin{frame}{Bayesian Inference}
-%The evidence becomes even harder to compute because $ \theta $ is often high-dimensional
-%(just think of neural nets!).
-%\begin{itemize}
-%\item $ p(x) = \intl{ p(x, \theta)}{\theta} $ (supervised learning)
-%\item $ p(x) = \intl{ \intl{ p(x, z, \theta)} {z}}{\theta} $ (unsupervised learning)
-%\end{itemize}
-%\pause
-%Again, approximate inference is needed.
-%\end{frame}
+\begin{frame}{Bayesian Inference}
+The evidence becomes even harder to compute because $ \theta $ is often high-dimensional
+(just think of neural nets!).
+\begin{itemize}
+\item $ p(x) = \intl{ p(x, \theta)}{\theta} $ (supervised learning)
+\item $ p(x) = \intl{ \intl{ p(x, z, \theta)} {z}}{\theta} $ (unsupervised learning)
+\end{itemize}
+\pause
+\alert{Today we will only treat the frequentist case!}
+\end{frame}
 
 \section{Examples}
 \frame{\tableofcontents[currentsection]}
