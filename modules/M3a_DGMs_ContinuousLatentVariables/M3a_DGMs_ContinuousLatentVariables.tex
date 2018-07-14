@@ -360,10 +360,10 @@ $ p(x) = \intl{\alert{\underbrace{p(x|z,\theta)}_{\substack{\text{highly} \\  \t
 \vspace{-10pt}
 \begin{equation*}
 \begin{aligned}
-&\dv{\theta}\E[q(z|x,\lambda)]{\log p(x|z,\theta)} - \overbrace{\KL{q(z|x,\lambda)}{p(z)}}^{constant} \\ \pause 
-&=\E[q(z|x,\lambda)]{\dv{\theta}\log p(x|z,\theta)} \\ \pause
+&\pdv{\theta}\E[q(z|x,\lambda)]{\log p(x|z,\theta)} - \overbrace{\KL{q(z|x,\lambda)}{p(z)}}^{constant} \\ \pause 
+&=\E[q(z|x,\lambda)]{\pdv{\theta}\log p(x|z,\theta)} \\ \pause
 &\overset{\text{MC}}{\approx} \frac{1}{S}\sum_{i=1}^{S}
-\dv{\theta} \log p(x|z_{i},\theta) \\
+\pdv{\theta} \log p(x|z_{i},\theta) \\
 &\textcolor{gray}{\text{where }z_i \sim q(z|x, \lambda)}
 \end{aligned}
 \end{equation*}
@@ -374,8 +374,8 @@ $ p(x) = \intl{\alert{\underbrace{p(x|z,\theta)}_{\substack{\text{highly} \\  \t
 \begin{frame}{Inference Network Gradient}
 \begin{equation*}
 \begin{aligned}
-&\dv{\lambda}\left[\E[q(z|x,\lambda)]{\log p(x|z,\theta)} - \KL{q(z|x,\lambda)}{p(z)} \right] \\ \pause
-=&\dv{\lambda}\E[q(z|x,\lambda)]{\log p(x|z,\theta)} - \underbrace{\dv{\lambda}\KL{q(z|x,\lambda)}{p(z)}}_{\text{analytical computation}} \\
+&\pdv{\lambda}\left[\E[q(z|x,\lambda)]{\log p(x|z,\theta)} - \KL{q(z|x,\lambda)}{p(z)} \right] \\ \pause
+=&\pdv{\lambda}\E[q(z|x,\lambda)]{\log p(x|z,\theta)} - \underbrace{\pdv{\lambda}\KL{q(z|x,\lambda)}{p(z)}}_{\text{analytical computation}} \\
 \end{aligned}
 \end{equation*}
 \pause
@@ -388,9 +388,9 @@ $ p(x) = \intl{\alert{\underbrace{p(x|z,\theta)}_{\substack{\text{highly} \\  \t
 
 \begin{equation*}
 \begin{aligned}
-&\dv{\lambda}\E[q(z|x,\lambda)]{\log p(x|z,\theta)} \\ \pause
-&= \dv{\lambda} \intl{q(z|x,\lambda)\log p(x|z,\theta)}{z} \\ \pause
-&= \intl{\alert{\dv{\lambda} q(z|x,\lambda)}\log p(x|z,\theta)}{z}
+&\pdv{\lambda}\E[q(z|x,\lambda)]{\log p(x|z,\theta)} \\ \pause
+&= \pdv{\lambda} \intl{q(z|x,\lambda)\log p(x|z,\theta)}{z} \\ \pause
+&= \intl{\alert{\pdv{\lambda} q(z|x,\lambda)}\log p(x|z,\theta)}{z}
 \end{aligned}
 \end{equation*}
 \pause
@@ -433,9 +433,9 @@ h(z, \lambda) &= \frac{z - \mu(\phi,\lambda)}{ \sigma(\phi, \lambda) } = \epsilo
 
 \begin{equation*}
 \begin{aligned}
-&= \dv{\lambda} \intl{q(z|x,\lambda)\log p(x|z,\theta)}{z} \\ \pause
-&= \dv{\lambda} \intl{\alert{q(\epsilon)} \loga{ p(x | \alert{\overbrace{h^{-1}(\epsilon, \lambda)}^{=z}},\theta)}}{\alert{\epsilon}} \\ \pause
-&= \intl{q(\epsilon) \dv{\lambda} \left[ \log p(x| \overbrace{h^{-1}(\epsilon, \lambda)}^{=z}, \theta)\right] }{\epsilon}
+&= \pdv{\lambda} \intl{q(z|x,\lambda)\log p(x|z,\theta)}{z} \\ \pause
+&= \pdv{\lambda} \intl{\alert{q(\epsilon)} \loga{ p(x | \alert{\overbrace{h^{-1}(\epsilon, \lambda)}^{=z}},\theta)}}{\alert{\epsilon}} \\ \pause
+&= \intl{q(\epsilon) \pdv{\lambda} \left[ \log p(x| \overbrace{h^{-1}(\epsilon, \lambda)}^{=z}, \theta)\right] }{\epsilon}
 \end{aligned}
 \end{equation*}
 \end{frame}
@@ -444,10 +444,10 @@ h(z, \lambda) &= \frac{z - \mu(\phi,\lambda)}{ \sigma(\phi, \lambda) } = \epsilo
 \vspace{-10pt}
 \begin{equation*}
 \begin{aligned}
-&\E[q(\epsilon)]{\dv{\lambda} \log p(x| \overbrace{h^{-1}(\epsilon, \lambda)}^{=z}, \theta)} \\ \pause
-\overset{\text{MC}}{\approx} &\frac{1}{S}\sum_{i=1}^{S} \dv{\lambda} \log p(x| \overbrace{h^{-1}(\epsilon_i, \lambda)}^{=z}, \theta) \\
+&\E[q(\epsilon)]{\pdv{\lambda} \log p(x| \overbrace{h^{-1}(\epsilon, \lambda)}^{=z}, \theta)} \\ \pause
+\overset{\text{MC}}{\approx} &\frac{1}{S}\sum_{i=1}^{S} \pdv{\lambda} \log p(x| \overbrace{h^{-1}(\epsilon_i, \lambda)}^{=z}, \theta) \\
 &\textcolor{gray}{\text{where }\epsilon_i \sim q(\epsilon)} \\ \pause
-\overset{\text{MC}}{\approx} &\frac{1}{S}\sum_{i=1}^{S} \underbrace{\dv{z} \log p(x| \overbrace{h^{-1}(\epsilon_i, \lambda)}^{=z}, \theta) \times \dv{\lambda} h^{-1}(\epsilon_i, \lambda)}_{\text{chain rule}}
+\overset{\text{MC}}{\approx} &\frac{1}{S}\sum_{i=1}^{S} \underbrace{\pdv{z} \log p(x| \overbrace{h^{-1}(\epsilon_i, \lambda)}^{=z}, \theta) \times \pdv{\lambda} h^{-1}(\epsilon_i, \lambda)}_{\text{chain rule}}
 %= &\E[q(\epsilon)]{\frac{d}{dz} \log p(x| \overbrace{h^{-1}(\epsilon, \lambda)}^{=z}, \theta)\times \frac{d}{d\lambda} h^{-1}(\epsilon, \lambda)}\\ \pause
 %\overset{\text{MC}}{\approx} &\frac{1}{S}\sum_{i=1}^{S} \frac{d}{dz} \log p(x| \overbrace{h^{-1}(\epsilon, \lambda)}^{=z}, \theta) \times \frac{d}{d\lambda} h^{-1}(\epsilon, \lambda)
 \end{aligned}
