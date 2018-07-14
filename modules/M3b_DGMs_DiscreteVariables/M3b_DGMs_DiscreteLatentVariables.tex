@@ -95,7 +95,7 @@ distributions are computed by neural networks
 \begin{frame}{Reparametrisation}
 In order to tranform variables, we need to compute the Jacobian (matrix of partial derivatives).
 \begin{equation*}
-p(z) = \phi(h(z))\left|\det J_{h(z)}\right|
+p(z) = p(\overbrace{h(z)}^{\epsilon})\left|\det J_{h(z)}\right|
 \end{equation*}
 The Jacobian 
 \begin{equation}
@@ -109,8 +109,7 @@ is generally not available for discrete variables.
 %\end{frame}
 
 \begin{frame}{Continuity}
-The outcome space of discrete variables is non-continuous. Thus, we cannot take derivatives with
-respect to real variables. 
+The outcome space of discrete variables is non-continuous. Thus, we cannot take derivatives.
 \end{frame}
 
 \section{Revisiting the Inference Gradient}
