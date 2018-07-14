@@ -3,6 +3,7 @@
 \usecolortheme{beaver}
 
 \usepackage{amsmath, amssymb, ../../vimacros, hyperref, enumerate}
+\usepackage{../../pdfpcnotes}
 \usepackage[round]{natbib}
 
 \usepackage{multicol}
@@ -43,6 +44,23 @@
 \end{block}
 \end{frame}
 
+\begin{frame}{Keywords}
+
+\begin{itemize}
+	\item supervised vs unsupervised learning
+	\item density estimation
+	\item probabilistic modelling
+	\item deep learning
+	\item maximum likelihood estimation
+	\item gradient-based optimisation
+	\item stochastic gradients
+	\item latent variable models
+	\item posterior inference
+	\item variational inference
+\end{itemize}
+
+\end{frame}
+
 \begin{frame}{Problems}
 Supervised problems: \alert{``learn a distribution over observed data''}
 \begin{itemize}
@@ -55,6 +73,9 @@ Unsupervised problems: \alert{``learn a distribution over observed and unobserve
 \begin{itemize}
 	\item \textcolor{gray}{sentences in natural language + parse trees, images + bounding boxes \ldots}
 \end{itemize}
+
+\pnote{Q: LM supervised or unsupervised?} 
+
 \end{frame}
 
 
@@ -198,7 +219,6 @@ Let $p(x|\theta)$ be the probability of an observation $x$\\
 
 Given a dataset $x^{(1)}, \ldots, x^{(N)}$ of i.i.d. observations, \pause
 the log-likelihood function gives us a criterion for parameter estimation
-
 \begin{equation*}
 \begin{aligned}
 \mathcal L(\theta|x^{(1:N)}) &= \log \prod_{s=1}^N p(x^{(s)}|\theta) \\ \pause
@@ -232,6 +252,7 @@ to attain a local maximum of the likelihood function
 
 
 \begin{frame}{Big Data}
+\pnote{Q: Why computing the exact gradient is inconvenient?} 
 
 For large \alert{$N$}, computing the gradient is inconvenient
 \begin{small}
@@ -248,9 +269,12 @@ For large \alert{$N$}, computing the gradient is inconvenient
 $S$ selects data points uniformly at random
 
 
+
 \end{frame}
 
 \begin{frame}{Stochastic optimisation}
+
+\pnote{Q: Why should we like expected gradients?} 
 
 For large $\alert{N}$, we can use a gradient estimate 
 \begin{small}
@@ -350,6 +374,10 @@ p(x|\theta) = \int p(x, z|\theta) \dd{z} = \int p(z)p(x|z, \theta) \dd{z}
 
 \begin{frame}{Examples of latent variable models}
 
+\pnote{Q: Can you think of a practical example of discrete latent and continuous observation?} 
+
+\pnote{Q: Can you think of a practical example of continuous latent and discrete observation?} 
+
 Discrete latent variable, continuous observation
 	\begin{small}
 	\begin{equation*}
@@ -377,8 +405,8 @@ Exact gradient is intractable
 \grad_\theta \log p(x|\theta) \pause &= \grad_\theta \log \underbrace{\int p(x, z|\theta) \dd{z}}_{\text{marginal}} \\ \pause
 &= \underbrace{\frac{1}{\int p(x, z|\theta) \dd{z}} \int \grad_\theta p(x,z|\theta) \dd{z}}_{\text{chain rule}} \\ \pause
 &= \frac{1}{p(x|\theta)} \int \underbrace{p(x,z|\theta) \grad_\theta \log p(x,z|\theta)}_{\text{log-identity for derivatives}} \dd{z} \\ \pause
-&= \int p(z|x, \theta) \grad_\theta \log p(x,z|\theta) \dd{z} \\ \pause
-&= \mathbb E_{p(z|x, \theta)} \left[ \grad_\theta \log p(x,Z|\theta) \right]
+&= \int \alert{p(z|x, \theta)} \grad_\theta \log p(x,z|\theta) \dd{z} \\ \pause
+&= \mathbb E_{\alert{p(z|x, \theta)}} \left[ \grad_\theta \log p(x,Z|\theta) \right]
 \end{aligned}
 \end{equation*}
 \end{small}
