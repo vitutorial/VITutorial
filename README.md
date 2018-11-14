@@ -13,10 +13,10 @@ Want to host our tutorial at your location? [Contact](#contact) one of us!
   * [Tour](#tour)
 * Slides
   * [Variational inference](//github.com/philschulz/VITutorial/blob/master/modules/M1_Basics/M1_Basics.pdf)
-  * [Continuous latent variables](//github.com/philschulz/VITutorial/blob/master/modules/M6_DeepGenerativeModels/M6_DeepGenerativeModels.pdf)
-  * Discrete latent variables
+  * [Continuous latent variables](//github.com/philschulz/VITutorial/blob/master/modules/M3a_DGMs_ContinuousLatentVariables/M3a_DGMs_ContinuousLatentVariables.pdf)
+  * [Discrete latent variables](//github.com/philschulz/VITutorial/blob/master/modules/M3b_DGMs_DiscreteVariables/M3b_DGMs_DiscreteLatentVariables.pdf)
 * Lecture notes
-  * [Explaining reparameterisation](//github.com/philschulz/VITutorial/blob/master/modules/M6_DeepGenerativeModels/ExplainingReparametrisationGradients.pdf)
+  * [Explaining reparameterisation](//github.com/philschulz/VITutorial/blob/master/modules/M3a_DGMs_ContinuousLatentVariables/ExplainingReparametrisationGradients.pdf)
   * Entropy and KL for exponential families
 * Code
   * [Dependencies](#code)
@@ -53,9 +53,12 @@ Make sure to follow the instructions and read the comments carefully. Also check
 Below are confirmed venues and dates (if available) for future presentations of the tutorial. Please contact us
 if you interested in hosting the tutorial.
 
-* ACL 2018, Melbourne: July 15th, 2018
+* University of Heidelberg: Nov 29/30 2018
+  1. Thursday, Nov 29: Basics of VI, continuous and discrete Deep Generative Models
+  2. Friday, Nov 30: Automatic differentiation VI, normalising flows
 
 **Past**
+* ACL 2018, Melbourne: July 15th, 2018
 * Naver Labs, Grenoble, France: April 3 and April 6, 2018
   1. Deep Generative Models
 * Uva-ILLC, Amsterdam: March 22, 2018
