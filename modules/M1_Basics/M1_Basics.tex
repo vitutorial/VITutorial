@@ -336,11 +336,11 @@ The Kullback-Leibler divergence (or relative entropy) measures the divergence of
 a distribution $ p $. 
 \begin{itemize}
 \pause
+\item $ \KL{q(z)}{p(z|x)} = \E[q(z)]{\loga{\frac{q(z)}{p(z|x)}}} $
+\pause
 \item $ \KL{q(z)}{p(z|x)} = \intl{ q(z) \loga{\frac{q(z)}{p(z|x)}}}{z} $ (continuous)
 \pause
 \item $ \KL{q(z)}{p(z|x)} = \sum_{z} q(z) \loga{\frac{q(z)}{p(z|x)}} $ (discrete)
-\pause
-\item $ \KL{q(z)}{p(z|x)} = \E[q(z)]{\loga{\frac{q(z)}{p(z|x)}}} $ (both)
 \end{itemize}
 \end{frame}
 
