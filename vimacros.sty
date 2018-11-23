@@ -2,12 +2,24 @@
 
 \usepackage{amsmath, amssymb, xifthen, xstring}
 
+% Support
+\DeclareMathOperator{\supp}{supp}
+
+%Jacobians
+\newcommand{\inv}[1]{{#1}^{-1}}
+\newcommand{\jac}[2]{J_{#1}(#2)}
+\newcommand{\djac}[2]{\left| \det \jac{#1}{#2} \right|}
+
 % Optimisation
 \DeclareMathOperator*{\argmin}{arg\,min}
 \DeclareMathOperator*{\argmax}{arg\,max}
 
 % Expectation (optional arg: distribution)
 \newcommand{\E}[2][]{\ifthenelse{\equal{#1}{}}{\mathbb{E}\left[#2\right]}{\mathbb{E}_{#1}\left[#2\right]}}
+
+% Prob
+\DeclareMathOperator{\BigP}{Pr}
+\newcommand{\Prob}[1]{\ensuremath{\BigP\{#1\}}}
 
 % Entropy
 \newcommand{\Ent}[1]{\mathbb{H}\left(#1\right)}
@@ -29,7 +41,7 @@
 \newcommand{\NDist}[2]{\mathcal{N}\left(#1,#2\right)}
 
 % Norm
-\newcommand{\norm}[1]{\lvert \lvert #1 \rvert \rvert}
+%\newcommand{\norm}[1]{\lvert \lvert #1 \rvert \rvert}
 
 % Logarithm (optional arg: base)
 \newcommand{\loga}[2][]{\ifthenelse{\equal{#1}{}}{\log\left(#2\right)}{\log_{#1}\left(#2\right)}}
@@ -60,6 +72,9 @@
 % Bernoulli Distribution
 \DeclareMathOperator{\Bernoulli}{Bernoulli}
 \newcommand{\BerDist}[1]{\Bernoulli\left(#1\right)}
+
+% Poisson Distribution
+\DeclareMathOperator{\Poisson}{Poisson}
 
 % Categorical Distribution
 \DeclareMathOperator{\Categorical}{Categorical}
