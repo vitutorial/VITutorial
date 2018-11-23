@@ -6,7 +6,7 @@
 \usepackage{mathtools}
 \hypersetup{breaklinks=true, colorlinks=true, urlcolor=blue, linkcolor=blue, citecolor=blue}
 
-\DeclareMathOperator*{\argmax}{arg\,max}
+%\DeclareMathOperator*{\argmax}{arg\,max}
 
 \author{Philip Schulz and Wilker Aziz}
 \title{Understanding Reparameterisation Gradients}
@@ -24,7 +24,7 @@ Our derivation mostly follows that of \citet{TitsiasLazarogredilla:2014}. It als
 
 We assume a model of some data $ x $ whose log-likelihood is given as
 \begin{equation}
-\log p(x|\theta) = \intl { \log \underbrace{p(x,z|\theta)}_{g(z)} } {z} 
+\log p(x|\theta) = \log \intl { \underbrace{p(x,z|\theta)}_{g(z)} } {z} 
 \end{equation}
 where $ z $ is any set of latent variables and $ \theta $ are the model parameters. The joint likelihood, which we abbreviate as $ g(z) $, can be arbitrarily
 complex; in particular, it can be given by a neural network. Since for complex models exact integration over the latent space is impossible, we employ variational
