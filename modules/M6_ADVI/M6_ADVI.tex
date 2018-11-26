@@ -1,4 +1,4 @@
-\documentclass[14pt]{beamer}
+\documentclass[14pt,dvipsnames]{beamer}
 
 \usetheme{Montpellier}
 \usecolortheme{beaver}
@@ -8,12 +8,14 @@
 \usetikzlibrary{positioning, fit, bayesnet, shapes.misc, patterns}
 \usepackage[round]{natbib}
 \usepackage{mathalfa}
+\usepackage{cancel}
 
 \beamertemplatenavigationsymbolsempty
 
 \hypersetup{breaklinks=true, colorlinks=true, linkcolor=blue, urlcolor=blue, citecolor=blue}
 
 \newcommand{\balert}[1]{\textcolor{blue}{#1}}
+\newcommand{\galert}[1]{\textcolor{PineGreen}{#1}}
 
 \pgfdeclarepatternformonly{stripes}
 {\pgfpointorigin}{\pgfpoint{.4cm}{.4cm}}
@@ -108,7 +110,7 @@
 
 \begin{frame}{Multivariate calculus recap}
 
-Let $x \in \mathbb R^D$ and let $\mathcal T: \mathbb R^D \to \mathbb R^D$ be differentiable and invertible
+Let $x \in \mathbb R^K$ and let $\mathcal T: \mathbb R^K \to \mathbb R^K$ be differentiable and invertible
 \begin{itemize}
 	\item $y = \mathcal T(x)$
 	\item $x = \inv{\mathcal T}(y)$
@@ -176,7 +178,7 @@ Let $x \in \mathbb R^D$ and let $\mathcal T: \mathbb R^D \to \mathbb R^D$ be dif
 
 \begin{frame}{Change of density}
 
-Let $X$ take on values in $\mathbb R^D$ with density $f_X(x)$\\ \pause
+Let $X$ take on values in $\mathbb R^K$ with density $f_X(x)$\\ \pause
 ~ and recall that $y = \mathcal T(x)$ and $x = \inv{\mathcal T}(y)$\\ \pause
 
 ~
@@ -196,12 +198,12 @@ f_X(x) = f_Y(y=\mathcal T(x)) \djac{\mathcal T}{x}
 \section{Reparameterised gradients revisited}
 
 \begin{frame}{Revisiting reparameterised gradients}
-	Let $Z$ take on values in $\mathbb R^D$ with pdf $q(z|\lambda)$ \\
+	Let $Z$ take on values in $\mathbb R^K$ with pdf $q(z|\lambda)$ \\
 	
 	~ \pause
 
 	The idea is to count on a \emph{standardisation} procedure\\ \pause
-	~ a transformation $\mathcal S_\lambda: \mathbb R^D \to \mathbb R^D$ such that \pause
+	~ a transformation $\mathcal S_\lambda: \mathbb R^K \to \mathbb R^K$ such that \pause
 	\begin{equation*}
 	\begin{aligned}
 	\mathcal S_\lambda(z) &\sim \pi(\epsilon) \\
@@ -289,7 +291,7 @@ f_X(x) = f_Y(y=\mathcal T(x)) \djac{\mathcal T}{x}
 	Many interesting densities are not location-scale families
 	\begin{itemize}
 		\item e.g. Beta, Gamma
-	\end{itemize}
+	\end{itemize} \pause
 	
 	The inverse cdf of a multivariate rv is seldom known in closed-form
 	\begin{itemize}
@@ -342,24 +344,40 @@ f_X(x) = f_Y(y=\mathcal T(x)) \djac{\mathcal T}{x}
 \begin{frame}{VI optimisation problem}
 	Let's focus on the design and optimisation of the variational approximation
 	\begin{equation*}
-		\argmin_{q(z)} \KL{q(z)}{p(z|x)}
+		\argmin_{\balert{q(z)}} \KL{\balert{q(z)}}{\alert{p(z|x)}}
 	\end{equation*}
 
 	\pause
-		
+	
+	To automatise the search for a variational approximation $\balert{q(z)}$ we must ensure that\\
+	 \begin{equation*}
+	 	\supp(\balert{q(z)}) \subseteq \supp(\alert{p(z|x)})
+	\end{equation*} \pause
+	
+	\vspace{-10pt}
+	 \begin{itemize}
+	 	\item otherwise KL is not defined\\
+		$\KL{q}{p} = \E[q]{\log q} - \E[q]{\log p} = \infty$
+	\end{itemize}	
 	 
 \end{frame}
 
 \begin{frame}{Support matching constraint}
 
-	To automatise the search for a variational approximation $q(z)$ we must ensure that\\
+	So let's constrain $q(z)$ to a family $\mathcal Q$ whose support is included in the support of the \alert{posterior}
 	 \begin{equation*}
-	 	\supp(q(z)) \subseteq \supp(p(z|x))
+		\argmin_{\balert{q(z)} \in \mathcal Q} \KL{\balert{q(z)}}{\alert{p(z|x)}}
 	\end{equation*}
+	where
+	\begin{equation*}
+	 	\mathcal Q = \{\balert{q(z)}: \supp(\balert{q(z)}) \subseteq \supp(\alert{p(z|x)}) \}
+	\end{equation*}
+	
+	\pause
+	
+	\alert{But what is the support of $\alert{p(z|x)}$?} \pause
 	 \begin{itemize}
-	 	\item otherwise KL is not defined \pause
-		\item but what is the support of $p(z|x)$? \pause
-		\item typically the same as the support of $p(z)$\\
+		\item typically the same as the support of $\galert{p(z)}$\\ \pause
 		as long as $p(x,z) > 0$ if $p(z) > 0$		
 	 \end{itemize}
 	 
@@ -367,30 +385,46 @@ f_X(x) = f_Y(y=\mathcal T(x)) \djac{\mathcal T}{x}
 
 \begin{frame}{Parametric family}
 
-	 So let's constrain $q(z)$ to a family $\mathcal Q$ whose support is included in the support of the prior
+	So let's constrain $q(z)$ to a family $\mathcal Q$ whose support is included in the support of the \galert{prior}
 	 \begin{equation*}
-	 	\mathcal Q = \{q(z; \phi): \phi \in \Phi \}
+		\argmin_{\balert{q(z)} \in \mathcal Q} \KL{\balert{q(z)}}{\alert{p(z|x)}}
 	\end{equation*}
-	\vspace{-10pt}
+	where
+	\begin{equation*}
+	 	\mathcal Q = \{\balert{q(z; \phi)}: \phi \in \Phi, \supp(\balert{q(z; \phi)}) \subseteq \supp(\galert{p(z)})  \}
+	\end{equation*}
+	\vspace{-10pt} \pause
 	 \begin{itemize}
-	 	\item a parameter vector $\phi$ picks out a member $q(z; \phi)$ of the family
+	 	\item a parameter vector $\phi$ picks out a member of the family
 	\end{itemize}
-	
-	~
-	
-	Our objective now is 
-	 \begin{equation*}
-		\argmin_{\phi \in \Phi} \KL{q(z; \phi)}{p(z|x)}
+
+\end{frame}
+
+\begin{frame}{Constrained optimisation for the ELBO}
+
+	We maximise the ELBO 
+	\begin{equation*}
+		\argmax_{\phi \in \Phi} \E[\balert{q(z; \phi)}]{\log p(x, z)} + \Ent{\balert{q(z|\phi)}}
 	\end{equation*}
+	subject to
+	 \begin{equation*}
+		\mathcal Q = \{\balert{q(z; \phi)}: \phi \in \Phi, \supp(\balert{q(z; \phi)}) \subseteq \supp(\galert{p(z)})  \}
+	\end{equation*}
+	\pause
+	
+	\vspace{-10pt}
+	There are really two constraints here\pause
+	\begin{itemize}
+		\item support matching constraint \pause
+		\item $\Phi$ can be an intricate subset of $\mathbb R^D$\\ \pause
+		e.g. univariate Gaussian location lives in $\mathbb R$ but scale lives in $\mathbb R_{>0}$
+	\end{itemize}
 
 \end{frame}
 
 \begin{frame}{ADVI}
 	
-	Minimising the original VI problem is equivalent to maximising the ELBO
-	\begin{equation}
-		\mathcal L(\phi) = \E[q(z; \phi)]{\log p(x, z)} + \Ent{q(z|\phi)}
-	\end{equation}
+	
 	
 	From the point of view of a black-box procedure, this objective poses two problems
 	\begin{enumerate}
