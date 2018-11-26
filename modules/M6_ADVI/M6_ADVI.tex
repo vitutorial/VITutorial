@@ -13,6 +13,8 @@
 
 \hypersetup{breaklinks=true, colorlinks=true, linkcolor=blue, urlcolor=blue, citecolor=blue}
 
+\newcommand{\balert}[1]{\textcolor{blue}{#1}}
+
 \pgfdeclarepatternformonly{stripes}
 {\pgfpointorigin}{\pgfpoint{.4cm}{.4cm}}
 {\pgfpoint{.4cm}{.4cm}}
@@ -45,15 +47,20 @@
 
 \begin{frame}{What we know so far}
     \begin{itemize}
-        \item DGMs: probabilistic models parameterised by neural networks \pause
-        \item Objective: a lowerbound on likelihood \pause
-        \item $ \ELBO$ cannot be computed exactly, but we can obtain gradient estimates \pause
-        \item Main problem: the MC estimator is not differentiable \pause
+        \item DGMs: \pause probabilistic models parameterised by neural networks \pause
+        \item Objective: \pause lowerbound on likelihood (ELBO) \pause
         \begin{itemize}
-        		\item Score function estimator: applicable to any model  \pause
-		\item Reparameterised gradients: so far seems applicable only to Gaussian variables
+        		\item \alert{cannot be computed exactly} \\ \pause
+        		\textcolor{blue}{we resort to Monte Carlo estimation} \pause		
+	\end{itemize}
+	\item \alert{But the MC estimator is not differentiable} \pause		        
+	\begin{itemize}
+       		\item Score function estimator: applicable to any model  \pause
+		\item Reparameterised gradients\\
+		so far seems applicable only to Gaussian variables
         \end{itemize}
     \end{itemize}
+    
 \end{frame}
 
 \begin{frame}{Reparameterised gradients: Gaussian}
@@ -125,27 +132,45 @@ Let $x \in \mathbb R^D$ and let $\mathcal T: \mathbb R^D \to \mathbb R^D$ be dif
 	
 \end{frame}
 
+\begin{frame}{Differential (or inifinitesimal)}
+
+	The {\bf differential} $\dd x$ of $x$ \\
+	~ refers to an \emph{infinitely small} change in $x$\\ \pause
+	\vspace{10pt}
+
+	We can relate the differential $\dd y$ of $y = \mathcal T(x)$ to $\dd x$ \pause
+	\begin{itemize}
+		\item Scalar case
+		\begin{equation*}
+			\dd y = \alert{\mathcal T'(x)} \dd x = \alert{\dv{y}{x}} \dd x = \alert{\dv{x}T(x)} \dd x
+		\end{equation*}
+		where \alert{$\dv*{y}{x}$} is the \emph{derivative} of $y$ wrt $x$ \pause
+		\item Multivariate case
+		\begin{equation*}
+        			\begin{aligned}
+			        \dd y = \alert{\djac{\mathcal T}{x}} \dd x % = \alert{\abs{\pdv{x}T(x)}} \dd x % in some texts people will find this notation
+		        	\end{aligned}
+	        	\end{equation*}
+		the absolute value absorbs the orientation 
+	\end{itemize}
+
+\end{frame}
+
 \begin{frame}{Integration by substitution}	
 	We can integrate a function $g(x)$ \\
 	~ by substituting $x = \inv{ \mathcal T}(y)$
 	\begin{equation*}
 	\begin{aligned}
-		\int g(x) \dd x \pause &= \int g(\inv{\mathcal T}(y)) \djac{\inv{\mathcal T}}{y} \dd y \\ \pause
+		\int g(\balert{x}) \alert{\dd x} \pause &= \int g(\underbrace{\balert{\inv{\mathcal T}(y)}}_{x}) \underbrace{\alert{\djac{\inv{\mathcal T}}{y} \dd y}}_{\dd x} \\ \pause
 	\end{aligned}
 	\end{equation*}
 	
-	\vspace{-10pt} and similarly for a function $h(y)$
+	and similarly for a function $h(y)$
 	\begin{equation*}
 	\begin{aligned}
-		\int h(y) \dd y \pause &= \int h(\mathcal T(x)) \djac{\mathcal T}{x} \dd x
+		\int h(\balert{y}) \alert{\dd y} \pause &= \int h(\balert{\mathcal T(x)}) \alert{\djac{\mathcal T}{x} \dd x}
 	\end{aligned}
-	\end{equation*} \pause
-	Rule of thumb
-	\begin{equation*}
-	\begin{aligned}
-	\dd x = \djac{\inv{\mathcal T}}{y} \dd y \pause \qquad \dd y = \djac{\mathcal T}{x} \dd x
-	\end{aligned}
-	\end{equation*}
+	\end{equation*} 
 
 \end{frame}
 
@@ -170,7 +195,7 @@ f_X(x) = f_Y(y=\mathcal T(x)) \djac{\mathcal T}{x}
 
 \section{Reparameterised gradients revisited}
 
-\begin{frame}{Revisting reparameterised gradients}
+\begin{frame}{Revisiting reparameterised gradients}
 	Let $Z$ take on values in $\mathbb R^D$ with pdf $q(z|\lambda)$ \\
 	
 	~ \pause
@@ -180,7 +205,7 @@ f_X(x) = f_Y(y=\mathcal T(x)) \djac{\mathcal T}{x}
 	\begin{equation*}
 	\begin{aligned}
 	\mathcal S_\lambda(z) &\sim \pi(\epsilon) \\
- 	\inv{\mathcal S}_\lambda(\epsilon) &\sim f(z|\lambda)
+ 	\inv{\mathcal S}_\lambda(\epsilon) &\sim q(z|\lambda)
 	\end{aligned}
 	\end{equation*} 
 	\begin{itemize}
@@ -197,7 +222,7 @@ f_X(x) = f_Y(y=\mathcal T(x)) \djac{\mathcal T}{x}
 	\begin{aligned}
 		&  \E[\alert{q(z|\lambda)}]{g(z)} \pause = \int \alert{q(z|\lambda)} g(z) \textcolor{blue}{\dd z} \\ \pause
 		&= \int \underbrace{\alert{\pi(\mathcal S_\lambda(z)) \djac{S_\lambda}{z}}}_{\text{change of density}} g(z) \textcolor{blue}{\dd z} \\ \pause
-		&= \int \alert{\pi(\epsilon) \djac{\inv{\mathcal S}_\lambda}{\epsilon}^{-1}} \pause g(\inv{\mathcal S}_\lambda(\epsilon)) \pause \textcolor{blue}{\djac{\inv{\mathcal S}_\lambda}{\epsilon} \dd \epsilon} \\ \pause
+		&= \int \alert{\pi(\epsilon)} \pause \underbrace{\alert{\djac{\inv{\mathcal S}_\lambda}{\epsilon}^{-1}}}_{\text{inv func theorem}} \pause g(\underbrace{\inv{\mathcal S}_\lambda(\epsilon)}_{z}) \pause \underbrace{\textcolor{blue}{\djac{\inv{\mathcal S}_\lambda}{\epsilon} \dd \epsilon}}_{\text{change of var}} \\ \pause
 		&= \int \pi(\epsilon) g(\inv{\mathcal S}_\lambda(\epsilon))\dd \epsilon \pause = \E[\pi(\epsilon)]{g(\inv{\mathcal S}_\lambda(\epsilon)) }
 	\end{aligned}
 	\end{equation*}
@@ -380,7 +405,6 @@ f_X(x) = f_Y(y=\mathcal T(x)) \djac{\mathcal T}{x}
 	\end{enumerate}
 	
 \end{frame}
-
 
 
 \begin{frame}[allowframebreaks]
