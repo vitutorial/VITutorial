@@ -1,0 +1,514 @@
+\documentclass[14pt]{beamer}
+
+\usetheme{Montpellier}
+\usecolortheme{beaver}
+
+\usepackage{amsmath, amssymb, ../../vimacros, hyperref, tikz}
+\usepackage{physics}
+\usetikzlibrary{positioning, fit, bayesnet, shapes.misc, patterns}
+\usepackage[round]{natbib}
+
+\beamertemplatenavigationsymbolsempty
+
+\hypersetup{breaklinks=true, colorlinks=true, linkcolor=blue, urlcolor=blue, citecolor=blue}
+
+\pgfdeclarepatternformonly{stripes}
+{\pgfpointorigin}{\pgfpoint{.4cm}{.4cm}}
+{\pgfpoint{.4cm}{.4cm}}
+{
+	\pgfpathmoveto{\pgfpoint{0cm}{0cm}}
+	\pgfpathlineto{\pgfpoint{.4cm}{.4cm}}
+	\pgfpathlineto{\pgfpoint{.4cm}{.2cm}}
+	\pgfpathlineto{\pgfpoint{.2cm}{0cm}}
+	\pgfpathclose
+	\pgfusepath{fill}
+	\pgfpathmoveto{\pgfpoint{0cm}{0.2cm}}
+	\pgfpathlineto{\pgfpoint{0cm}{.4cm}}
+	\pgfpathlineto{\pgfpoint{0.2cm}{.4cm}}
+	\pgfpathclose
+	\pgfusepath{fill}
+}
+
+\title{Normalising Flows}
+\author{Philip Schulz and Wilker Aziz\\
+\url{https://github.com/philschulz/VITutorial}}
+\date{}
+
+\setbeamertemplate{footline}[frame number]
+
+\begin{document}
+
+\begin{frame}
+\maketitle
+\end{frame}
+
+\begin{frame}
+\tableofcontents
+\end{frame}
+
+\section{The problem with Standard Likelihoods}
+
+\begin{frame}
+\tableofcontents[current]
+\end{frame}
+
+\begin{frame}{The Case of Pictures}
+Have you modeled pixels as Gaussian variables?
+Do we really believe that the pixels follow a Gaussian distribution?
+\end{frame}
+
+\begin{frame}{The case of Word Embeddings}
+\end{frame}
+
+\begin{frame}{Posterior Approximations}
+We often use exponential families to approximate posteriors. Thus we assume unimodal posteriors. Is that realistic?
+\begin{block}{Counter example}
+Gaussian mixture model
+\end{block}
+\end{frame}
+
+\section{Normalising Flows}
+
+\begin{frame}
+\tableofcontents[current]
+\end{frame}
+
+\begin{frame}{Recap: Reparametrisation}
+Express the density of a variable $ Y $ in terms of the density of a variable $ X $. Assume that a differentiable, invertible mapping
+$ h: \mathcal{X} \rightarrow \mathcal{Y} $ exists.
+\begin{equation*}
+\begin{aligned}
+h(x) &= y \\ \pause
+p(y) &= p(h^{-1}(y))\abs{\det J_{h^{-1}}(y)} = p(x)\abs{\det J_{h^{-1}}(y)}  \\
+p(x) &= p(h(x))\abs{\det J_{h}(x)} = p(y)\abs{\det J_{h}(x)}
+\end{aligned}
+\end{equation*}
+\begin{block}{The Challenge}
+The mapping $ h $ (or its inverse) needs to be defined.
+\end{block}
+\end{frame}
+
+\begin{frame}{Normalising Flows}
+\begin{block}{Approach}
+Let's learn the transformation $ h $ (or its inverse).
+\end{block}
+\begin{block}{Problem}
+If we want $ p(y) $, we need to provide $ \abs{\det \jacob{h^{-1}}{y}} $ \textbf{in the forward pass}. But that's hard!
+\end{block}
+We are going to devise ways to get $ \abs{\det \jacob{h^{-1}}{y}} $.
+\end{frame}
+
+\begin{frame}{Normalising Flows}
+\begin{block}{Core Idea}
+Decompose mapping $ h: \mathcal{X} \rightarrow \mathcal{Y} $ into 
+\begin{equation*}
+h = h_{1}\circ h_{2}\circ\ldots\circ h_K \ .
+\end{equation*}
+Now we can learn $ K $ mappings with simple Jacobians.
+\begin{small}
+\begin{equation*}
+\begin{aligned}
+h^{-1} &= h_{K}^{-1}\circ h_{K-1}^{-1} \circ \ldots \circ h_{1}^{-1} \\
+p(x) &= p(y)\abs{\det \jacob{h_{1}}{y^{(1)}}}\abs{\det \jacob{h_{2}}{y^{(2)}}}\ldots\abs{\det \jacob{h_{K}}{x}} \\
+p(y) &= p(x)\abs{\det \jacob{h_{1}^{-1}}{y^{(K-1)}}}\abs{\det \jacob{h_{2}^{-1}}{y^{(K-2)}}}\ldots\abs{\det \jacob{h_{1}^{-1}}{y}}
+\end{aligned}
+\end{equation*}
+\end{small}
+\end{block}
+\end{frame}
+
+\section{Use Case 1: Density Estimation}
+\begin{frame}
+\tableofcontents[current]
+\end{frame}
+
+\begin{frame}{Normalising Flows: Density Estimation}
+\begin{block}{Setting}
+Our data $ x $ is has unknown continuous density $ p(x) $.
+We can therefore not handcraft a likelihood.
+\end{block}
+\begin{block}{Goal}
+Transform known variable $ x $ into $ \epsilon = h(x) $ and express the likelihood as
+\begin{small}
+\begin{equation*}
+\begin{aligned}
+p(x) &= p(\epsilon)\abs{\det \jacob{h}{x}} \\
+&= p(\epsilon)\abs{\det \jacob{h_{1}}{\epsilon^{(1)}}}\abs{\det \jacob{h_{2}}{\epsilon^{(2)}}}\ldots \abs{\det \jacob{h_{K}}{x}} \\
+&= p(h_{1}(\epsilon^{(1)}))\abs{\det \jacob{h_{1}}{\epsilon^{(1)}}}\ldots \abs{\det \jacob{h_{K}}{x}}
+\end{aligned}
+\end{equation*}
+\end{small}
+\end{block}
+\end{frame}
+
+\begin{frame}{2-step Flow}
+\begin{equation*}
+\begin{aligned}
+p(x) &= p(\epsilon)\abs{\det\jacob{h_{1}^{-1}}{\epsilon^{(1)}}}\abs{\det\jacob{h_{2}^{-1}}{x}} \\ \pause
+&= p(h_{1}^{-1}(h_{2}^{-1}(x)))\abs{\det\jacob{h_{1}^{-1}}{h_{2}^{-1}(x)}}\abs{\det\jacob{h_{2}^{-1}}{x}}
+\end{aligned}
+\end{equation*}
+\pause
+The transformations $ h^{-1}_{1} $ and $ h^{-1}_{2} $ are learned by backprop. The determinants need to be computed analytically.
+\end{frame}
+
+\begin{frame}{Designing a Transformation}
+Assume: $ x_{i} = (x_{i1}, x_{i2}, \ldots x_{iM}) $.
+Then factorise the density according to the chain rule.
+\begin{equation*}
+\log p(x_{i}|\theta) = \sum_{j=1}^{M} \log p(x_{ij}|x_{i,<j}\theta)
+\end{equation*}
+Next assume an invertible mapping $ h(x_{ij}) = \epsilon_{ij} $.
+\begin{block}{Simple Mapping}
+\begin{equation*}
+\begin{aligned}
+h(x) &= \epsilon \\
+h^{-1}(\epsilon) &= x
+\end{aligned}
+\end{equation*}
+\end{block}
+\end{frame}
+
+\begin{frame}{Designing a Transformation}
+Assume: $ x_{i} = (x_{i1}, x_{i2}, \ldots x_{iM}) $.
+Then factorise the density according to the chain rule.
+\begin{equation*}
+\log p(x_{i}|\theta) = \sum_{j=1}^{M} \log p(x_{ij}|x_{i,<j}\theta)
+\end{equation*}
+Next assume a mapping $ h(x_{ij}) = \epsilon_{ij} $.
+\begin{block}{Flow Mapping}
+\begin{equation*}
+\begin{aligned}
+h_{1}\circ h_{2} \circ\ldots\circ h_{K}(x) &= \epsilon \\
+h^{-1}_{K}\circ h^{-1}_{K-1}\circ\ldots \circ h^{-1}_{1}(\epsilon) &= x
+\end{aligned}
+\end{equation*}
+\end{block}
+\end{frame}
+
+\begin{frame}{Designing a Transformation}
+\begin{block}{MADE \citep{GermainEtAl:2015}}
+An autoregressive network that takes constant time. Its connectivity matrix is lower-triangular.
+\begin{equation*}
+\begin{bmatrix}
+0 & 0 & \cdots & 0 & 0 \\
+1 & 0 & \cdots & 0 & 0 \\
+1 & 1 & \cdots & 0 & 0 \\
+\vdots & \vdots & \cdots & \vdots & \vdots \\
+1 & 1 & \cdots & 1 & 0
+\end{bmatrix}
+\end{equation*}
+\end{block}
+\end{frame}
+
+\begin{frame}{Designing a Transformation}
+\begin{figure}
+\begin{tikzpicture}
+\node[obs] (x1) {$x_{1}$};
+\node[obs, right = of x1] (x2) {$x_{2}$};
+\node[obs, right = of x2] (x3) {$x_{3}$};
+\node[obs, right = of x3] (x4) {$x_{4}$};
+
+\node[latent, above = of x1] (e11) {$\epsilon^{(1)}_{1}$};
+\node[latent, above = of x2] (e12) {$\epsilon^{(1)}_{2}$};
+\node[latent, above = of x3] (e13) {$\epsilon^{(1)}_{3}$};
+\node[latent, above = of x4] (e14) {$\epsilon^{(1)}_{4}$};
+
+\node[latent, above = of e11] (e21) {$\epsilon_{1}$};
+\node[latent, above = of e12] (e22) {$\epsilon_{2}$};
+\node[latent, above = of e13] (e23) {$\epsilon_{3}$};
+\node[latent, above = of e14] (e24) {$\epsilon_{4}$};
+
+\edge[color=red]{x1}{e12};
+\edge[color=red]{x1,x2}{e13};
+\edge[color=red]{x1,x2,x3}{e14};
+
+\edge[color=red]{e11}{e22};
+\edge[color=red]{e11,e12}{e23};
+\edge[color=red]{e11,e12,e13}{e24};
+
+\node[left = of e21] (n1) {$\NDist{0}{\IMatrix}$};
+\node[draw=black, thick, rectangle, fit= (n1)(e21)(e22)(e23)(e24), rounded corners] {};
+\end{tikzpicture}
+\end{figure}
+\end{frame}
+
+\begin{frame}{Designing a Transformation}
+We use a MADE $ g^{(2)}_{\theta} $ to predict the parameters of the first transformation: $ \begin{bmatrix} \mu_{j} & \sigma_{j} \end{bmatrix} =  g^{(2)}_{\theta}(x_{<j}) $.
+Then we apply the first transformation.
+\begin{equation*}
+\begin{aligned}
+\epsilon_{j}^{(1)} &= h_{2}^{-1}(x)_{j} &= \frac{x - \mu(x_{<j})}{\sigma(x_{<j})} \\ \pause
+\epsilon^{(1)} &= h_{2}^{-1}(x) &= \frac{x - \mu}{\sigma}
+\end{aligned}
+\end{equation*}
+\pause
+The Jacobian is
+\begin{equation*}
+\jacob{h_{2}^{-1}}{x} = \pause \IMatrix\sigma^{-1} + J_{\frac{-\mu}{\sigma}}(x)
+\end{equation*}
+\end{frame}
+
+\begin{frame}{Designing a Transformation}
+Define $ \alpha_{lj} = \frac{d}{dx_{l}}\frac{-\mu_{j}}{\sigma_{j}} $.
+\begin{small}
+\begin{equation*}
+\begin{aligned}
+&\jacob{h_{K}^{-1}}{x} = \IMatrix\sigma^{-1} + J_{\frac{-\mu}{\sigma}}(x) = \\ \pause
+&\begin{bmatrix}
+\sigma^{-1}_{11} & 0 & \cdots & 0 & 0 \\
+0 & \sigma^{-1}_{22} & \cdots & 0 & 0 \\
+0 & 0 & \cdots & 0 & 0 \\
+\vdots & \vdots & \cdots & \vdots & \vdots \\
+0 & 0 & \cdots & 0 & \sigma^{-1}_{mm}
+\end{bmatrix}
+\pause
++
+\begin{bmatrix}
+0 & 0 & \cdots & 0 & 0 \\
+\alpha_{21} & 0 & \cdots & 0 & 0 \\
+\alpha_{31} & \alpha_{32} & \cdots & 0 & 0 \\
+\vdots & \vdots & \cdots & \vdots & \vdots \\
+\alpha_{m1} & \alpha_{m2} & \cdots & \alpha_{m,m-1} & 0
+\end{bmatrix}
+\end{aligned}
+\end{equation*}
+\end{small}
+\end{frame}
+
+\begin{frame}{Designing a Transformation}
+\begin{block}{Simple Jacobian Determinant}
+\begin{equation*}
+\abs{\det\jacob{h_{2}^{-1}}{x}} = \prod_{j=1}^{M}\sigma^{-1}_{j}
+\end{equation*}
+\pause
+In practice we work with the log-likelihood.
+\begin{equation*}
+\log\abs{\det\jacob{h_{2}^{-1}}{x}} = -\sum_{j=1}^{M}\log\sigma_{j}
+\end{equation*}
+\end{block}
+\end{frame}
+
+\begin{frame}{2-step Flow}
+\begin{small}
+\begin{equation*}
+\begin{aligned}
+p(x) &= p(\epsilon)\abs{\det\jacob{h_{1}^{-1}}{\epsilon^{(1)}}}\abs{\det\jacob{h_{2}^{-1}}{x}} \\
+&= p(h_{1}^{-1}(h_{2}^{-1}(x)))\abs{\det\jacob{h_{1}^{-1}}{h_{2}^{-1}(x)}}\abs{\det\jacob{h_{2}^{-1}}{x}} \\ \pause
+\log p(x) &= \log p(h_{1}^{-1}(h_{2}^{-1}(x)))\pause -\sum_{j=1}^{M}\log\sigma^{(2)}_{j}-\sum_{j=1}^{M}\log\sigma^{(1)}_{j}
+\end{aligned}
+\end{equation*}
+\end{small}
+\pause
+\begin{equation*}
+\begin{aligned}
+\epsilon^{(1)} = h^{-1}_{2} = \frac{x - \mu^{(1)}}{\sigma^{(1)}} \text{ where } \begin{bmatrix}\mu^{(1)}, \sigma^{(1)}\end{bmatrix} = g(x) \\ \pause
+\epsilon = h^{-1}_{1} = \frac{\epsilon^{(1)} - \mu^{(2)}}{\sigma^{(2)}} \text{ where } \begin{bmatrix}\mu^{(2)}, \sigma^{(2)}\end{bmatrix} = g(\epsilon^{(1)})
+\end{aligned}
+\end{equation*}
+\end{frame}
+
+\begin{frame}{Intermediate Summary}
+\begin{itemize}
+\item NFs map transform complex distributions to simpler ones (or vice versa)
+\item Use in density estimation for complex distributions
+\item Jacobian needs to be carefully designed
+\item Sampling is slow because sequential
+\end{itemize}
+\end{frame}
+
+\section{Use Case 2: Inference (sampling)}
+\begin{frame}
+\tableofcontents[current]
+\end{frame}
+
+\begin{frame}{Setting}
+We have a generative model $ p(x|z) $. We want to approximate the posterior $ p(z|x) $ using an amortized variational distribution $ q(z|x) $ computed by a neural net.
+\begin{block}{Goal}
+We want a complex, multimodal approximate posterior $ q(z|x) $.
+\end{block}
+\end{frame}
+
+\begin{frame}{Normalising Flows: Inference}
+\begin{equation*}
+\begin{aligned}
+\ELBO &= -\KL{p(z|x)}{q(z|x)} \\
+&= \E[q(z|\lambda)]{\log p(x|z)} - \KL{q(z|\lambda))}{p(z)} \\
+&= \underbrace{\E[q(\epsilon)]{\log p(x|h^{-1}(\epsilon))}}_{\text{sample $ z $}} - \underbrace{\KL{q(z|\lambda)}{p(z)}}_{\text{assess density}}
+\end{aligned}
+\end{equation*}
+\begin{block}{Simple Mapping}
+\begin{equation*}
+\begin{aligned}
+h(z) &= \epsilon \text{ s.t. } \epsilon \perp \lambda \\
+h^{-1}(\epsilon) &= z
+\end{aligned}
+\end{equation*}
+\end{block}
+\end{frame}
+
+\begin{frame}{Normalising Flows: Inference}
+\begin{equation*}
+\begin{aligned}
+&-\KL{q(z|x)}{p(z|x)} \propto \ELBO = \\
+&= \E[q(z|\lambda)]{\log p(x|z)} - \KL{q(z|\lambda))}{p(z)} \\
+&= \underbrace{\E[q(\epsilon)]{\log p(x|h^{-1}(\epsilon))}}_{\text{sample $ z $}} - \underbrace{\KL{q(z|\lambda)}{p(z)}}_{\text{assess density}}
+\end{aligned}
+\end{equation*}
+\begin{block}{Flow Mapping}
+\begin{equation*}
+\begin{aligned}
+h_{1}(h_{2}(\ldots h_{K}(z))) &= \epsilon \text{ s.t. } \epsilon \perp \lambda \\
+h^{-1}_{K}(h^{-1}_{K-1}(\ldots h^{-1}_{1}(\epsilon))) &= z
+\end{aligned}
+\end{equation*}
+\end{block}
+\end{frame}
+
+\begin{frame}{2-step Flow}
+\begin{small}
+\begin{equation*}
+\begin{aligned}
+q(z^{(2)}) &= q(\epsilon)\abs{\det\jacob{h_{1}}{z^{(1)}}}\abs{\det\jacob{h_{2}}{z^{(2)}}} \\ \pause
+&= q(h_{1}(h_{2}(z^{(2)})))\abs{\det\jacob{h_{1}}{h_{2}(z^{(2)})}}\abs{\det\jacob{h_{2}}{z^{(2)}}}
+\end{aligned}
+\end{equation*}
+\end{small}
+\pause
+The transformations $ h^{-1}_{1} $ and $ h^{-1}_{2} $ are learned by backprop. The determinants need to be computed analytically.
+\end{frame}
+
+\begin{frame}{Designing a Transformation}
+We are again going to use a MADE to predict parameters. However, this time we will use it in the other direction.
+\end{frame}
+
+\begin{frame}{Designing a Transformation}
+\begin{figure}
+\begin{tikzpicture}
+\node[latent] (z21) {$z^{(2)}_{1}$};
+\node[latent, right = of z21] (z22) {$z^{(2)}_{2}$};
+\node[latent, right = of z22] (z23) {$z^{(2)}_{3}$};
+\node[latent, right = of z23] (z24) {$z^{(2)}_{4}$};
+
+\node[latent, above = of z21] (z11) {$z^{(1)}_{1}$};
+\node[latent, above = of z22] (z12) {$z^{(1)}_{2}$};
+\node[latent, above = of z23] (z13) {$z^{(1)}_{3}$};
+\node[latent, above = of z24] (z14) {$z^{(1)}_{4}$};
+
+\node[latent, above = of z11] (z1) {$\epsilon_{1}$};
+\node[latent, above = of z12] (z2) {$\epsilon_{2}$};
+\node[latent, above = of z13] (z3) {$\epsilon_{3}$};
+\node[latent, above = of z14] (z4) {$\epsilon_{4}$};
+
+\edge{z11}{z22,z23,z24};
+\edge{z12}{z23,z24};
+\edge{z13}{z24};
+
+\edge{z1}{z12,z13,z14};
+\edge{z2}{z13,z14};
+\edge{z3}{z14};
+
+\node[left = of z1] (n1) {$\NDist{0}{\IMatrix}$};
+\node[draw=black, thick, rectangle, fit= (n1)(z1)(z2)(z3)(z4), rounded corners] {};
+\end{tikzpicture}
+\end{figure}
+\end{frame}
+
+\begin{frame}{Designing a Transformation}
+We use a MADE $ f_{\lambda} $ to predict the parameters of the first transformation: $ \begin{bmatrix} \mu_{j} & \sigma_{j} \end{bmatrix} =  f_{\lambda}(\epsilon_{<j}) $.
+Then we apply the first transformation.
+\begin{equation*}
+\begin{aligned}
+z^{(1)}_{j} &= h_{1}(\epsilon)_{j} &= \mu_{j} + \sigma_{j} \epsilon \\ \pause
+z^{(1)} &= h_{1}(\epsilon) &= \mu + \sigma \epsilon
+\end{aligned}
+\end{equation*}
+\pause
+\begin{equation*}
+\jacob{h_{1}}{\epsilon} = \IMatrix \sigma + \jacob{\mu}{\epsilon} +\jacob{\sigma \epsilon}{\epsilon}
+\end{equation*}
+\end{frame}
+
+\begin{frame}{Designing a Transformation}
+\begin{block}{Simple Jacobian Determinant}
+\begin{equation*}
+\abs{\det\jacob{h_{1}}{\epsilon}} = \prod_{j=1}^{M}\sigma_{j}
+\end{equation*}
+In practice we work with the log-likelihood.
+\begin{equation*}
+\log\abs{\det\jacob{h_{1}}{\epsilon}} = \sum_{j=1}^{M}\log\sigma_{j}
+\end{equation*}
+\end{block}
+\end{frame}
+
+\begin{frame}{2-step Flow}
+\begin{small}
+\begin{equation*}
+\begin{aligned}
+q(z^{(2)}) &= q(\epsilon)\abs{\det\jacob{h_{1}^{-1}}{z^{(1)}}}\abs{\det\jacob{h_{2}^{-1}}{z^{(2)}}} \\
+&= q(h_{1}^{-1}(h_{2}^{-1}(z^{(2)})))\abs{\det\jacob{h_{1}^{-1}}{h_{2}^{-1}(z^{(2)})}}\abs{\det\jacob{h_{2}^{-1}}{z^{(2)}}} \\
+\log q(z^{(2)}) &= \log q(h_{1}^{-1}(h_{2}^{-1}(z^{(2)}))) + \sum_{j=1}^{M}\log\sigma^{(1)}_{j} + \sum_{j=1}^{M}\log\sigma^{(2)}_{j}
+\end{aligned}
+\end{equation*}
+\end{small}
+\begin{equation*}
+\begin{aligned}
+z^{(1)} &= \mu^{(1)} + \sigma^{(1)}\epsilon \text{ where } \begin{bmatrix}\mu^{(1)}, \sigma^{(1)}\end{bmatrix} = f_{\lambda}(\epsilon) \\
+z^{(2)} &= \mu^{(2)} + \sigma^{(2)}z^{(1)} \text{ where } \begin{bmatrix}\mu^{(2)}, \sigma^{(2)}\end{bmatrix} = f_{\lambda}(z^{(1)})
+\end{aligned}
+\end{equation*}
+\end{frame}
+
+\begin{frame}{ELBO}
+\begin{small}
+\begin{equation*}
+\begin{aligned}
+&\ELBO = \E[q(z|\lambda)]{\log p(x|z)} - \KL{q(z^{(2)}|\lambda))}{p(z^{(2)})} = \\
+&\E[q(z|\lambda)]{\log p(x|z)} - \KL{q(\epsilon)\abs{\det\jacob{h}{z^{(2)}}}}{p(z)}
+\end{aligned}
+\end{equation*}
+\end{small}
+\end{frame}
+
+\begin{frame}{ELBO}
+\begin{small}
+\begin{block}{KL-term}
+\begin{equation*}
+\begin{aligned}
+&\KL{q(\epsilon)\abs{\det\jacob{h}{z^{(2)}}}}{p(z)} = \\
+&\E[q(z^{(2)}|\lambda))]{\frac{q(\epsilon)\abs{\det\jacob{h}{z^{(2)}}}}{p(z^{(2)})}} \overset{\text{MC}}{\approx} \frac{1}{S}\sum_{s=1}^{S} \frac{q(\epsilon)\abs{\det\jacob{h}{z^{(2,s)}}}}{p(z^{(2,s)})}
+\end{aligned}
+\end{equation*}
+\end{block}
+\begin{block}{Jacobian}
+\begin{equation*}
+\abs{\det\jacob{h}{z^{(2,s)}}} = \sum_{j=1}^{M}\log\sigma^{(1)}_{j} + \sum_{j=1}^{M}\log\sigma^{(2)}_{j}
+\end{equation*}
+\end{block}
+\end{small}
+\end{frame}
+
+\begin{frame}{Other Appliations of Normalizing Flows}
+\begin{itemize}
+\item As a prior
+\item Modeling of dynamic systems
+\end{itemize}
+\end{frame}
+
+\section{Summary}
+
+\begin{frame}{Summary}
+\begin{itemize}
+\item NFs model arbitrary continuous distributions
+\item They allow for density computation
+\item Need to have simple Jacobian
+\item Depending on direction, they are good at either sampling or density computation (not both)
+\end{itemize}
+\end{frame}
+
+\begin{frame}[allowframebreaks]{References}
+\bibliographystyle{plainnat}
+\bibliography{../../VI}
+\end{frame}
+
+\end{document}
