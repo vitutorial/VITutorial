@@ -3,8 +3,8 @@
 \usetheme{Montpellier}
 \usecolortheme{beaver}
 
-\usepackage{amsmath, amssymb, ../../vimacros, hyperref, tikz}
 \usepackage{physics}
+\usepackage{amsmath, amssymb, ../../vimacros, hyperref, tikz}
 \usetikzlibrary{positioning, fit, bayesnet, shapes.misc, patterns}
 \usepackage[round]{natbib}
 \usepackage{mathalfa}
@@ -34,6 +34,21 @@
 	\pgfusepath{fill}
 }
 
+\newcommand\Wider[2][3em]{%
+\makebox[\linewidth][c]{%
+  \begin{minipage}{\dimexpr\textwidth+#1\relax}
+  \raggedright#2
+  \end{minipage}%
+  }%
+}
+
+\makeatletter
+\newenvironment{noheadline}{
+    \setbeamertemplate{headline}{}
+    \addtobeamertemplate{frametitle}{\vspace*{-0.9\baselineskip}}{}
+}{}
+\makeatother
+
 \title{Automatic Differentiation Variational Inference}
 \author{Philip Schulz and Wilker Aziz\\
 \url{https://github.com/philschulz/VITutorial}}
@@ -50,7 +65,7 @@
 \begin{frame}{What we know so far}
     \begin{itemize}
         \item DGMs: \pause probabilistic models parameterised by neural networks \pause
-        \item Objective: \pause lowerbound on likelihood (ELBO) \pause
+        \item Objective: \pause lowerbound on log-likelihood (ELBO) \pause
         \begin{itemize}
         		\item \alert{cannot be computed exactly} \\ \pause
         		\textcolor{blue}{we resort to Monte Carlo estimation} \pause		
@@ -65,46 +80,7 @@
     
 \end{frame}
 
-\begin{frame}{Reparameterised gradients: Gaussian}
-	We have  seen one case, namely,\\
-	~ if $\epsilon \sim \mathcal N(0, I)$ and $Z \sim \mathcal N(\mu,\sigma^2)$\pause\\
-	Then
-	\begin{equation*}
-	\begin{aligned}
-		%\epsilon &\sim \mathcal N(0, 1) \\	\pause
-		%Z &\sim \mathcal N(\mu, \sigma^2) \\ \pause
-		Z &\sim \mu +  \sigma  \epsilon
-	\end{aligned}
-	\end{equation*}
-	and
-	\begin{equation*}
-	\begin{aligned}
-		&\pdv{\lambda} \E[\mathcal N(z|\mu, \sigma^2)]{ g(z) }\\ \pause
-		&= \E[\mathcal N(0, I)]{\pdv{\lambda} g(z = \mu + \sigma  \epsilon)} \\ \pause
-		&= \E[\mathcal N(0, I)]{\pdv{z} g(z = \mu + \sigma  \epsilon) \pdv{z}{\lambda}}
-	\end{aligned}
-	\end{equation*}
-\end{frame}
 
-\begin{frame}{Reparameterised gradients: Gaussian}
-	Location
-	\begin{equation*}
-	\begin{aligned}
-		\pdv{\mu} \E[\mathcal N(z|\mu, \sigma^2)]{ g(z) }
-			&= \E[\mathcal N(0, I)]{\pdv{z} g(z = \mu + \sigma  \epsilon) \pdv{z}{\mu}} \\ \pause
-		&= \E[\mathcal N(0, I)]{\pdv{z} g(z = \mu + \sigma  \epsilon)} \pause
-	\end{aligned}
-	\end{equation*}
-	
-	Scale
-	\begin{equation*}
-	\begin{aligned}
-		\pdv{\sigma} \E[\mathcal N(z|\mu, \sigma^2)]{ g(z) } &= \E[\mathcal N(0, I)]{\pdv{z} g(z = \mu + \sigma  \epsilon) \pdv{z}{\sigma}} \\ \pause
-		&= \E[\mathcal N(0, I)]{\pdv{z} g(z = \mu + \sigma  \epsilon)  \epsilon} \pause
-	\end{aligned}
-	\end{equation*}
-	
-\end{frame}
 
 \section{Multivariate calculus recap}
 
@@ -167,6 +143,7 @@ Let $x \in \mathbb R^K$ and let $\mathcal T: \mathbb R^K \to \mathbb R^K$ be dif
 	\end{aligned}
 	\end{equation*}
 	
+	\vspace{-10pt}
 	and similarly for a function $h(y)$
 	\begin{equation*}
 	\begin{aligned}
@@ -185,11 +162,11 @@ Let $X$ take on values in $\mathbb R^K$ with density $f_X(x)$\\ \pause
 
 Then $\mathcal T$ induces a density $f_Y(y)$ expressed as
 \begin{equation*}
-f_Y(y) = f_X(x = \inv{\mathcal T}(y)) \djac{\inv{\mathcal T}}{y}
+f_Y(y) = f_X(\inv{\mathcal T}(y)) \djac{\inv{\mathcal T}}{y}
 \end{equation*} \pause
 and then it follows that
 \begin{equation*}
-f_X(x) = f_Y(y=\mathcal T(x)) \djac{\mathcal T}{x}
+f_X(x) = f_Y(\mathcal T(x)) \djac{\mathcal T}{x}
 \end{equation*}
 
 	
@@ -237,7 +214,7 @@ f_X(x) = f_Y(y=\mathcal T(x)) \djac{\mathcal T}{x}
 			\pdv{\alert{\lambda}}  \E[\alert{q(z|\lambda)}]{g(z)} = \pdv{\alert{\lambda}} \E[\textcolor{blue}{\pi(\epsilon)}]{g(\inv{\mathcal S}_{\alert\lambda}(\epsilon)) }
 		\end{aligned}
 	\end{equation*} \pause
-	since now the measure of integration does not depend on $\lambda$, we can obtain a gradient estimate
+	since now the density does not depend on $\lambda$, we can obtain a gradient estimate
 	\begin{equation*}
 		\begin{aligned}
 			&\pdv{\alert{\lambda}}  \E[\alert{q(z|\lambda)}]{g(z)} =  \E[\textcolor{blue}{\pi(\epsilon)}]{\pdv{\alert{\lambda}} g(\inv{\mathcal S}_{\alert\lambda}(\epsilon)) } \\ \pause
@@ -261,6 +238,47 @@ f_X(x) = f_Y(y=\mathcal T(x)) \djac{\mathcal T}{x}
 	\pause
 	
 	Examples: Gaussian, Laplace, Cauchy, Uniform
+	
+\end{frame}
+
+\begin{frame}{Reparameterised gradients: Gaussian}
+	We have  seen one case, namely,\\
+	~ if $\epsilon \sim \mathcal N(0, I)$ and $Z \sim \mathcal N(\mu,\sigma^2)$\pause\\
+	Then
+	\begin{equation*}
+	\begin{aligned}
+		%\epsilon &\sim \mathcal N(0, 1) \\	\pause
+		%Z &\sim \mathcal N(\mu, \sigma^2) \\ \pause
+		Z &\sim \mu +  \sigma  \epsilon
+	\end{aligned}
+	\end{equation*}
+	and
+	\begin{equation*}
+	\begin{aligned}
+		&\pdv{\lambda} \E[\mathcal N(z|\mu, \sigma^2)]{ g(z) }\\ \pause
+		&= \E[\mathcal N(0, I)]{\pdv{\lambda} g(z = \mu + \sigma  \epsilon)} \\ \pause
+		&= \E[\mathcal N(0, I)]{\pdv{z} g(z = \mu + \sigma  \epsilon) \pdv{z}{\lambda}}
+	\end{aligned}
+	\end{equation*}
+\end{frame}
+
+\begin{frame}{Reparameterised gradients: Gaussian}
+	Location
+	\begin{equation*}
+	\begin{aligned}
+		\pdv{\mu} \E[\mathcal N(z|\mu, \sigma^2)]{ g(z) }
+			&= \E[\mathcal N(0, I)]{\pdv{z} g(z = \mu + \sigma  \epsilon) \pdv{z}{\mu}} \\ \pause
+		&= \E[\mathcal N(0, I)]{\pdv{z} g(z = \mu + \sigma  \epsilon)} \pause
+	\end{aligned}
+	\end{equation*}
+	
+	Scale
+	\begin{equation*}
+	\begin{aligned}
+		\pdv{\sigma} \E[\mathcal N(z|\mu, \sigma^2)]{ g(z) } &= \E[\mathcal N(0, I)]{\pdv{z} g(z = \mu + \sigma  \epsilon) \pdv{z}{\sigma}} \\ \pause
+		&= \E[\mathcal N(0, I)]{\pdv{z} g(z = \mu + \sigma  \epsilon)  \epsilon} 
+	\end{aligned}
+	\end{equation*}
 	
 \end{frame}
 
@@ -341,6 +359,27 @@ f_X(x) = f_Y(y=\mathcal T(x)) \djac{\mathcal T}{x}
 	
 \end{frame}
 
+\begin{frame}{Why do we need differentiable models?}
+	
+	Recall the gradient of the ELBO
+	\begin{equation*}
+		\only<1>{\pdv{\lambda} \E[q(z; \lambda)]{\log p(x,z)}}\only<2->{\alert{\pdv{\lambda} \E[q(z; \lambda)]{\log p(x,z)}}} -  \only<1>{\pdv{\lambda} \Ent{q(z; \lambda)}}\only<2->{\textcolor{gray}{\pdv{\lambda} \Ent{q(z; \lambda)}}} 
+	\end{equation*}
+	
+	\pause
+	
+	Reparameterisation requires $\pdv{}{z}$
+	\uncover<3->{
+	\begin{equation*}
+	\begin{aligned}
+		\pdv{\lambda} \E[q(z; \lambda)]{\log p(x,z)} \uncover<4->{= \E[\pi(\epsilon)]{\pdv{\lambda} \log p(x,z=\inv{\mathcal S}_\lambda(\epsilon))}} \\
+		\uncover<5->{= \E[\pi(\epsilon)]{\alert{\pdv{z} \log p(x,z)} \pdv{\lambda} \inv{\mathcal S}_\lambda(\epsilon)}}
+	\end{aligned}
+	\end{equation*}
+	}
+
+\end{frame}
+
 \begin{frame}{VI optimisation problem}
 	Let's focus on the design and optimisation of the variational approximation
 	\begin{equation*}
@@ -391,11 +430,12 @@ f_X(x) = f_Y(y=\mathcal T(x)) \djac{\mathcal T}{x}
 	\end{equation*}
 	where
 	\begin{equation*}
-	 	\mathcal Q = \{\balert{q(z; \phi)}: \phi \in \Phi, \supp(\balert{q(z; \phi)}) \subseteq \supp(\galert{p(z)})  \}
+	 	\mathcal Q = \{\balert{q(z; \lambda)}: \lambda \in \Lambda, \supp(\balert{q(z; \lambda)}) \subseteq \supp(\galert{p(z)})  \}
 	\end{equation*}
+	
 	\vspace{-10pt} \pause
 	 \begin{itemize}
-	 	\item a parameter vector $\phi$ picks out a member of the family
+	 	\item a parameter vector $\lambda$ picks out a member of the family
 	\end{itemize}
 
 \end{frame}
@@ -404,41 +444,198 @@ f_X(x) = f_Y(y=\mathcal T(x)) \djac{\mathcal T}{x}
 
 	We maximise the ELBO 
 	\begin{equation*}
-		\argmax_{\phi \in \Phi} \E[\balert{q(z; \phi)}]{\log p(x, z)} + \Ent{\balert{q(z|\phi)}}
+		\argmax_{\lambda \in \Lambda} \E[\balert{q(z; \lambda)}]{\log p(x, z)} + \Ent{\balert{q(z; \lambda)}}
 	\end{equation*}
-	subject to
+	\pause subject to
 	 \begin{equation*}
-		\mathcal Q = \{\balert{q(z; \phi)}: \phi \in \Phi, \supp(\balert{q(z; \phi)}) \subseteq \supp(\galert{p(z)})  \}
+		\mathcal Q = \{\balert{q(z; \lambda)}: \lambda \in \Lambda, \supp(\balert{q(z; \lambda)}) \subseteq \supp(\galert{p(z)})  \}
 	\end{equation*}
 	\pause
 	
 	\vspace{-10pt}
 	There are really two constraints here\pause
 	\begin{itemize}
-		\item support matching constraint \pause
-		\item $\Phi$ can be an intricate subset of $\mathbb R^D$\\ \pause
+		\item \galert{support matching constraint} \pause
+		\item \alert{$\Lambda$ can be an intricate subset of $\mathbb R^D$}\\ \pause
 		e.g. univariate Gaussian location lives in $\mathbb R$ but scale lives in $\mathbb R_{>0}$
+	\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Parameters in real coordinate space}
+	It is easy to make sure parameters are unconstrained
+	\vspace{-15pt}
+	\begin{itemize}
+		\item we just need to use an appropriate activation
+	\end{itemize}
+	
+	Example 
+	\begin{itemize}
+		\item $Z \sim \mathcal N(\mu, \sigma)$ \\
+		where $\mu \in \mathbb R^d$ and $\sigma \in \mathbb R^d_{>0}$ \pause
+		\begin{itemize}
+			\item $\mu = \lambda_\mu \in \mathbb R^d$ \pause
+			\item $\sigma = \softplus(\lambda_\sigma)$ and $\lambda_\sigma \in \mathbb R^d$
+		\end{itemize} \pause
+		\item $Z \sim \vMF(\mu, \kappa)$ \\ 
+		where $\mu \in \mathbb R^d$ with $\norm{\mu}_2 = 1$ and $\kappa \in \mathbb R_{\ge 0}$ \pause
+		\begin{itemize}
+			\item $\mu = \frac{\lambda_\mu}{\norm{\lambda_\mu}_2}$ for $\lambda_\mu \in \mathbb R^d$ \pause
+			\item $\kappa = \softplus(\lambda_\kappa)$ and $\lambda_\kappa \in \mathbb R$
+		\end{itemize}
+		
+	\end{itemize}
+	
+\end{frame}
+
+
+\begin{frame}{Constrained optimisation for the ELBO}
+
+	We maximise the ELBO 
+	\begin{equation*}
+		\argmax_{\lambda \in \galert{\mathbb R^D}} \E[\balert{q(z; \lambda)}]{\log p(x, z)} + \Ent{\balert{q(z; \lambda)}}
+	\end{equation*}
+	\pause 	subject to
+	 \begin{equation*}
+		\mathcal Q = \{\balert{q(z; \lambda)}: \lambda \in \galert{\mathbb R^D}, \supp(\balert{q(z; \lambda)}) \subseteq \alert{\supp(p(z))}  \}
+	\end{equation*}
+	
+	\vspace{-10pt}
+	There is one constraint left\pause
+	\begin{itemize}
+		\item \alert{support of $q(z; \lambda)$ depends on the choice of prior}\looseness=-1 \\
+		\alert{and thus may be an intricate subset of $\mathbb R^K$}
 	\end{itemize}
 
 \end{frame}
 
 \begin{frame}{ADVI}
 	
-	
-	
-	From the point of view of a black-box procedure, this objective poses two problems
-	\begin{enumerate}
-		\item intractable expectations \pause Reparameterised Gradients!
-		\item custom $\supp(q(z; \phi))$ 
+	A gradient-based black-box VI procedure \pause
+	\begin{enumerate}		
+		\item \alert{Custom parameter space} \pause
+			\begin{itemize}
+				\item \galert{Appropriate transformations of unconstrained parameters!} \pause
+			\end{itemize}
+		\item \alert{Custom $\supp(p(z))$} \pause
+			\begin{itemize}
+				\item \galert{Express $z \in \supp(p(z)) \subseteq \mathbb R^K$ as a transformation of some unconstrained $\zeta \in \mathbb R^K$} \pause
+				\item \galert{Pick a variational family over the entire real coordinate space} \pause
+				\item \galert{And pick one for which a standardisation exists!} \pause
+			\end{itemize}
+		\item \alert{Intractable expectations} \pause
+			\begin{itemize}
+				\item \galert{Reparameterised Gradients!} 
+			\end{itemize}
 	\end{enumerate}
+		
+\end{frame}
+
+\begin{frame}{Joint model in real coordinate space}
+
+	Let's introduce an invertible and differentiable transformation
+	\begin{equation*}
+		\mathcal T: \supp(p(z)) \to \mathbb R^K
+	\end{equation*} \pause
+	 and define a transformed variable $\zeta \in \mathbb R^K$
+	\begin{equation*}
+		\zeta = \mathcal T(z)
+ 	\end{equation*} \pause
 	
-	Idea
-	\begin{enumerate}
-		\item let's find a way to transform $\supp(p(z))$ to the complete real coordinate space
-		\item then we pick a variational family over the complete real coordinate space for which a standardisation exists!
-	\end{enumerate}
+	\vspace{-10pt}	
+	
+	Recall that we have a joint density $p(x,z)$\\ \pause
+	~ which we can use to construct $p(x, \zeta)$ \pause
+	\begin{equation*}
+		p(x, \zeta) = p(x, \inv{\mathcal T}(\zeta)) \djac{\inv{\mathcal T}}{\zeta}
+	\end{equation*}
+\end{frame}
+
+\begin{frame}{VI in real coordinate space}
+	We can design a posterior approximation whose support is $\mathbb R^K$\\ \pause
+	
+	\begin{equation*}
+	\begin{aligned}
+		q(\zeta; \lambda) \pause &= \underbrace{\galert{\prod_{k=1}^K} q(\zeta_{\galert{k}}; \lambda)}_{\text{mean field}} \pause
+		&= \prod_{k=1}^K \galert{\mathcal N(\zeta_k|\mu_k, \sigma^2_k)} \\ 
+	\end{aligned}
+	\end{equation*}
+	where
+	\begin{itemize}
+		\item $\mu_k = \lambda_{\mu_k}$ for $\lambda_{\mu_k} \in \mathbb R^K$
+		\item $\sigma_k = \softplus(\lambda_{\sigma_k})$ for $\lambda_{\sigma_k} \in \mathbb R^K$
+	\end{itemize}
 	
 \end{frame}
+
+
+\begin{frame}{ELBO in real coordinate space}
+\Wider[4em]{	
+	\begin{equation*}
+	\begin{aligned}
+		&\log p(x) \pause = \log \int p(x,\alert{z}) \dd \alert{z}  \\ \pause
+		&= \log \int p(x,\alert{\inv{\mathcal T}(\zeta)}) \alert{\djac{\inv{\mathcal T}}{\zeta} \dd \zeta}	\\	\pause
+		&= \log \int \galert{q(\zeta)} \frac{p(x,\inv{\mathcal T}(\zeta)) \djac{\inv{\mathcal T}}{\zeta}}{\galert{q(\zeta)}} \dd \zeta \\ \pause
+		&\overset{\text{JI}}{\alert{\ge}}  \int q(\zeta) \alert{\log} \frac{p(x,\inv{\mathcal T}(\zeta)) \djac{\inv{\mathcal T}}{\zeta}}{q(\zeta)} \dd \zeta \\ \pause
+		&= \E[q(\zeta)]{\log p(x,\inv{\mathcal T}(\zeta)) + \log \djac{\inv{\mathcal T}}{\zeta}} + \Ent{q(\zeta)}
+	\end{aligned}
+	\end{equation*}
+}
+\end{frame}
+
+\begin{frame}{Reparameterised ELBO}
+	
+	Recall that for Gaussians we have a standardisation procedure $\mathcal S_\lambda(z) \sim \mathcal N(\epsilon| 0, I)$
+	
+	\Wider[4em]{
+	\begin{equation*}
+	\begin{aligned}
+		&\alert{\E[q(\zeta; \lambda)]{\log p(x, \inv{\mathcal T}(\zeta)) + \log \djac{\inv{\mathcal T}}{\zeta}}} + \galert{\Ent{q(\zeta; \lambda)}}  \\ \pause
+		&= \E[\mathcal N(\epsilon|0, I)]{\log p(x, \underbrace{\inv{\mathcal T}(\overbrace{\mathcal S_\lambda(\epsilon)}^{\zeta})}_{z}) + \log \djac{\inv{\mathcal T}}{\mathcal S_\lambda(\epsilon)} } \\
+		&+ \Ent{q(\zeta; \lambda)}
+	\end{aligned}
+	\end{equation*}
+	}
+
+\end{frame}
+
+\begin{frame}{Gradient estimate}
+
+	
+	\begin{small}
+	For $\epsilon_i \sim \mathcal N(0, I)$
+	
+	\begin{equation*}
+		\begin{aligned}
+		\pdv{\lambda}\ELBO(\lambda) \pause \overset{\text{MC}}{\approx}& \frac{1}{M} \sum_{i=1}^M \pdv{\lambda} \log \underbrace{p(x|\inv{\mathcal T}(\mathcal S_\lambda(\epsilon_i)))}_{\text{likelihood}} \\ \pause
+		&\phantom{\frac{1}{M} \sum}+ \pdv{\lambda} \log \underbrace{p(\inv{\mathcal T}(\mathcal S_\lambda(\epsilon_i)))}_{\text{prior}} \\ \pause
+		&\phantom{\frac{1}{M} \sum}+ \pdv{\lambda} \log \underbrace{\djac{\inv{\mathcal T}}{\mathcal S_\lambda(\epsilon_i)}}_{\text{change of space}} \\ \pause
+		&+ \pdv{\lambda} \underbrace{\Ent{q(\zeta; \lambda)}}_{\text{analaytic}}
+		\end{aligned}
+	\end{equation*}
+	
+	\end{small}
+
+\end{frame}
+
+\begin{frame}{Relevance}
+
+	Many software packages know how to transform the support of various distributions
+	\begin{itemize}
+		\item Stan
+		\item Tensorflow \texttt{tf.probability}
+		\item Pytorch \texttt{torch.distributions}
+	\end{itemize}
+\end{frame}
+
+\section{Example}
+
+\begin{frame}{LDA}
+\end{frame}
+
+\begin{frame}{Wait... no deep learning?}
+\end{frame}
+
 
 
 \begin{frame}[allowframebreaks]

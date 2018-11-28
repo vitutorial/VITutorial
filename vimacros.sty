@@ -8,7 +8,7 @@
 %Jacobians
 \newcommand{\inv}[1]{{#1}^{-1}}
 \newcommand{\jac}[2]{J_{#1}(#2)}
-\newcommand{\djac}[2]{\left| \det \jac{#1}{#2} \right|}
+\newcommand{\djac}[2]{\abs{\det \jac{#1}{#2}}}
 
 % Optimisation
 \DeclareMathOperator*{\argmin}{arg\,min}
@@ -75,6 +75,7 @@
 
 % Poisson Distribution
 \DeclareMathOperator{\Poisson}{Poisson}
+\DeclareMathOperator{\vMF}{vMF}
 
 % Categorical Distribution
 \DeclareMathOperator{\Categorical}{Categorical}
