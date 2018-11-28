@@ -587,15 +587,16 @@ f_X(x) = f_Y(\mathcal T(x)) \djac{\mathcal T}{x}
 	
 	Recall that for Gaussians we have a standardisation procedure $\mathcal S_\lambda(z) \sim \mathcal N(\epsilon| 0, I)$
 	
-	\Wider[4em]{
+
+	\begin{small}
 	\begin{equation*}
 	\begin{aligned}
 		&\alert{\E[q(\zeta; \lambda)]{\log p(x, \inv{\mathcal T}(\zeta)) + \log \djac{\inv{\mathcal T}}{\zeta}}} + \galert{\Ent{q(\zeta; \lambda)}}  \\ \pause
-		&= \E[\mathcal N(\epsilon|0, I)]{\log p(x, \underbrace{\inv{\mathcal T}(\overbrace{\mathcal S_\lambda(\epsilon)}^{\zeta})}_{z}) + \log \djac{\inv{\mathcal T}}{\mathcal S_\lambda(\epsilon)} } \\
+		&= \E[\mathcal N(\epsilon|0, I)]{\log p(x, \underbrace{\inv{\mathcal T}(\overbrace{\inv{\mathcal S}_\lambda(\epsilon)}^{\zeta})}_{z}) + \log \djac{\inv{\mathcal T}}{\inv{\mathcal S}_\lambda(\epsilon)} } \\
 		&+ \Ent{q(\zeta; \lambda)}
 	\end{aligned}
 	\end{equation*}
-	}
+	\end{small}
 
 \end{frame}
 
@@ -607,9 +608,9 @@ f_X(x) = f_Y(\mathcal T(x)) \djac{\mathcal T}{x}
 	
 	\begin{equation*}
 		\begin{aligned}
-		\pdv{\lambda}\ELBO(\lambda) \pause \overset{\text{MC}}{\approx}& \frac{1}{M} \sum_{i=1}^M \pdv{\lambda} \log \underbrace{p(x|\inv{\mathcal T}(\mathcal S_\lambda(\epsilon_i)))}_{\text{likelihood}} \\ \pause
-		&\phantom{\frac{1}{M} \sum}+ \pdv{\lambda} \log \underbrace{p(\inv{\mathcal T}(\mathcal S_\lambda(\epsilon_i)))}_{\text{prior}} \\ \pause
-		&\phantom{\frac{1}{M} \sum}+ \pdv{\lambda} \log \underbrace{\djac{\inv{\mathcal T}}{\mathcal S_\lambda(\epsilon_i)}}_{\text{change of space}} \\ \pause
+		\pdv{\lambda}\ELBO(\lambda) \pause \overset{\text{MC}}{\approx}& \frac{1}{M} \sum_{i=1}^M \pdv{\lambda} \log \underbrace{p(x|\inv{\mathcal T}(\inv{\mathcal S}_\lambda(\epsilon_i)))}_{\text{likelihood}} \\ \pause
+		&\phantom{\frac{1}{M} \sum}+ \pdv{\lambda} \log \underbrace{p(\inv{\mathcal T}(\inv{\mathcal S}_\lambda(\epsilon_i)))}_{\text{prior}} \\ \pause
+		&\phantom{\frac{1}{M} \sum}+ \pdv{\lambda} \log \underbrace{\djac{\inv{\mathcal T}}{\inv{\mathcal S}_\lambda(\epsilon_i)}}_{\text{change of space}} \\ \pause
 		&+ \pdv{\lambda} \underbrace{\Ent{q(\zeta; \lambda)}}_{\text{analaytic}}
 		\end{aligned}
 	\end{equation*}
@@ -618,7 +619,7 @@ f_X(x) = f_Y(\mathcal T(x)) \djac{\mathcal T}{x}
 
 \end{frame}
 
-\begin{frame}{Relevance}
+\begin{frame}{Practical tips}
 
 	Many software packages know how to transform the support of various distributions
 	\begin{itemize}
