@@ -9,6 +9,7 @@
 \usepackage[round]{natbib}
 \usepackage{mathalfa}
 \usepackage{cancel}
+\usepackage{verbatim}
 
 \beamertemplatenavigationsymbolsempty
 
@@ -96,7 +97,7 @@ Let $x \in \mathbb R^K$ and let $\mathcal T: \mathbb R^K \to \mathbb R^K$ be dif
 
 \begin{frame}{Jacobian}
 
-	The Jacobian matrix $\mathbf J = \jac{\mathcal T}{x} $ of  $\mathcal T$ \\
+	The Jacobian matrix $\jac{\mathcal T}{x} $ of  $\mathcal T$ \\
 	~assessed at $x$ is the matrix of partial derivatives
 	\begin{equation*}
 		J_{ij} = \pdv{y_i}{x_j} 
@@ -155,18 +156,18 @@ Let $x \in \mathbb R^K$ and let $\mathcal T: \mathbb R^K \to \mathbb R^K$ be dif
 
 \begin{frame}{Change of density}
 
-Let $X$ take on values in $\mathbb R^K$ with density $f_X(x)$\\ \pause
+Let $X$ take on values in $\mathbb R^K$ with density $p_X(x)$\\ \pause
 ~ and recall that $y = \mathcal T(x)$ and $x = \inv{\mathcal T}(y)$\\ \pause
 
 ~
 
-Then $\mathcal T$ induces a density $f_Y(y)$ expressed as
+Then $\mathcal T$ induces a density $p_Y(y)$ expressed as
 \begin{equation*}
-f_Y(y) = f_X(\inv{\mathcal T}(y)) \djac{\inv{\mathcal T}}{y}
+p_Y(y) = p_X(\inv{\mathcal T}(y)) \djac{\inv{\mathcal T}}{y}
 \end{equation*} \pause
 and then it follows that
 \begin{equation*}
-f_X(x) = f_Y(\mathcal T(x)) \djac{\mathcal T}{x}
+p_X(x) = p_Y(\mathcal T(x)) \djac{\mathcal T}{x}
 \end{equation*}
 
 	
@@ -183,13 +184,13 @@ f_X(x) = f_Y(\mathcal T(x)) \djac{\mathcal T}{x}
 	~ a transformation $\mathcal S_\lambda: \mathbb R^K \to \mathbb R^K$ such that \pause
 	\begin{equation*}
 	\begin{aligned}
-	\mathcal S_\lambda(z) &\sim \pi(\epsilon) \\
- 	\inv{\mathcal S}_\lambda(\epsilon) &\sim q(z|\lambda)
+	\mathcal S_\lambda(z) &\sim \pi(\epsilon) \\ \pause
+ 	\inv{\mathcal S}_\lambda(\epsilon) &\sim q(z|\lambda) \pause
 	\end{aligned}
 	\end{equation*} 
 	\begin{itemize}
 		\item $\pi(\epsilon)$ does not depend on parameters $\lambda$\\
-		we call it a \emph{standard} density \pause
+		we call it a \emph{base density} \pause
 		\item $\mathcal S_\lambda(z)$ absorbs dependency on $\lambda$ 
 	\end{itemize}
 
@@ -223,6 +224,7 @@ f_X(x) = f_Y(\mathcal T(x)) \djac{\mathcal T}{x}
 	\end{equation*}
 \end{frame}
 
+\begin{comment}
 \begin{frame}{Standardisation functions}
 	Location-scale family
 	\begin{itemize}
@@ -240,6 +242,7 @@ f_X(x) = f_Y(\mathcal T(x)) \djac{\mathcal T}{x}
 	Examples: Gaussian, Laplace, Cauchy, Uniform
 	
 \end{frame}
+\end{comment}
 
 \begin{frame}{Reparameterised gradients: Gaussian}
 	We have  seen one case, namely,\\
@@ -262,6 +265,7 @@ f_X(x) = f_Y(\mathcal T(x)) \djac{\mathcal T}{x}
 	\end{equation*}
 \end{frame}
 
+\begin{comment}
 \begin{frame}{Reparameterised gradients: Gaussian}
 	Location
 	\begin{equation*}
@@ -281,7 +285,9 @@ f_X(x) = f_Y(\mathcal T(x)) \djac{\mathcal T}{x}
 	\end{equation*}
 	
 \end{frame}
+\end{comment}
 
+\begin{comment}
 \begin{frame}{Standardisation functions (cont.)}
 	Inverse cdf
 	\begin{itemize}
@@ -303,18 +309,19 @@ f_X(x) = f_Y(\mathcal T(x)) \djac{\mathcal T}{x}
 		\item $\inv{F}_Z(p) = \mu - \beta \log( - \log p)$
 	\end{itemize}
 \end{frame}
+\end{comment}
 
 \begin{frame}{Beyond}
 
-	Many interesting densities are not location-scale families
+	Many interesting densities cannot easily be reparameterised %are not location-scale families
 	\begin{itemize}
-		\item e.g. Beta, Gamma
-	\end{itemize} \pause
-	
-	The inverse cdf of a multivariate rv is seldom known in closed-form
-	\begin{itemize}
-		\item Dirichlet, von Mises-Fisher
-	\end{itemize}
+		\item e.g. Beta, Gamma, Dirichlet, von Mises-Fisher
+	\end{itemize} 
+	%
+	%The inverse cdf of a multivariate rv is seldom known in closed-form
+	%\begin{itemize}
+	%	\item Dirichlet, von Mises-Fisher
+	%\end{itemize}
 
 \end{frame}
 
@@ -324,14 +331,14 @@ f_X(x) = f_Y(\mathcal T(x)) \djac{\mathcal T}{x}
 	Motivation
 	\begin{itemize}
 		\item many models have intractable posteriors\\
-		their normalising constants (evidence) lacks analytic solutions \pause
+		their normalising constants (evidence) lack analytic solutions \pause
 		\item but many models are differentiable\\
 		that's the main constraint for using NNs \pause
 	\end{itemize}
 
 	Reparameterised gradients are a step towards automatising VI for differentiable models \pause
 	\begin{itemize}
-		\item but not every model of interest employs rvs for which a standardisation function is known
+		\item but not every model of interest employs rvs for which a reparameterisation is known %standardisation function is known
 	\end{itemize}
 	
 \end{frame}
@@ -342,6 +349,9 @@ f_X(x) = f_Y(\mathcal T(x)) \djac{\mathcal T}{x}
 		X|\lambda \sim \Poisson(\lambda)
 	\end{equation*}
 	and suppose we want to impose 
+	
+	\alert{FINISH EXAMPLE, GIVE THE OVERVIEW OF ADVI ``PSEUDO-CODE'' FIRST}
+	% ALONG THE LINES OF THE "ADVI" SLIDE BUT WITH SIMPLE LANGUAGE
 \end{frame}
 
 \begin{frame}{Differentiable models}
@@ -363,7 +373,7 @@ f_X(x) = f_Y(\mathcal T(x)) \djac{\mathcal T}{x}
 	
 	Recall the gradient of the ELBO
 	\begin{equation*}
-		\only<1>{\pdv{\lambda} \E[q(z; \lambda)]{\log p(x,z)}}\only<2->{\alert{\pdv{\lambda} \E[q(z; \lambda)]{\log p(x,z)}}} -  \only<1>{\pdv{\lambda} \Ent{q(z; \lambda)}}\only<2->{\textcolor{gray}{\pdv{\lambda} \Ent{q(z; \lambda)}}} 
+		\only<1>{\pdv{\lambda} \E[q(z; \lambda)]{\log p(x,z)}}\only<2->{\alert{\pdv{\lambda} \E[q(z; \lambda)]{\log p(x,z)}}} +  \only<1>{\pdv{\lambda} \Ent{q(z; \lambda)}}\only<2->{\textcolor{gray}{\pdv{\lambda} \Ent{q(z; \lambda)}}} 
 	\end{equation*}
 	
 	\pause
@@ -395,8 +405,8 @@ f_X(x) = f_Y(\mathcal T(x)) \djac{\mathcal T}{x}
 	
 	\vspace{-10pt}
 	 \begin{itemize}
-	 	\item otherwise KL is not defined\\
-		$\KL{q}{p} = \E[q]{\log q} - \E[q]{\log p} = \infty$
+	 	\item otherwise KL is not a real number\\
+		$\KL{q}{p} = \E[q]{\log q} - \E[q]{\log p} \overset{\text{def}}{=} \infty$
 	\end{itemize}	
 	 
 \end{frame}
@@ -453,10 +463,10 @@ f_X(x) = f_Y(\mathcal T(x)) \djac{\mathcal T}{x}
 	\pause
 	
 	\vspace{-10pt}
-	There are really two constraints here\pause
+	Often there can be two constraints here\pause
 	\begin{itemize}
 		\item \galert{support matching constraint} \pause
-		\item \alert{$\Lambda$ can be an intricate subset of $\mathbb R^D$}\\ \pause
+		\item \alert{$\Lambda$ may be constrained to a subset of $\mathbb R^D$}\\ \pause
 		e.g. univariate Gaussian location lives in $\mathbb R$ but scale lives in $\mathbb R_{>0}$
 	\end{itemize}
 
@@ -504,7 +514,7 @@ f_X(x) = f_Y(\mathcal T(x)) \djac{\mathcal T}{x}
 	There is one constraint left\pause
 	\begin{itemize}
 		\item \alert{support of $q(z; \lambda)$ depends on the choice of prior}\looseness=-1 \\
-		\alert{and thus may be an intricate subset of $\mathbb R^K$}
+		\alert{and thus may be a subset of $\mathbb R^K$}
 	\end{itemize}
 
 \end{frame}
@@ -521,7 +531,8 @@ f_X(x) = f_Y(\mathcal T(x)) \djac{\mathcal T}{x}
 			\begin{itemize}
 				\item \galert{Express $z \in \supp(p(z)) \subseteq \mathbb R^K$ as a transformation of some unconstrained $\zeta \in \mathbb R^K$} \pause
 				\item \galert{Pick a variational family over the entire real coordinate space} \pause
-				\item \galert{And pick one for which a standardisation exists!} \pause
+				\item \galert{basically, pick a Gaussian!} \pause
+				%\item \galert{And pick one for which a standardisation exists!} \pause
 			\end{itemize}
 		\item \alert{Intractable expectations} \pause
 			\begin{itemize}
@@ -549,6 +560,8 @@ f_X(x) = f_Y(\mathcal T(x)) \djac{\mathcal T}{x}
 	\begin{equation*}
 		p(x, \zeta) = p(x, \inv{\mathcal T}(\zeta)) \djac{\inv{\mathcal T}}{\zeta}
 	\end{equation*}
+	
+	\alert{ASK FILL-IN THE GAP QUESTION}
 \end{frame}
 
 \begin{frame}{VI in real coordinate space}
@@ -585,7 +598,7 @@ f_X(x) = f_Y(\mathcal T(x)) \djac{\mathcal T}{x}
 
 \begin{frame}{Reparameterised ELBO}
 	
-	Recall that for Gaussians we have a standardisation procedure $\mathcal S_\lambda(z) \sim \mathcal N(\epsilon| 0, I)$
+	Recall that for Gaussians we have a standardisation procedure $\mathcal S_\lambda(\zeta) \sim \mathcal N(\epsilon| 0, I)$
 	
 
 	\begin{small}
@@ -610,7 +623,7 @@ f_X(x) = f_Y(\mathcal T(x)) \djac{\mathcal T}{x}
 		\begin{aligned}
 		\pdv{\lambda}\ELBO(\lambda) \pause \overset{\text{MC}}{\approx}& \frac{1}{M} \sum_{i=1}^M \pdv{\lambda} \log \underbrace{p(x|\inv{\mathcal T}(\inv{\mathcal S}_\lambda(\epsilon_i)))}_{\text{likelihood}} \\ \pause
 		&\phantom{\frac{1}{M} \sum}+ \pdv{\lambda} \log \underbrace{p(\inv{\mathcal T}(\inv{\mathcal S}_\lambda(\epsilon_i)))}_{\text{prior}} \\ \pause
-		&\phantom{\frac{1}{M} \sum}+ \pdv{\lambda} \log \underbrace{\djac{\inv{\mathcal T}}{\inv{\mathcal S}_\lambda(\epsilon_i)}}_{\text{change of space}} \\ \pause
+		&\phantom{\frac{1}{M} \sum}+ \pdv{\lambda} \log \underbrace{\djac{\inv{\mathcal T}}{\inv{\mathcal S}_\lambda(\epsilon_i)}}_{\text{change of volume}} \\ \pause
 		&+ \pdv{\lambda} \underbrace{\Ent{q(\zeta; \lambda)}}_{\text{analaytic}}
 		\end{aligned}
 	\end{equation*}
