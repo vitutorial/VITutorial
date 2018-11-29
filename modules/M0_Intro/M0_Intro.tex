@@ -46,13 +46,8 @@
 
 \begin{frame}{Why are we here today?}
 
-Because NN models work
-\begin{itemize}
-	\item at least one drawback is low data efficiency
-\end{itemize}
-\pause
-
-We usually turn to probabilistic models to deal with
+Because NN models work \\ \pause
+~ but they may struggle with
 \begin{itemize}
 	\item lack of supervision
 	\item partial supervision
@@ -60,7 +55,8 @@ We usually turn to probabilistic models to deal with
 \end{itemize}
 \pause
 
-But it turns out NNs and probabilistic modelling do not go along very well
+In such cases, we usually turn to probabilistic models \\ \pause
+~ but it turns out NNs and PGMs do not go along
 \begin{itemize}
 	\item well... \pause that's no longer true!
 \end{itemize}
@@ -72,7 +68,7 @@ But it turns out NNs and probabilistic modelling do not go along very well
 As we progress we will
 \begin{itemize}
 	\item develop a shared vocabulary to talk about generative models powered by NNs
-	\item deriving crucial results step by step
+	\item derive crucial results step by step
 \end{itemize}
 
 \pause
@@ -448,12 +444,14 @@ Exact gradient is intractable
 Some reasons
 
 \begin{itemize}
+	\item better handle on statistical assumptions\\
+	e.g. breaking marginal independence \pause
 	\item organise a massive collection of data\\
 	e.g. LDA	 \pause
 	\item learn from unlabelled data\\
 	e.g. semi-supervised learning \pause
 	\item induce discrete representations\\
-	e.g. parse trees, dependency graphs, permutations, alignments \pause
+	e.g. parse trees, dependency graphs, alignments \pause
 	%e.g. derivatives are not defined for discontinuous functions
 	\item uncertainty quantification\\
 	e.g. Bayesian NNs 
