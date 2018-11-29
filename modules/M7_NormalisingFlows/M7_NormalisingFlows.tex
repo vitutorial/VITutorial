@@ -3,7 +3,7 @@
 \usetheme{Montpellier}
 \usecolortheme{beaver}
 
-\usepackage{amsmath, amssymb, ../../vimacros, hyperref, tikz}
+\usepackage{amsmath, amssymb, ../../vimacros, hyperref, tikz, subcaption}
 \usepackage{physics}
 \usetikzlibrary{positioning, fit, bayesnet, shapes.misc, patterns}
 \usepackage[round]{natbib}
@@ -55,13 +55,36 @@
 \begin{frame}{The Case of Pictures}
 Have you modeled pixels as Gaussian variables?
 Do we really believe that the pixels follow a Gaussian distribution?
+\begin{figure}
+\begin{subfigure}{.3\textwidth}
+\includegraphics[scale=.02]{cat1.jpg} 
+\end{subfigure}
+~
+\begin{subfigure}{.3\textwidth}
+\includegraphics[scale=.02]{cat2.jpg} 
+\end{subfigure}
+~
+\begin{subfigure}{.3\textwidth}
+\includegraphics[scale=.02]{cat3.jpg} 
+\end{subfigure}
+\end{figure}
+\end{frame}
+
+\begin{frame}
+
 \end{frame}
 
 \begin{frame}{The case of Word Embeddings}
+\pause
+\begin{figure}
+\includegraphics[scale=.2]{wordcloud.png}
+\caption{\url{https://it.mathworks.com/help/textanalytics/ref/trainwordembedding.html}}
+\end{figure}
 \end{frame}
 
 \begin{frame}{Posterior Approximations}
 We often use exponential families to approximate posteriors. Thus we assume unimodal posteriors. Is that realistic?
+\pause
 \begin{block}{Counter example}
 Gaussian mixture model
 \end{block}
@@ -79,7 +102,7 @@ $ h: \mathcal{X} \rightarrow \mathcal{Y} $ exists.
 \begin{equation*}
 \begin{aligned}
 h(x) &= y \\ \pause
-p(y) &= p(h^{-1}(y))\djac{h^{-1}}{y} = p(x)\djac{h^{-1}}{y}  \\
+p(y) &= p(h^{-1}(y))\djac{h^{-1}}{y} = p(x)\djac{h^{-1}}{y}  \\ \pause
 p(x) &= p(h(x))\djac{h}{x} = p(y)\djac{h}{x}
 \end{aligned}
 \end{equation*}
@@ -107,7 +130,7 @@ Decompose mapping $ h: \mathcal{X} \rightarrow \mathcal{Y} $ into
 h = h_{1}\circ h_{2}\circ\ldots\circ h_K \ .
 \end{equation*}
 \pause
-Now we can learn $ K $ mappings with simple Jacobians.
+Now we can learn $ K $ mappings with simple jacobian determinants.
 \begin{small}
 \pause
 \begin{equation*}
@@ -250,7 +273,7 @@ We use a MADE $ g^{(2)}_{\theta} $ to predict the parameters of the first transf
 Then we apply the first transformation.
 \begin{equation*}
 \begin{aligned}
-\epsilon_{j}^{(1)} &= h_{2}^{-1}(x)_{j} &= \frac{x - \mu(x_{<j})}{\sigma(x_{<j})} \\ \pause
+\epsilon_{j}^{(1)} &= h_{2}^{-1}(x)_{j} &= \frac{x_{j} - \mu(x_{<j})}{\sigma(x_{<j})} \\ \pause
 \epsilon^{(1)} &= h_{2}^{-1}(x) &= \frac{x - \mu}{\sigma}
 \end{aligned}
 \end{equation*}
@@ -371,8 +394,8 @@ h^{-1}(\epsilon) &= z
 \begin{block}{Flow Mapping}
 \begin{equation*}
 \begin{aligned}
-h_{1}(h_{2}(\ldots h_{K}(z))) &= \epsilon \text{ s.t. } \epsilon \perp \lambda \\
-h^{-1}_{K}(h^{-1}_{K-1}(\ldots h^{-1}_{1}(\epsilon))) &= z
+h_{1}\circ h_{2}\circ \ldots \circ h_{K}(z) &= \epsilon \text{ s.t. } \epsilon \perp \lambda \\
+h^{-1}_{K}\circ h^{-1}_{K-1}\circ\ldots \circ h^{-1}_{1}(\epsilon) &= z
 \end{aligned}
 \end{equation*}
 \end{block}
@@ -511,6 +534,7 @@ z^{(2)} &= \mu^{(2)} + \sigma^{(2)}z^{(1)} \text{ where } \begin{bmatrix}\mu^{(2
 \begin{frame}{Other Appliations of Normalizing Flows}
 \begin{itemize}
 \item As a prior
+\pause
 \item Modeling of dynamic systems
 \end{itemize}
 \end{frame}
