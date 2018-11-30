@@ -132,12 +132,19 @@ Now we can learn $ K $ mappings with simple jacobian determinants.
 \begin{equation*}
 \begin{aligned}
 h^{-1} &= h_{K}^{-1}\circ h_{K-1}^{-1} \circ \ldots \circ h_{1}^{-1} \\ \pause
-p(x) &= p(y) \djac{h_{1}}{y^{(1)}}\djac{h_{2}}{y^{(2)}}\ldots \djac{h_{K}}{x} \\ \pause
-p(y) &= p(x)\djac{h_{1}^{-1}}{y^{(K-1)}} \djac{h_{2}^{-1}}{y^{(K-2)}}\ldots \djac{h_{1}^{-1}}{y}
+p_{X}(x) &= p_{Y}(y) \djac{h_{1}}{y^{(1)}}\djac{h_{2}}{y^{(2)}}\ldots \djac{h_{K}}{x} \\ \pause
+p_{Y}(y) &= p_{X}(x)\djac{h_{1}^{-1}}{y^{(K-1)}} \djac{h_{2}^{-1}}{y^{(K-2)}}\ldots \djac{h_{1}^{-1}}{y}
 \end{aligned}
 \end{equation*}
 \end{small}
 \end{block}
+\end{frame}
+
+\begin{frame}{Normalising Flows}
+\begin{figure}
+\includegraphics[scale=.4]{nf.png}
+\caption{Taken from \cite{RezendeMohamed:2015}}
+\end{figure}
 \end{frame}
 
 \section{Use Case 1: Density Estimation}
@@ -169,8 +176,8 @@ p_{X}(x) &= p_{\epsilon}(\epsilon)\djac{h}{x} \\ \pause
 \begin{frame}{2-step Flow}
 \begin{equation*}
 \begin{aligned}
-p(x) &= p(\textcolor{blue}{\epsilon})\djac{h_{1}^{-1}}{\textcolor{red}{\epsilon^{(1)}}}\djac{h_{2}^{-1}}{x} \\ \pause
-&= p(\textcolor{blue}{h_{1}^{-1}(h_{2}^{-1}(x))})\djac{h_{1}^{-1}}{\textcolor{red}{h_{2}^{-1}(x)}}\djac{h_{2}^{-1}}{x}
+p_{X}(x) &= p_{\epsilon}(\textcolor{blue}{\epsilon})\djac{h_{1}^{-1}}{\textcolor{red}{\epsilon^{(1)}}}\djac{h_{2}^{-1}}{x} \\ \pause
+&= p_{\epsilon}(\textcolor{blue}{h_{1}^{-1}(h_{2}^{-1}(x))})\djac{h_{1}^{-1}}{\textcolor{red}{h_{2}^{-1}(x)}}\djac{h_{2}^{-1}}{x}
 \end{aligned}
 \end{equation*}
 \pause
@@ -324,9 +331,9 @@ In practice we work with the log-likelihood.
 \begin{small}
 \begin{equation*}
 \begin{aligned}
-p(x) &= p(\textcolor{blue}{\epsilon})\djac{h_{1}^{-1}}{\textcolor{red}{\epsilon^{(1)}}}\djac{h_{2}^{-1}}{x} \\
-&= p(\textcolor{blue}{h_{1}^{-1}(h_{2}^{-1}(x))})\djac{h_{1}^{-1}}{\textcolor{red}{h_{2}^{-1}(x)}}\djac{h_{2}^{-1}}{x} \\ \pause
-\log p(x) &= \log p(\textcolor{blue}{h_{1}^{-1}(h_{2}^{-1}(x))})\pause -\sum_{j=1}^{M}\log\sigma^{(2)}_{j}-\sum_{j=1}^{M}\log\sigma^{(1)}_{j}
+p_{X}(x) &= p_{\epsilon}(\textcolor{blue}{\epsilon})\djac{h_{1}^{-1}}{\textcolor{red}{\epsilon^{(1)}}}\djac{h_{2}^{-1}}{x} \\
+&= p_{\epsilon}(\textcolor{blue}{h_{1}^{-1}(h_{2}^{-1}(x))})\djac{h_{1}^{-1}}{\textcolor{red}{h_{2}^{-1}(x)}}\djac{h_{2}^{-1}}{x} \\ \pause
+\log p_{X}(x) &= \log p_{\epsilon}(\textcolor{blue}{h_{1}^{-1}(h_{2}^{-1}(x))})\pause -\sum_{j=1}^{M}\log\sigma^{(2)}_{j}-\sum_{j=1}^{M}\log\sigma^{(1)}_{j}
 \end{aligned}
 \end{equation*}
 \end{small}
