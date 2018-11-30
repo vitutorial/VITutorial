@@ -156,6 +156,8 @@ p_{Y}(y) &= p_{X}(x)\djac{h_{1}^{-1}}{y^{(K-1)}} \djac{h_{2}^{-1}}{y^{(K-2)}}\ld
 \begin{block}{Setting}
 Our data $ x $ is has unknown continuous density $ p(x) $.
 We can therefore not handcraft a likelihood.
+\\ \pause
+\textbf{Examples:} word embeddings, pictures
 \end{block}
 \pause
 \begin{block}{Goal}
@@ -212,7 +214,7 @@ Next assume a mapping $ h(x_{j}) = \epsilon_{j} $.
 \begin{equation*}
 \begin{aligned}
 h_{1}\circ h_{2} \circ\ldots\circ h_{K}(x) &= \epsilon \\
-h^{-1}_{K}\circ h^{-1}_{K-1}\circ\ldots \circ h^{-1}_{1}(\epsilon) &= x
+h^{-1}_{K}\circ h^{-1}_{K-1}\circ\ldots \circ h^{-1}_{1}(\epsilon) &= x \pause = \epsilon^{(K)}
 \end{aligned}
 \end{equation*}
 \end{block}
@@ -380,7 +382,7 @@ We want a complex, multimodal approximate posterior $ q(z|x) $.
 \begin{equation*}
 \begin{aligned}
 h(z) &= \epsilon \text{ s.t. } \epsilon \perp \lambda \\
-h^{-1}(\epsilon) &= z = z^{(K)}
+h^{-1}(\epsilon) &= z
 \end{aligned}
 \end{equation*}
 \end{block}
@@ -398,7 +400,7 @@ h^{-1}(\epsilon) &= z = z^{(K)}
 \begin{equation*}
 \begin{aligned}
 h_{1}\circ h_{2}\circ \ldots \circ h_{K}(z) &= \epsilon \text{ s.t. } \epsilon \perp \lambda \\
-h^{-1}_{K}\circ h^{-1}_{K-1}\circ\ldots \circ h^{-1}_{1}(\epsilon) &= z
+h^{-1}_{K}\circ h^{-1}_{K-1}\circ\ldots \circ h^{-1}_{1}(\epsilon) &= z \pause = z^{(K)}
 \end{aligned}
 \end{equation*}
 \end{block}
