@@ -46,7 +46,7 @@
 \tableofcontents
 \end{frame}
 
-\section{The problem with Standard Distributions}
+\section{The problem with Known Distributions}
 
 \begin{frame}
 \tableofcontents[current]
@@ -68,10 +68,6 @@ Do we really believe that the pixels follow a Gaussian distribution?
 \includegraphics[scale=.02]{cat3.jpg} 
 \end{subfigure}
 \end{figure}
-\end{frame}
-
-\begin{frame}
-
 \end{frame}
 
 \begin{frame}{The case of Word Embeddings}
@@ -102,8 +98,8 @@ $ h: \mathcal{X} \rightarrow \mathcal{Y} $ exists.
 \begin{equation*}
 \begin{aligned}
 h(x) &= y \\ \pause
-p(y) &= p(h^{-1}(y))\djac{h^{-1}}{y} = p(x)\djac{h^{-1}}{y}  \\ \pause
-p(x) &= p(h(x))\djac{h}{x} = p(y)\djac{h}{x}
+p_{Y}(y) &= p_{X}(h^{-1}(y))\djac{h^{-1}}{y} = p(x)\djac{h^{-1}}{y}  \\ \pause
+p_{X}(x) &= p_{Y}(h(x))\djac{h}{x} = p(y)\djac{h}{x}
 \end{aligned}
 \end{equation*}
 \pause
@@ -156,14 +152,14 @@ We can therefore not handcraft a likelihood.
 \end{block}
 \pause
 \begin{block}{Goal}
-Transform known variable $ x $ into $ \epsilon = h(x) $ and express the likelihood as
+Transform known variable $ x $ into $ \epsilon = h(x) $ with \textbf{known} density $ p_{\epsilon}(\epsilon) $ and express the likelihood as
 \begin{small}
 \pause
 \begin{equation*}
 \begin{aligned}
-p(x) &= p(\epsilon)\djac{h}{x} \\ \pause
-&= p(\textcolor{blue}{\epsilon})\djac{h_{1}}{\epsilon^{(1)}}\djac{h_{2}}{\epsilon^{(2)}}\ldots \djac{h_{K}}{x} \\ \pause
-&= p(\textcolor{blue}{h_{1}(\epsilon^{(1)})})\djac{h_{1}}{\epsilon^{(1)}}\ldots \djac{h_{K}}{x}
+p_{X}(x) &= p_{\epsilon}(\epsilon)\djac{h}{x} \\ \pause
+&= p_{\epsilon}(\textcolor{blue}{\epsilon})\djac{h_{1}}{\epsilon^{(1)}}\djac{h_{2}}{\epsilon^{(2)}}\ldots \djac{h_{K}}{x} \\ \pause
+&= p_{\epsilon}(\textcolor{blue}{h_{1}(\epsilon^{(1)})})\djac{h_{1}}{\epsilon^{(1)}}\ldots \djac{h_{K}}{x}
 \end{aligned}
 \end{equation*}
 \end{small}
@@ -182,12 +178,12 @@ The transformations $ h^{-1}_{1} $ and $ h^{-1}_{2} $ are learned by backprop. T
 \end{frame}
 
 \begin{frame}{Designing a Transformation}
-Assume: $ x_{i} = (x_{i1}, x_{i2}, \ldots x_{iM}) $.
+Assume: $ x = (x_{1}, x_{2}, \ldots x_{M}) $.
 Then factorise the density according to the chain rule.
 \begin{equation*}
-\log p(x_{i}|\theta) = \sum_{j=1}^{M} \log p(x_{ij}|x_{i,<j}\theta)
+\log p(x|\theta) = \sum_{j=1}^{M} \log p(x_{j}|x_{<j}\theta)
 \end{equation*}
-Next assume an invertible mapping $ h(x_{ij}) = \epsilon_{ij} $.
+Next assume an invertible mapping $ h(x_{j}) = \epsilon_{j} $.
 \begin{block}{Simple Mapping}
 \begin{equation*}
 \begin{aligned}
@@ -199,12 +195,12 @@ h^{-1}(\epsilon) &= x
 \end{frame}
 
 \begin{frame}{Designing a Transformation}
-Assume: $ x_{i} = (x_{i1}, x_{i2}, \ldots x_{iM}) $.
+Assume: $ x = (x_{1}, x_{2}, \ldots x_{M}) $.
 Then factorise the density according to the chain rule.
 \begin{equation*}
-\log p(x_{i}|\theta) = \sum_{j=1}^{M} \log p(x_{ij}|x_{i,<j}\theta)
+\log p(x|\theta) = \sum_{j=1}^{M} \log p(x_{j}|x_{<j}\theta)
 \end{equation*}
-Next assume a mapping $ h(x_{ij}) = \epsilon_{ij} $.
+Next assume a mapping $ h(x_{j}) = \epsilon_{j} $.
 \begin{block}{Flow Mapping}
 \begin{equation*}
 \begin{aligned}
@@ -368,7 +364,7 @@ We want a complex, multimodal approximate posterior $ q(z|x) $.
 \begin{frame}{Normalising Flows: Inference}
 \begin{equation*}
 \begin{aligned}
-\ELBO &= -\KL{p(z|x)}{q(z|x)} \\
+\ELBO &= -\KL{q(z|x)}{p(z|x)} \\
 &= \E[q(z|\lambda)]{\log p(x|z)} - \KL{q(z|\lambda))}{p(z)} \\
 &= \underbrace{\E[q(\epsilon)]{\log p(x|h^{-1}(\epsilon))}}_{\text{sample $ z $}} - \underbrace{\KL{q(z|\lambda)}{p(z)}}_{\text{assess density}}
 \end{aligned}
@@ -377,7 +373,7 @@ We want a complex, multimodal approximate posterior $ q(z|x) $.
 \begin{equation*}
 \begin{aligned}
 h(z) &= \epsilon \text{ s.t. } \epsilon \perp \lambda \\
-h^{-1}(\epsilon) &= z
+h^{-1}(\epsilon) &= z = z^{(K)}
 \end{aligned}
 \end{equation*}
 \end{block}
@@ -405,13 +401,13 @@ h^{-1}_{K}\circ h^{-1}_{K-1}\circ\ldots \circ h^{-1}_{1}(\epsilon) &= z
 \begin{small}
 \begin{equation*}
 \begin{aligned}
-q(z^{(2)}) &= q(\textcolor{blue}{\epsilon})\djac{h_{1}}{\textcolor{red}{z^{(1)}}}\djac{h_{2}}{z^{(2)}} \\ \pause
-&= q(\textcolor{blue}{h_{1}(h_{2}(z^{(2)}))})\djac{h_{1}}{\textcolor{red}{h_{2}(z^{(2)})}}\djac{h_{2}}{z^{(2)}}
+q_{Z}(z^{(2)}) &= q_{\epsilon}(\epsilon)\djac{h_{1}}{\textcolor{red}{z^{(1)}}}\djac{h_{2}}{\textcolor{blue}{z^{(2)}}} \\ \pause
+&= q_{\epsilon}(\epsilon)\djac{h_{1}}{\textcolor{red}{h_{1}(\epsilon)}}\djac{h_{2}}{\textcolor{blue}{h_{2}(h_{1}(\epsilon))}}
 \end{aligned}
 \end{equation*}
 \end{small}
 \pause
-The transformations $ h^{-1}_{1} $ and $ h^{-1}_{2} $ are learned by backprop. The determinants need to be computed analytically.
+The transformations $ h_{1} $ and $ h_{2} $ are learned by backprop. The determinants need to be computed analytically.
 \end{frame}
 
 \begin{frame}{Designing a Transformation}
@@ -485,9 +481,9 @@ In practice we work with the log-likelihood.
 \begin{small}
 \begin{equation*}
 \begin{aligned}
-q(z^{(2)}) &= q(\textcolor{blue}{\epsilon})\djac{h_{1}}{\textcolor{red}{z^{(1)}}}\djac{h_{2}}{z^{(2)}} \\
-&= q(\textcolor{blue}{h_{1}(h_{2}(z^{(2)}))})\djac{h_{1}}{\textcolor{red}{h_{2}(z^{(2)})}}\djac{h_{2}}{z^{(2)}} \\ \pause
-\log q(z^{(2)}) &= \log q(\textcolor{blue}{h_{1}(h_{2}(z^{(2)}))}) + \sum_{j=1}^{M}\log\sigma^{(1)}_{j} + \sum_{j=1}^{M}\log\sigma^{(2)}_{j}
+q_{Z}(z^{(2)}) &= q_{\epsilon}(\epsilon)\djac{h_{1}}{\textcolor{red}{z^{(1)}}}\djac{h_{2}}{\textcolor{blue}{z^{(2)}}} \\
+&= q_{\epsilon}(\epsilon)\djac{h_{1}}{\textcolor{red}{h_{1}(\epsilon)}}\djac{h_{2}}{\textcolor{blue}{h_{2}(h_{1}(\epsilon))}} \\ \pause
+\log q_{Z}(z^{(2)}) &= \log q_{\epsilon}(\epsilon) \pause + \sum_{j=1}^{M}\log\sigma^{(1)}_{j} + \sum_{j=1}^{M}\log\sigma^{(2)}_{j}
 \end{aligned}
 \end{equation*}
 \end{small}
@@ -501,11 +497,12 @@ z^{(2)} &= \mu^{(2)} + \sigma^{(2)}z^{(1)} \text{ where } \begin{bmatrix}\mu^{(2
 \end{frame}
 
 \begin{frame}{ELBO}
+Recall: $ z = z^{(2)} $
 \begin{small}
 \begin{equation*}
 \begin{aligned}
-&\ELBO = \E[q(z|\lambda)]{\log p(x|z)} - \KL{q(z^{(2)}|\lambda))}{p(z^{(2)})} = \\ \pause
-&\E[q(z|\lambda)]{\log p(x|z)} - \KL{q(\epsilon)\djac{h}{z^{(2)}}}{p(z)}
+&\ELBO = \E[q(z|\lambda)]{\log p(x|z)} - \KL{\textcolor{blue}{q(z)|\lambda))}}{p(z)} = \\ \pause
+&\E[q(z|\lambda)]{\log p(x|z)} - \KL{\textcolor{blue}{q(\epsilon)\djac{h}{z}}}{p(z)}
 \end{aligned}
 \end{equation*}
 \end{small}
@@ -516,8 +513,8 @@ z^{(2)} &= \mu^{(2)} + \sigma^{(2)}z^{(1)} \text{ where } \begin{bmatrix}\mu^{(2
 \begin{block}{KL-term}
 \begin{equation*}
 \begin{aligned}
-&\KL{q(\epsilon)\djac{h}{z^{(2)}}}{p(z)} = \\ \pause
-&\E[q(z^{(2)}|\lambda))]{\frac{q(\epsilon)\djac{h}{z^{(2)}}}{p(z^{(2)})}} \pause \overset{\text{MC}}{\approx} \frac{1}{S}\sum_{s=1}^{S} \frac{q(\epsilon)\djac{h}{z^{(2,s)}}}{p(z^{(2,s)})}
+&\KL{q(\epsilon)\djac{h}{z}}{p(z)} = \\ \pause
+&\E[q(z|\lambda))]{\log\frac{q(\epsilon)\djac{h}{z}}{p(z)}} \pause \overset{\text{MC}}{\approx} \frac{1}{S}\sum_{s=1}^{S} \log\frac{q(\epsilon)\djac{h}{z^{(s)}}}{p(z^{(s)})}
 \end{aligned}
 \end{equation*}
 \end{block}
@@ -525,19 +522,19 @@ z^{(2)} &= \mu^{(2)} + \sigma^{(2)}z^{(1)} \text{ where } \begin{bmatrix}\mu^{(2
 \begin{block}{Jacobian}
 \pause
 \begin{equation*}
-\djac{h}{z^{(2,s)}} = \sum_{j=1}^{M}\log\sigma^{(1)}_{j} + \sum_{j=1}^{M}\log\sigma^{(2)}_{j}
+\djac{h}{z^{(s)}} = \sum_{j=1}^{M}\log\sigma^{(1)}_{j} + \sum_{j=1}^{M}\log\sigma^{(2)}_{j}
 \end{equation*}
 \end{block}
 \end{small}
 \end{frame}
 
-\begin{frame}{Other Appliations of Normalizing Flows}
-\begin{itemize}
-\item As a prior
-\pause
-\item Modeling of dynamic systems
-\end{itemize}
-\end{frame}
+%\begin{frame}{Other Appliations of Normalizing Flows}
+%\begin{itemize}
+%\item As a prior
+%\pause
+%\item Modeling of dynamic systems
+%\end{itemize}
+%\end{frame}
 
 \section{Summary}
 
@@ -545,7 +542,7 @@ z^{(2)} &= \mu^{(2)} + \sigma^{(2)}z^{(1)} \text{ where } \begin{bmatrix}\mu^{(2
 \begin{itemize}
 \item NFs model arbitrary continuous distributions
 \item They allow for density computation
-\item Need to have simple Jacobian
+\item Need to have simple Jacobian determinants
 \item Depending on direction, they are good at either sampling or density computation (not both)
 \end{itemize}
 \end{frame}
