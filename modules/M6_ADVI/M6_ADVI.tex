@@ -63,6 +63,8 @@
 \maketitle
 \end{frame}
 
+
+
 \begin{frame}{What we know so far}
     \begin{itemize}
         \item DGMs: \pause probabilistic models parameterised by neural networks \pause
@@ -81,6 +83,7 @@
     
 \end{frame}
 
+\frame{\tableofcontents}
 
 
 \section{Multivariate calculus recap}
@@ -180,7 +183,7 @@ p_X(x) = p_Y(\mathcal T(x)) \djac{\mathcal T}{x}
 	
 	~ \pause
 
-	The idea is to count on a \emph{standardisation} procedure\\ \pause
+	The idea is to count on a \emph{reparameterisation} \\ \pause
 	~ a transformation $\mathcal S_\lambda: \mathbb R^K \to \mathbb R^K$ such that \pause
 	\begin{equation*}
 	\begin{aligned}
@@ -314,9 +317,38 @@ p_X(x) = p_Y(\mathcal T(x)) \djac{\mathcal T}{x}
 \begin{frame}{Beyond}
 
 	Many interesting densities cannot easily be reparameterised %are not location-scale families
-	\begin{itemize}
-		\item e.g. Beta, Gamma, Dirichlet, von Mises-Fisher
-	\end{itemize} 
+	
+	~
+	
+	\only<2>{
+		Beta
+	
+		\includegraphics[scale=0.3]{densities/beta}
+	}
+	\only<3>{
+		Gamma
+	
+		\includegraphics[scale=0.3]{densities/gamma}
+	}
+	\only<4>{
+		Weibull
+	
+		\includegraphics[scale=0.25]{densities/weibull}
+	}
+	\only<5>{
+		Dirichlet
+	
+		\includegraphics[scale=0.3]{densities/dirichlet}
+	}
+	\only<6>{
+		von Mises-Fisher 
+	
+		\includegraphics[scale=0.3]{densities/spherical}
+	}
+	
+	%\begin{itemize}
+	%	\item e.g. Beta, Gamma, Dirichlet, von Mises-Fisher
+	%\end{itemize} 
 	%
 	%The inverse cdf of a multivariate rv is seldom known in closed-form
 	%\begin{itemize}
@@ -343,15 +375,66 @@ p_X(x) = p_Y(\mathcal T(x)) \djac{\mathcal T}{x}
 	
 \end{frame}
 
-\begin{frame}{Example}
+
+\begin{frame}{Example: Weibull-Poisson model}
 	Suppose we have some ordinal data which we assume to be Poisson-distributed
-	\begin{equation*}
-		X|\lambda \sim \Poisson(\lambda)
+	\begin{equation*}	
+	\begin{aligned}
+		\uncover<3->{\alert{z}|r, k &\sim \alert{\Weibull(r, k)}} & \uncover<3->{r \in \mathbb R_{>0}, k \in \mathbb R_{>0}}	\\
+		X|\alert{z} &\sim \Poisson(\alert{z}) 
+		&\alert{z} \in \mathbb R_{>0}
+	\end{aligned}
 	\end{equation*}
-	and suppose we want to impose 
+	\uncover<2->{and suppose we want to impose a Weibull prior on the Poisson rate}
 	
-	\alert{FINISH EXAMPLE, GIVE THE OVERVIEW OF ADVI ``PSEUDO-CODE'' FIRST}
+	%\alert{FINISH EXAMPLE, GIVE THE OVERVIEW OF ADVI ``PSEUDO-CODE'' FIRST}
 	% ALONG THE LINES OF THE "ADVI" SLIDE BUT WITH SIMPLE LANGUAGE
+\end{frame}
+
+\begin{frame}{VI for Weibull-Poisson model}
+	Generative model
+	\begin{equation*}
+		\begin{aligned}
+			&p(x, z|r,k) = p(z|r, k) p(x|\rho) \pause
+		\end{aligned}
+	\end{equation*}
+	
+	Marginal 
+	\begin{equation*}
+		p(x|r,k) = \int_{\alert{\mathbb R_{>0}}} p(z|r, k) p(x|\rho) \dd z
+	\end{equation*}
+	
+	\pause
+	
+	ELBO 
+	\begin{equation*}
+		\E[\alert{q(z|\lambda)}]{\log p(x, z|r,k)} + \Ent{q(z)} \pause
+	\end{equation*}
+	\alert{Can we make $q(z|\lambda)$ Gaussian?} \\ \pause 
+	~ \alert{No! $\supp(\mathcal N(z|\mu, \sigma^2)) = \mathbb R$}
+\end{frame}
+
+\begin{frame}{Strategy}
+
+	Build a change of variable into the model 
+	\begin{equation*}
+		\begin{aligned}
+			&p(x, \alert{z}|r,k) = p(\alert{z}|r, k) p(x|\rho) \\
+			&= \Weibull(\alert{z}|r, k) \Poisson(x|z) \\ 
+			\uncover<2->{&= \Weibull(\underbrace{\uncover<3->{\exp(\galert{\zeta})}}_{\alert{z}}|r, k)  \Poisson(x|\underbrace{\uncover<3->{\exp(\galert{\zeta})}}_{\alert{z}})\uncover<4->{\djac{\exp}{\galert{\zeta}}}  }
+		\end{aligned}
+	\end{equation*}
+	
+	\uncover<6->{
+	ELBO
+	\begin{equation*}
+		\E[q(\zeta|\lambda)]{\ldots} + \Ent{q(\zeta)}
+	\end{equation*}
+	\uncover<7->{
+		\alert{Can we use a Gaussian approximate posterior?} \pause \uncover<8->{\galert{Yes!}}
+	}
+	}
+
 \end{frame}
 
 \begin{frame}{Differentiable models}
@@ -473,28 +556,25 @@ p_X(x) = p_Y(\mathcal T(x)) \djac{\mathcal T}{x}
 \end{frame}
 
 \begin{frame}{Parameters in real coordinate space}
-	It is easy to make sure parameters are unconstrained
-	\vspace{-15pt}
+	
+	Consider the Gaussian case: $Z \sim \mathcal N(\mu, \sigma)$ \\ \pause
+	~ how can we obtain $\mu \in \mathbb R^d$ and $\sigma \in \mathbb R^d_{\alert{>0}}$ \\
+	~ from $\lambda_\mu \in \mathbb R^d$ and $\lambda_\sigma \in \mathbb R^d$? \pause
 	\begin{itemize}
-		\item we just need to use an appropriate activation
+		\item $\mu = \lambda_\mu$ \pause
+		\item $\sigma = \galert{\exp}(\lambda_\sigma)$ \pause or $\sigma = \galert{\softplus}(\lambda_\sigma)$ 
 	\end{itemize}
 	
-	Example 
+	\pause
+	
+	The vMF distribution is parameterised by a unit-norm vector $v$\\
+	~ how can we get $v$ from $\lambda_v \in \mathbb R^d$? \pause
 	\begin{itemize}
-		\item $Z \sim \mathcal N(\mu, \sigma)$ \\
-		where $\mu \in \mathbb R^d$ and $\sigma \in \mathbb R^d_{>0}$ \pause
-		\begin{itemize}
-			\item $\mu = \lambda_\mu \in \mathbb R^d$ \pause
-			\item $\sigma = \softplus(\lambda_\sigma)$ and $\lambda_\sigma \in \mathbb R^d$
-		\end{itemize} \pause
-		\item $Z \sim \vMF(\mu, \kappa)$ \\ 
-		where $\mu \in \mathbb R^d$ with $\norm{\mu}_2 = 1$ and $\kappa \in \mathbb R_{\ge 0}$ \pause
-		\begin{itemize}
-			\item $\mu = \frac{\lambda_\mu}{\norm{\lambda_\mu}_2}$ for $\lambda_\mu \in \mathbb R^d$ \pause
-			\item $\kappa = \softplus(\lambda_\kappa)$ and $\lambda_\kappa \in \mathbb R$
-		\end{itemize}
-		
+		\item $v = \galert{\frac{\textcolor{black}{\lambda_v}}{\norm{\textcolor{black}{\lambda_v}}_2}}$  \pause
 	\end{itemize}
+	
+	It is typically possible to work with unconstrained parameters, \galert{it only takes an appropriate activation}
+	
 	
 \end{frame}
 
@@ -558,10 +638,9 @@ p_X(x) = p_Y(\mathcal T(x)) \djac{\mathcal T}{x}
 	Recall that we have a joint density $p(x,z)$\\ \pause
 	~ which we can use to construct $p(x, \zeta)$ \pause
 	\begin{equation*}
-		p(x, \zeta) = p(x, \inv{\mathcal T}(\zeta)) \djac{\inv{\mathcal T}}{\zeta}
+		p(x, \zeta) = p(x, \underbrace{\uncover<6->{\inv{\mathcal T}(\zeta)}}_{z}) \djac{\uncover<7->{\inv{\mathcal T}}}{\uncover<7->{\zeta}}
 	\end{equation*}
 	
-	\alert{ASK FILL-IN THE GAP QUESTION}
 \end{frame}
 
 \begin{frame}{VI in real coordinate space}
@@ -644,12 +723,72 @@ p_X(x) = p_Y(\mathcal T(x)) \djac{\mathcal T}{x}
 
 \section{Example}
 
-\begin{frame}{LDA}
+
+\begin{frame}{Weibull-Poisson model}
+
+	Build a change of variable into the model 
+	\begin{small}
+	\begin{equation*}
+		\begin{aligned}
+			&p(x, \alert{z}|r,k) = p(\alert{z}|r, k) p(x|\rho) \\
+			&= \Weibull(\alert{z}|r, k) \Poisson(x|z) \\ 
+			\uncover<2->{&= \Weibull(\underbrace{\uncover<3->{\inv{\log}(\galert{\zeta})}}_{\alert{z}}|r, k)  \Poisson(x|\underbrace{\uncover<3->{\inv{\log}(\galert{\zeta})}}_{\alert{z}})\uncover<4->{\djac{\inv{\log}}{\galert{\zeta}}}  } \\
+			\uncover<5->{&= p(x, \alert{z} = \inv{\log}(\galert{\zeta})) \djac{\inv{\log}}{\galert{\zeta}}}
+		\end{aligned}
+	\end{equation*}
+	\end{small}
+	
+	\uncover<6->{
+	ELBO
+	\begin{small}
+	\begin{equation*}
+	\begin{aligned}
+		&\E[q(\zeta|\lambda)]{\only<6>{\ldots}\only<7->{\log p(x, z = \inv{\log}(\zeta)) \djac{\inv{\log}}{\zeta}}} + \Ent{q(\zeta)} \\
+		&\uncover<8->{\E[\phi(\epsilon)]{\log p(x, z = \inv{\log}(\inv{\mathcal S}(\epsilon))) \djac{\inv{\log}}{\inv{\mathcal S}(\epsilon)}} + \Ent{q(\zeta)} }
+	\end{aligned}
+	\end{equation*}
+	\end{small}
+	
+	}
+
 \end{frame}
+
+\begin{frame}{Visualisation}
+
+	\includegraphics[scale=0.25]{advi/t} \includegraphics[scale=0.3]{advi/s}
+	
+	Images from \citet{KucukelbirEtAl:2017}
+\end{frame}
+
 
 \begin{frame}{Wait... no deep learning?}
+
+	Sure! Parameters may well be predicted by NNs
+	
+	\begin{itemize}
+		\item approximate posterior location and scale
+		\item Weibull rate and shape
+	\end{itemize}
+	
+	Everything is now differentiable, reparameterisable, and the optimisation is unconstrained!
+	
 \end{frame}
 
+
+\begin{frame}{Summary}
+
+ADVI is a big step towards blackbox VI \pause
+\begin{itemize}
+	\item we knew how to map parameters to the unconstrained real coordinate space \pause
+	\item now we also know how to map latent variables to unconstrained real coordinate space \pause
+	\item it takes a change of variable built into the model \pause
+\end{itemize}
+
+Think of ADVI as reparameterised gradients and autodiff expanded to many more models! \pause
+
+\alert{What's left?} \pause Our posteriors are still rather simple, aren't they?
+
+\end{frame}
 
 
 \begin{frame}[allowframebreaks]
