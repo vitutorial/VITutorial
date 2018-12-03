@@ -178,12 +178,12 @@ p_{X}(x) &= p_{\epsilon}(\epsilon)\djac{h}{x} \\ \pause
 \begin{frame}{2-step Flow}
 \begin{equation*}
 \begin{aligned}
-p_{X}(x) &= p_{\epsilon}(\textcolor{blue}{\epsilon})\djac{h_{1}^{-1}}{\textcolor{red}{\epsilon^{(1)}}}\djac{h_{2}^{-1}}{x} \\ \pause
-&= p_{\epsilon}(\textcolor{blue}{h_{1}^{-1}(h_{2}^{-1}(x))})\djac{h_{1}^{-1}}{\textcolor{red}{h_{2}^{-1}(x)}}\djac{h_{2}^{-1}}{x}
+p_{X}(x) &= p_{\epsilon}(\textcolor{blue}{\epsilon})\djac{h_{1}}{\textcolor{red}{\epsilon^{(1)}}}\djac{h_{2}}{x} \\ \pause
+&= p_{\epsilon}(\textcolor{blue}{h_{1}](h_{2}(x))})\djac{h_{1}]}{\textcolor{red}{h_{2}(x)}}\djac{h_{2}]}{x}
 \end{aligned}
 \end{equation*}
 \pause
-The transformations $ h^{-1}_{1} $ and $ h^{-1}_{2} $ are learned by backprop. The determinants need to be computed analytically.
+The transformations $ h_{1} $ and $ h_{2} $ are learned by backprop. The determinants need to be computed analytically.
 \end{frame}
 
 \begin{frame}{Designing a Transformation}
@@ -278,14 +278,14 @@ We use a MADE $ g^{(2)}_{\theta} $ to predict the parameters of the first transf
 Then we apply the first transformation.
 \begin{equation*}
 \begin{aligned}
-\epsilon_{j}^{(1)} &= h_{2}^{-1}(x)_{j} &= \frac{x_{j} - \mu(x_{<j})}{\sigma(x_{<j})} \\ \pause
-\epsilon^{(1)} &= h_{2}^{-1}(x) &= \frac{x - \mu}{\sigma}
+\epsilon_{j}^{(1)} &= h_{2}(x)_{j} &= \frac{x_{j} - \mu(x_{<j})}{\sigma(x_{<j})} \\ \pause
+\epsilon^{(1)} &= h_{2}(x) &= \frac{x - \mu}{\sigma}
 \end{aligned}
 \end{equation*}
 \pause
 The Jacobian is
 \begin{equation*}
-\jac{h_{2}^{-1}}{x} = \pause \IMatrix\sigma^{-1} + J_{\frac{-\mu}{\sigma}}(x)
+\jac{h_{2}}{x} = \pause \IMatrix\sigma^{-1} + J_{\frac{-\mu}{\sigma}}(x)
 \end{equation*}
 \end{frame}
 
@@ -319,12 +319,12 @@ Define $ \alpha_{lj} = \frac{d}{dx_{l}}\frac{-\mu_{j}}{\sigma_{j}} $.
 \begin{frame}{Designing a Transformation}
 \begin{block}{Simple Jacobian Determinant}
 \begin{equation*}
-\djac{h_{2}^{-1}}{x} = \prod_{j=1}^{M}\sigma^{-1}_{j}
+\djac{h_{2}}{x} = \prod_{j=1}^{M}\sigma^{-1}_{j}
 \end{equation*}
 \pause
 In practice we work with the log-likelihood.
 \begin{equation*}
-\log\djac{h_{2}^{-1}}{x} = -\sum_{j=1}^{M}\log\sigma_{j}
+\log\djac{h_{2}}{x} = -\sum_{j=1}^{M}\log\sigma_{j}
 \end{equation*}
 \end{block}
 \end{frame}
@@ -333,17 +333,17 @@ In practice we work with the log-likelihood.
 \begin{small}
 \begin{equation*}
 \begin{aligned}
-p_{X}(x) &= p_{\epsilon}(\textcolor{blue}{\epsilon})\djac{h_{1}^{-1}}{\textcolor{red}{\epsilon^{(1)}}}\djac{h_{2}^{-1}}{x} \\
-&= p_{\epsilon}(\textcolor{blue}{h_{1}^{-1}(h_{2}^{-1}(x))})\djac{h_{1}^{-1}}{\textcolor{red}{h_{2}^{-1}(x)}}\djac{h_{2}^{-1}}{x} \\ \pause
-\log p_{X}(x) &= \log p_{\epsilon}(\textcolor{blue}{h_{1}^{-1}(h_{2}^{-1}(x))})\pause -\sum_{j=1}^{M}\log\sigma^{(2)}_{j}-\sum_{j=1}^{M}\log\sigma^{(1)}_{j}
+p_{X}(x) &= p_{\epsilon}(\textcolor{blue}{\epsilon})\djac{h_{1}}{\textcolor{red}{\epsilon^{(1)}}}\djac{h_{2}}{x} \\
+&= p_{\epsilon}(\textcolor{blue}{h_{1}(h_{2}(x))})\djac{h_{1}}{\textcolor{red}{h_{2}(x)}}\djac{h_{2}}{x} \\ \pause
+\log p_{X}(x) &= \log p_{\epsilon}(\textcolor{blue}{h_{1}(h_{2}(x))})\pause -\sum_{j=1}^{M}\log\sigma^{(2)}_{j}-\sum_{j=1}^{M}\log\sigma^{(1)}_{j}
 \end{aligned}
 \end{equation*}
 \end{small}
 \pause
 \begin{equation*}
 \begin{aligned}
-\epsilon^{(1)} = h^{-1}_{2} = \frac{x - \mu^{(2)}}{\sigma^{(2)}} \text{ where } \begin{bmatrix}\mu^{(2)}, \sigma^{(2)}\end{bmatrix} = g^{(2)}(x) \\ \pause
-\epsilon = h^{-1}_{1} = \frac{\epsilon^{(1)} - \mu^{(1)}}{\sigma^{(1)}} \text{ where } \begin{bmatrix}\mu^{(1)}, \sigma^{(1)}\end{bmatrix} = g^{(1)}(\epsilon^{(1)})
+\epsilon^{(1)} = h_{2} = \frac{x - \mu^{(2)}}{\sigma^{(2)}} \text{ where } \begin{bmatrix}\mu^{(2)}, \sigma^{(2)}\end{bmatrix} = g^{(2)}(x) \\ \pause
+\epsilon = h_{1} = \frac{\epsilon^{(1)} - \mu^{(1)}}{\sigma^{(1)}} \text{ where } \begin{bmatrix}\mu^{(1)}, \sigma^{(1)}\end{bmatrix} = g^{(1)}(\epsilon^{(1)})
 \end{aligned}
 \end{equation*}
 \end{frame}
@@ -363,7 +363,7 @@ p_{X}(x) &= p_{\epsilon}(\textcolor{blue}{\epsilon})\djac{h_{1}^{-1}}{\textcolor
 \end{frame}
 
 \begin{frame}{Setting}
-We have a generative model $ p(x|z) $. We want to approximate the posterior $ p(z|x) $ using an amortized variational distribution $ q(z|x) $ computed by a neural net.
+We have a generative model $ p(x,z) $. We want to approximate the posterior $ p(z|x) $ using an amortized variational distribution $ q(z|x) $ computed by a neural net.
 \pause
 \begin{block}{Goal}
 We want a complex, multimodal approximate posterior $ q(z|x) $.
@@ -410,13 +410,13 @@ h^{-1}_{K}\circ h^{-1}_{K-1}\circ\ldots \circ h^{-1}_{1}(\epsilon) &= z \pause =
 \begin{small}
 \begin{equation*}
 \begin{aligned}
-q_{Z}(z^{(2)}) &= q_{\epsilon}(\epsilon)\djac{h_{1}}{\textcolor{red}{z^{(1)}}}\djac{h_{2}}{\textcolor{blue}{z^{(2)}}} \\ \pause
-&= q_{\epsilon}(\epsilon)\djac{h_{1}}{\textcolor{red}{h_{1}(\epsilon)}}\djac{h_{2}}{\textcolor{blue}{h_{2}(h_{1}(\epsilon))}}
+q_{Z}(z^{(2)}) &= q_{\epsilon}(\epsilon)\djac{h^{-1}_{1}}{\textcolor{red}{z^{(1)}}}\djac{h^{-1}_{2}}{\textcolor{blue}{z^{(2)}}} \\ \pause
+&= q_{\epsilon}(\epsilon)\djac{h^{-1}_{1}}{\textcolor{red}{h^{-1}_{1}(\epsilon)}}\djac{h^{-1}_{2}}{\textcolor{blue}{h^{-1}_{2}(h^{-1}_{1}(\epsilon))}}
 \end{aligned}
 \end{equation*}
 \end{small}
 \pause
-The transformations $ h_{1} $ and $ h_{2} $ are learned by backprop. The determinants need to be computed analytically.
+The transformations $ h^{-1}_{1} $ and $ h^{-1}_{2} $ are learned by backprop. The determinants need to be computed analytically.
 \end{frame}
 
 \begin{frame}{Designing a Transformation}
@@ -464,24 +464,24 @@ We use a MADE $ f_{\lambda} $ to predict the parameters of the first transformat
 Then we apply the first transformation.
 \begin{equation*}
 \begin{aligned}
-z^{(1)}_{j} &= h_{1}(\epsilon)_{j} &= \mu(\epsilon_{<j}) + \sigma(\epsilon_{<j}) \epsilon_{j} \\ \pause
-z^{(1)} &= h_{1}(\epsilon) &= \mu + \sigma \epsilon
+z^{(1)}_{j} &= h^{-1}_{1}(\epsilon)_{j} &= \mu(\epsilon_{<j}) + \sigma(\epsilon_{<j}) \epsilon_{j} \\ \pause
+z^{(1)} &= h^{-1}_{1}(\epsilon) &= \mu + \sigma \epsilon
 \end{aligned}
 \end{equation*}
 \pause
 \begin{equation*}
-\jac{h_{1}}{\epsilon} = \IMatrix \sigma + \jac{\mu}{\epsilon} +\jac{\sigma \epsilon}{\epsilon}
+\jac{h^{-1}_{1}}{\epsilon} = \IMatrix \sigma + \jac{\mu}{\epsilon} +\jac{\sigma \epsilon}{\epsilon}
 \end{equation*}
 \end{frame}
 
 \begin{frame}{Designing a Transformation}
 \begin{block}{Simple Jacobian Determinant}
 \begin{equation*}
-\djac{h_{1}}{\epsilon} = \prod_{j=1}^{M}\sigma_{j}
+\djac{h^{-1}_{1}}{\epsilon} = \prod_{j=1}^{M}\sigma_{j}
 \end{equation*}
 In practice we work with the log-likelihood.
 \begin{equation*}
-\log\djac{h_{1}}{\epsilon} = \sum_{j=1}^{M}\log\sigma_{j}
+\log\djac{h^{-1}_{1}}{\epsilon} = \sum_{j=1}^{M}\log\sigma_{j}
 \end{equation*}
 \end{block}
 \end{frame}
@@ -490,8 +490,8 @@ In practice we work with the log-likelihood.
 \begin{small}
 \begin{equation*}
 \begin{aligned}
-q_{Z}(z^{(2)}) &= q_{\epsilon}(\epsilon)\djac{h_{1}}{\textcolor{red}{z^{(1)}}}\djac{h_{2}}{\textcolor{blue}{z^{(2)}}} \\
-&= q_{\epsilon}(\epsilon)\djac{h_{1}}{\textcolor{red}{h_{1}(\epsilon)}}\djac{h_{2}}{\textcolor{blue}{h_{2}(h_{1}(\epsilon))}} \\ \pause
+q_{Z}(z^{(2)}) &= q_{\epsilon}(\epsilon)\djac{h^{-1}_{1}}{\textcolor{red}{z^{(1)}}}\djac{h^{-1}_{2}}{\textcolor{blue}{z^{(2)}}} \\
+&= q_{\epsilon}(\epsilon)\djac{h^{-1}_{1}}{\textcolor{red}{h^{-1}_{1}(\epsilon)}}\djac{h^{-1}_{2}}{\textcolor{blue}{h^{-1}_{2}(h^{-1}_{1}(\epsilon))}} \\ \pause
 \log q_{Z}(z^{(2)}) &= \log q_{\epsilon}(\epsilon) \pause + \sum_{j=1}^{M}\log\sigma^{(1)}_{j} + \sum_{j=1}^{M}\log\sigma^{(2)}_{j}
 \end{aligned}
 \end{equation*}
@@ -511,7 +511,7 @@ Recall: $ z = z^{(2)} $
 \begin{equation*}
 \begin{aligned}
 &\ELBO = \E[q(z|\lambda)]{\log p(x|z)} - \KL{\textcolor{blue}{q(z)|\lambda))}}{p(z)} = \\ \pause
-&\E[q(z|\lambda)]{\log p(x|z)} - \KL{\textcolor{blue}{q(\epsilon)\djac{h}{z}}}{p(z)}
+&\E[q(z|\lambda)]{\log p(x|z)} - \KL{\textcolor{blue}{q(\epsilon)\djac{h^{-1}}{z}}}{p(z)}
 \end{aligned}
 \end{equation*}
 \end{small}
@@ -523,7 +523,7 @@ Recall: $ z = z^{(2)} $
 \begin{equation*}
 \begin{aligned}
 &\KL{q(\epsilon)\djac{h}{z}}{p(z)} = \\ \pause
-&\E[q(z|\lambda))]{\log\frac{q(\epsilon)\djac{h}{z}}{p(z)}} \pause \overset{\text{MC}}{\approx} \frac{1}{S}\sum_{s=1}^{S} \log\frac{q(\epsilon)\djac{h}{z^{(s)}}}{p(z^{(s)})}
+&\E[q(z|\lambda))]{\log\frac{q(\epsilon)\djac{h^{-1}}{z}}{p(z)}} \pause \overset{\text{MC}}{\approx} \frac{1}{S}\sum_{s=1}^{S} \log\frac{q(\epsilon)\djac{h^{-1}}{z^{(s)}}}{p(z^{(s)})}
 \end{aligned}
 \end{equation*}
 \end{block}
@@ -531,7 +531,7 @@ Recall: $ z = z^{(2)} $
 \begin{block}{Jacobian}
 \pause
 \begin{equation*}
-\djac{h}{z^{(s)}} = \sum_{j=1}^{M}\log\sigma^{(1)}_{j} + \sum_{j=1}^{M}\log\sigma^{(2)}_{j}
+\djac{h^{-1}}{z^{(s)}} = \sum_{j=1}^{M}\log\sigma^{(1)}_{j} + \sum_{j=1}^{M}\log\sigma^{(2)}_{j}
 \end{equation*}
 \end{block}
 \end{small}
