@@ -15,6 +15,7 @@ Want to host our tutorial at your location? [Contact](#contact) one of us!
   * [Variational inference](//github.com/philschulz/VITutorial/blob/master/modules/M1_Basics/M1_Basics.pdf)
   * [Continuous latent variables](//github.com/philschulz/VITutorial/blob/master/modules/M3a_DGMs_ContinuousLatentVariables/M3a_DGMs_ContinuousLatentVariables.pdf)
   * [Discrete latent variables](//github.com/philschulz/VITutorial/blob/master/modules/M3b_DGMs_DiscreteVariables/M3b_DGMs_DiscreteLatentVariables.pdf)
+  * [Normalising Flows](//github.com/philschulz/VITutorial/blob/master/modules/M7_NormalisingFlows/M7_NormalisingFlows.pdf)
 * Lecture notes
   * [Explaining reparameterisation](//github.com/philschulz/VITutorial/blob/master/modules/M3a_DGMs_ContinuousLatentVariables/ExplainingReparametrisationGradients.pdf)
   * Entropy and KL for exponential families
@@ -39,7 +40,7 @@ Instead, we explain how to use the score-function or REINFORCE gradient estimato
 We finish by explaining how to combine continuous and discrete variables in semi-supervised modelling problems.
 
 # <a name="news"> News
-
+* A [new module on normalising flows](modules/M7_NormalisingFlows/M7_NormalisingFlows.pdf) has been added. Normalising flows are a way of learning distributions. Check it out to learn more. Soon we will also add module on ADVI, a black-box variational inference procedure.
 * We have now tagged the version of the tutorial that we presented at ACL 2018 in Melbourne to simplify future reference. To get to that version, [click here](https://github.com/philschulz/VITutorial/tree/acl2018).
 * We have added a [module on discrete latent variables](modules/M3b_DGMs_DiscreteVariables/M3b_DGMs_DiscreteLatentVariables.pdf).
 This also led to a change in the module structure. The DGM part (M3) now consists of 2 interdependent modules. One presents
