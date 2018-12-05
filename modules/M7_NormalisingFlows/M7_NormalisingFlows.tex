@@ -98,8 +98,8 @@ $ h: \mathcal{X} \rightarrow \mathcal{Y} $ exists.
 \begin{equation*}
 \begin{aligned}
 h(x) &= y \\ \pause
-p_{Y}(y) &= p_{X}(h^{-1}(y))\djac{h^{-1}}{y} = p(x)\djac{h^{-1}}{y}  \\ \pause
-p_{X}(x) &= p_{Y}(h(x))\djac{h}{x} = p(y)\djac{h}{x}
+p_{Y}(y) &= p_{X}(\textcolor{blue}{x})\djac{h^{-1}}{y} p_{X}(\textcolor{blue}{h^{-1}(y)})\djac{h^{-1}}{y}  \\ \pause
+p_{X}(x) &= p_{Y}(\textcolor{red}{y})\djac{h}{x} = p_{Y}(\textcolor{red}{h(x)})\djac{h}{x}
 \end{aligned}
 \end{equation*}
 \pause
@@ -133,7 +133,7 @@ Now we can learn $ K $ mappings with simple jacobian determinants.
 \begin{aligned}
 h^{-1} &= h_{K}^{-1}\circ h_{K-1}^{-1} \circ \ldots \circ h_{1}^{-1} \\ \pause
 p_{X}(x) &= p_{Y}(y) \djac{h_{1}}{y^{(1)}}\djac{h_{2}}{y^{(2)}}\ldots \djac{h_{K}}{x} \\ \pause
-p_{Y}(y) &= p_{X}(x)\djac{h_{1}^{-1}}{y^{(K-1)}} \djac{h_{2}^{-1}}{y^{(K-2)}}\ldots \djac{h_{1}^{-1}}{y}
+p_{Y}(y) &= p_{X}(x)\djac{h_{K}^{-1}}{y^{(K-1)}} \djac{h_{K-1}^{-1}}{y^{(K-2)}}\ldots \djac{h_{1}^{-1}}{y}
 \end{aligned}
 \end{equation*}
 \end{small}
@@ -154,14 +154,14 @@ p_{Y}(y) &= p_{X}(x)\djac{h_{1}^{-1}}{y^{(K-1)}} \djac{h_{2}^{-1}}{y^{(K-2)}}\ld
 
 \begin{frame}{Normalising Flows: Density Estimation}
 \begin{block}{Setting}
-Our data $ x $ is has unknown continuous density $ p(x) $.
+Our data $ x $ has unknown continuous density $ p(x) $.
 We can therefore not handcraft a likelihood.
 \\ \pause
 \textbf{Examples:} word embeddings, pictures
 \end{block}
 \pause
 \begin{block}{Goal}
-Transform known variable $ x $ into $ \epsilon = h(x) $ with \textbf{known} density $ p_{\epsilon}(\epsilon) $ and express the likelihood as
+Transform unknown (observed)	 variable $ x $ into $ \epsilon = h(x) $ with \textbf{known} density $ p_{\epsilon}(\epsilon) $ and express the likelihood as
 \begin{small}
 \pause
 \begin{equation*}
@@ -178,12 +178,12 @@ p_{X}(x) &= p_{\epsilon}(\epsilon)\djac{h}{x} \\ \pause
 \begin{frame}{2-step Flow}
 \begin{equation*}
 \begin{aligned}
-p_{X}(x) &= p_{\epsilon}(\textcolor{blue}{\epsilon})\djac{h_{1}}{\textcolor{red}{\epsilon^{(1)}}}\djac{h_{2}}{x} \\ \pause
-&= p_{\epsilon}(\textcolor{blue}{h_{1}](h_{2}(x))})\djac{h_{1}]}{\textcolor{red}{h_{2}(x)}}\djac{h_{2}]}{x}
+p_{X}(x) &= p_{\epsilon}(\textcolor{blue}{\overbrace{\epsilon}^{\epsilon^{(0)}}})\djac{h_{1}}{\textcolor{red}{\epsilon^{(1)}}}\djac{h_{2}}{x} \\ \pause
+&= p_{\epsilon}(\textcolor{blue}{h_{1}(h_{2}(x))})\djac{h_{1}}{\textcolor{red}{h_{2}(x)}}\djac{h_{2}}{x}
 \end{aligned}
 \end{equation*}
 \pause
-The transformations $ h_{1} $ and $ h_{2} $ are learned by backprop. The determinants need to be computed analytically.
+The transformations $ h_{1} $ and $ h_{2} $ are learned by backprop (while still being invertible). The determinants need to be computed analytically.
 \end{frame}
 
 \begin{frame}{Designing a Transformation}
@@ -357,6 +357,71 @@ p_{X}(x) &= p_{\epsilon}(\textcolor{blue}{\epsilon})\djac{h_{1}}{\textcolor{red}
 \end{itemize}
 \end{frame}
 
+\begin{frame}{Sampling From the Flow}
+\begin{figure}
+\begin{tikzpicture}
+\node[obs] (x1) {$x_{1}$};
+\node[latent, above = of x1] (e11) {$\epsilon^{(1)}_{1}$};
+\node[latent, above = of e11] (e21) {$\epsilon_{1}$};
+\edge{e21}{e11};
+\edge{e11}{x1};
+\node[left = of e21] (n1) {$\NDist{0}{\IMatrix}$};
+\node[draw=black, thick, rectangle, fit= (n1)(e21)(e22)(e23)(e24), rounded corners] {};
+
+\pause
+
+\node[latent, right = of e11] (e12) {$\epsilon^{(1)}_{2}$};
+\edge[color=red]{x1}{e12};
+
+\pause
+
+\node[latent, above = of e12] (e22) {$\epsilon_{2}$};
+\edge[color=red]{e11}{e22};
+
+\pause
+
+\node[obs, right = of x1] (x2) {$x_{2}$};
+\edge{e22}{e12};
+\edge{e12}{x2};
+
+\pause
+
+\node[latent, above = of e13] (e23) {$\epsilon_{3}$};
+\node[latent, above = of x3] (e13) {$\epsilon^{(1)}_{3}$};
+
+\edge[color=red]{x1,x2}{e13};
+
+\edge[color=red]{e11,e12}{e23};
+
+\node[left = of e21] (n1) {$\NDist{0}{\IMatrix}$};
+
+\pause
+
+\node[obs, right = of x2] (x3) {$x_{3}$};
+\edge{e23}{e13};
+\edge{e13}{x3};
+
+\pause
+
+\edge[color=red]{x1,x2,x3}{e14};
+\edge[color=red]{e11,e12,e13}{e24};
+
+\node[latent, above = of x4] (e14) {$\epsilon^{(1)}_{4}$};
+\node[latent, above = of e14] (e24) {$\epsilon_{4}$};
+
+\edge{e21}{e12};
+\edge{e11}{x2};
+
+\pause
+
+\node[obs, right = of x3] (x4) {$x_{4}$};
+\edge{e24}{e14};
+\edge{e14}{x4};
+
+\end{tikzpicture}
+\end{figure}
+\end{frame}
+
 \section{Use Case 2: Inference (sampling)}
 \begin{frame}
 \tableofcontents[current]
@@ -416,7 +481,7 @@ q_{Z}(z^{(2)}) &= q_{\epsilon}(\epsilon)\djac{h^{-1}_{1}}{\textcolor{red}{z^{(1)
 \end{equation*}
 \end{small}
 \pause
-The transformations $ h^{-1}_{1} $ and $ h^{-1}_{2} $ are learned by backprop. The determinants need to be computed analytically.
+The transformations $ h^{-1}_{1} $ and $ h^{-1}_{2} $ are learned by backprop (while still being invertible). The determinants need to be computed analytically.
 \end{frame}
 
 \begin{frame}{Designing a Transformation}
