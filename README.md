@@ -40,6 +40,7 @@ We finish by explaining how to combine continuous and discrete variables in semi
 
 # <a name="news"> News
 
+* We have now tagged the version of the tutorial that we presented at ACL 2018 in Melbourne to simplify future reference. To get to that version, [click here](https://github.com/philschulz/VITutorial/tree/acl2018).
 * We have added a [module on discrete latent variables](modules/M3b_DGMs_DiscreteVariables/M3b_DGMs_DiscreteLatentVariables.pdf).
 This also led to a change in the module structure. The DGM part (M3) now consists of 2 interdependent modules. One presents
 continuous latent variable models and the other discrete latent variable models.
@@ -53,11 +54,10 @@ Make sure to follow the instructions and read the comments carefully. Also check
 Below are confirmed venues and dates (if available) for future presentations of the tutorial. Please contact us
 if you interested in hosting the tutorial.
 
+**Past**
 * University of Heidelberg: Nov 29/30 2018
   1. Thursday, Nov 29: Basics of VI, continuous and discrete Deep Generative Models
   2. Friday, Nov 30: Automatic differentiation VI, normalising flows
-
-**Past**
 * ACL 2018, Melbourne: July 15th, 2018
 * Naver Labs, Grenoble, France: April 3 and April 6, 2018
   1. Deep Generative Models
