@@ -336,11 +336,11 @@ The Kullback-Leibler divergence (or relative entropy) measures the divergence of
 a distribution $ p $. 
 \begin{itemize}
 \pause
-\item $ \KL{q(z)}{p(z|x)} = \E[q(z)]{\loga{\frac{q(z)}{p(z|x)}}} $
+\item $ \KL{q(z)}{p(z|x)} = \E[q(z)]{\log \frac{q(z)}{p(z|x)}} $
 \pause
-\item $ \KL{q(z)}{p(z|x)} = \intl{ q(z) \loga{\frac{q(z)}{p(z|x)}}}{z} $ (continuous)
+\item $ \KL{q(z)}{p(z|x)} = \intl{ q(z) \log{\frac{q(z)}{p(z|x)}}}{z} $ (continuous)
 \pause
-\item $ \KL{q(z)}{p(z|x)} = \sum_{z} q(z) \loga{\frac{q(z)}{p(z|x)}} $ (discrete)
+\item $ \KL{q(z)}{p(z|x)} = \sum_{z} q(z) \log{\frac{q(z)}{p(z|x)}} $ (discrete)
 \end{itemize}
 \end{frame}
 
@@ -364,7 +364,7 @@ a distribution $ p $.
 \begin{itemize}
 \item $ \KL{q(z)}{p(z|x)} \geq 0 $ with \\ equality iff $ q(z) = p(z|x) $.
 \pause
-\item $ -\KL{q(z)}{p(z|x)} = \E[q(z)]{\loga{\frac{p(z|x)}{q(z)}}} \leq 0 $.
+\item $ -\KL{q(z)}{p(z|x)} = \E[q(z)]{\log{\frac{p(z|x)}{q(z)}}} \leq 0 $.
 \pause
 \item $ \KL{q(z)}{p(z|x)} = \infty $ \\ if $ \exists z $ s.t. $ p(z|x) = 0 $ and $ q(z) > 0 $.
 %\pause
@@ -383,10 +383,10 @@ a distribution $ p $.
 \pause
 &= \loga{\intl{\alert{q(z)}\frac{p(x,z)}{\alert{q(z)}}}{z}} \\
 \pause
-&= \loga{\E[q(z)]{\frac{p(x,z)}{\alert{q(z)}}}} \\
-&\geq \E[q(z)]{  \loga{\frac{p(x,z)}{\alert{q(z)}}}} \\
+&= \loga{\E[q(z)]{\frac{p(x,z)}{\alert{q(z)}}}} \\ \pause
+&\geq \E[q(z)]{  \log{\frac{p(x,z)}{\alert{q(z)}}}} \\
 \pause
-& = \E[q(z)] {\loga{\frac{p(z|x)p(x)}{\alert{q(z)}}}}
+& = \E[q(z)] {\log{\frac{p(z|x)p(x)}{\alert{q(z)}}}}
 \end{aligned}
 \end{equation*}
 \end{small}
@@ -396,9 +396,9 @@ a distribution $ p $.
 \begin{equation*}
 \begin{aligned}
 \log p(x) &\geq 
-\E[q(z|x)] {\loga{\frac{p(z|x)p(x)}{q(z)}}} \\
+\E[q(z|x)] {\log{\frac{p(z|x)p(x)}{q(z)}}} \\
 \pause
-&= \intl{ q(z) \loga{\frac{p(z|x)}{q(z)}}}{z} + \log p(x) \\
+&= \intl{ q(z) \log{\frac{p(z|x)}{q(z)}}}{z} + \log p(x) \\
 \pause
 &= -\KL{q(z)}{p(z|x)} + \log p(x)
 \end{aligned}
@@ -414,7 +414,10 @@ Recall that we want to find $ q(z) $ such that $ \KL{q(z)}{p(z|x)} $ is small.
 \pause
 \begin{block}{Formal Objective}
 \begin{equation*}
-\underset{q(z)}{\min} \KL{q(z)}{p(z|x)} \pause = \underset{q(z)}{\max} -\KL{q(z)}{p(z|x)}
+\begin{aligned}
+&\underset{q(z)}{\argmin} ~ \KL{q(z)}{p(z|x)} \pause \\
+&= \underset{q(z)}{\argmax} -\KL{q(z)}{p(z|x)}
+\end{aligned}
 \end{equation*}
 \end{block}
 \end{frame}
@@ -423,16 +426,16 @@ Recall that we want to find $ q(z) $ such that $ \KL{q(z)}{p(z|x)} $ is small.
 \begin{small}
 \begin{equation*}
 \begin{aligned}
-&\underset{q(z)}{\max} -\KL{q(z)}{p(z|x)} \\ 
+&\underset{q(z)}{\argmax} -\KL{q(z)}{p(z|x)} \\ 
 \pause
-&= \underset{q(z)}{\max} \intl{ q(z) \loga{\frac{p(z|x)}{q(z)}}}{z} \\
+&= \underset{q(z)}{\argmax} \intl{ q(z) \log{\frac{p(z|x)}{q(z)}}}{z} \\
 \pause
-&= \underset{q(z)}{\max} \intl{ q(z) \loga{\frac{p(z,x)}{p(x)q(z)}}} {z} \\
+&= \underset{q(z)}{\argmax} \intl{ q(z) \log{\frac{p(z,x)}{p(x)q(z)}}} {z} \\
 \pause
-&= \underset{q(z)}{\max} \intl{ q(z) \loga{p(z,x)}} {z} - \intl{ q(z) \log q(z)} {z} 
+&= \underset{q(z)}{\argmax} \intl{ q(z) \log{p(z,x)}} {z} - \intl{ q(z) \log q(z)} {z} 
 - \overbrace{\log p(x)}^{constant} \\
 \pause
-&= \underset{q(z)}{\max}~\E[q(z)]{\log p(x,z) } + \Ent{q(z)}
+&= \underset{q(z)}{\argmax}~\E[q(z)]{\log p(x,z) } + \Ent{q(z)}
 \end{aligned}
 \end{equation*}
 \end{small}
@@ -444,7 +447,7 @@ or \textbf{ELBO} is our optimisation objective.
 \begin{block}{ELBO}
 \center
 \boxed{
-\underset{q(z)}{\max}~\E[q(z)]{\log p(x,z)} + \Ent{q(z)}
+\underset{q(z)}{\argmax}~\E[q(z)]{\log p(x,z)} + \Ent{q(z)}
 }
 \end{block}
 \end{frame}
@@ -457,19 +460,42 @@ VI in its basic form can be performed via coordinate ascent. This can be done as
 \pause
 \item Maximize (regularised) expected log-density.
 \begin{equation*}
-\underset{q(z)}{\max}~\E[q(z)]{\loga{p(x,z)}} + \Ent{q(z)}
+\underset{q(z)}{\argmax}~\E[q(z)]{\log{p(x,z)}} + \Ent{q(z)}
 \end{equation*}
 \pause
 \item Optimise generative model.
 \begin{equation*}
-\underset{p(x,z)}{\max}~ \E[q(z)]{\loga{p(x,z)}} + \underbrace{\Ent{q(z)}}_{\text{constant}}
+\underset{p(x,z)}{\argmax}~ \E[q(z)]{\log{p(x,z)}} + \underbrace{\Ent{q(z)}}_{\text{constant}}
 \end{equation*}
 \end{enumerate}
 \end{frame}
 
+\begin{frame}{Unconstrained (exact) optimisation}
+
+What's the solution to 
+\begin{equation*}
+\argmax_{q(z) \in \mathcal Q} \E[q(z)]{\log p(x, z)} + \Ent{q(z)}
+\end{equation*}
+if $\mathcal Q$ includes the true posterior $p(z|x)$?
+
+\pause
+
+~
+
+
+The true posterior \alert{$p(z|x)$}! Exactly because
+\begin{equation*}
+\argmax_{q(z) \in \mathcal Q} \ELBO = \argmin_{q(z) \in \mathcal Q} \KL{q(z)}{p(z|x)}
+\end{equation*}
+and KL is never negative and $0$ iff $q(z) = p(z|x)$.
+
+
+\end{frame}
+
 \begin{frame}{Recap: EM Algorithm}
 \begin{itemize}
-\item[\alert{E-step}] Compute: $ \E[p(z|x)]{\loga{p(x,z)}} $. \\ Same as: $ \underset{p(z|x)}{\max}~ \E[p(z|x)]{\log p(x,z)} $ \pause
+\item[\alert{E-step}] Compute: $\log p(x)$ \\ 
+Same as: $ \underset{p(z|x)}{\max}~ \E[p(z|x)]{\log p(x, z)} + \Ent{p(z|x)} $ \pause
 \item[\alert{M-step}] $ \underset{p(x,z)}{\max}~\E[p(z|x)]{\log p(x,z)} + \underbrace{\Ent{p(z|x)}}_{\text{constant}} $
 \end{itemize}
 \pause 
