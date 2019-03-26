@@ -1,0 +1,381 @@
+
+
+\begin{frame}{Variational Inference Learning (NVIL)}
+
+Generative model with NN likelihood
+\pause
+
+~
+
+Let us consider a latent factor model for topic modelling: \pause
+
+\begin{itemize}
+	\item a document $ x = (x_{1},\ldots,x_{N})$ consists of $ n $ i.i.d. categorical draws from that model \pause
+	\item the categorical distribution in turn depends on  binary latent factors $ z = (z_{1},\ldots,z_{K}) $ which are also i.i.d. 
+\end{itemize}
+
+
+\end{frame}
+
+\begin{frame}{Latent factor model}
+
+\begin{equation*}
+\begin{aligned}
+Z_{j} &\sim \BerDist{\phi} && (1 \leq j \leq K) \\ 
+X_{i}|z &\sim \CatDist{f(z; \theta)} && (1 \leq i \leq N)
+\end{aligned}
+\end{equation*} 
+Here $0 < \phi < 1$ specifies a Bernoulli prior \\
+~ and $ f(\cdot; \theta) $ is a function computed by a \\
+~ neural network with softmax output, e.g.
+
+\begin{equation*}
+\begin{aligned}
+f(z; \theta) = \softmax(Wz + b)
+\end{aligned}
+\end{equation*}
+\end{frame}
+
+\begin{frame}{Example Model}
+\begin{figure}
+\center
+\begin{tikzpicture}
+\foreach \x in {1,...,4} {
+  \pgfmathtruncatemacro{\y}{\x-1}
+  \ifthenelse{\x=1}{\node[obs] (x\x) {$ x_{\x} $}}{\node[obs, right= of x\y] (x\x) {$ x_{\x} $}};
+}
+\foreach \z in {1,2,3} {
+  \node[latent, above right = of x\z] (z\z) {$ z_{\z} $};
+  \edge{z\z}{x1,x2,x3,x4};
+}
+\edge[-,red]{z1}{z2};
+\edge[-,red,bend left]{z1}{z3};
+\edge[-,red]{z2}{z3};
+\end{tikzpicture}
+\end{figure}
+At inference time the latent variables are marginally dependent. For our variational distribution
+we are going to assume that they are not (recall: mean field assumption).
+\end{frame}
+
+\begin{frame}{Mean Field Inference}
+\begin{figure}
+\center
+\begin{tikzpicture}
+\foreach \x in {1,...,4} {
+\pgfmathtruncatemacro{\y}{\x-1}
+\ifthenelse{\x=1}{\node[obs] (x\x) {$ x_{\x} $}}{\node[obs, right= of x\y] (x\x) {$ x_{\x} $}};
+}
+\foreach \z in {1,2,3} {
+  \node[latent, above right = of x\z] (z\z) {$ z_{\z} $};
+  \edge[color=red]{x1,x2,x3,x4}{z\z};
+}
+\node[above = of z2] (lambda) {$\lambda$};
+\foreach \z in {1,2,3} {
+  \edge[color=red]{lambda}{z\z};
+}
+
+\end{tikzpicture}
+\end{figure}
+The inference network needs to predict $ K $ Bernoulli parameters $ \psi $. Any neural network with
+sigmoid output will do that job.
+
+\end{frame}
+
+\begin{frame}{Inference Network}
+\begin{equation*}
+\begin{aligned}
+	q(z|x, \lambda) &= \prod_{k=1}^K \Bern(z_k|b_k) \\
+	&\quad~\text{where }b_1^K = g(x; \lambda)
+\end{aligned}
+\end{equation*}
+
+Example architecture 
+\begin{equation*}
+\begin{aligned}
+h = \frac{1}{N} \sum_{i=1}^N E_{x_i} \qquad b_1^K = \sigmoid( W h + b)
+\end{aligned}
+\end{equation*}
+
+$\lambda = \{E, W, b\}$
+
+\end{frame}
+
+
+
+\begin{frame}{Objective}
+
+\begin{equation*}
+\begin{aligned}
+&\ELBO = \E[q(z|x, \lambda)]{\log p(x,z|\theta)} + \Ent{q(z|x, \lambda)} \\ 
+&= \E[q(z|x, \lambda)]{\log p(x|z, \theta)} - \KL{q(z|x, \lambda)}{p(z)}
+\end{aligned}
+\end{equation*}
+
+
+Parameter estimation
+\begin{equation*}
+\argmax_{\theta,\lambda} ~ \E[q(z|x,\lambda)]{\log p(x|z,\theta)} - \KL{q(z|x,\lambda)}{p(z)}
+\end{equation*}
+
+
+\end{frame}
+
+\begin{frame}{KL}
+
+KL between $K$ independent Bernoulli distributions is tractable
+
+\begin{equation*}
+\begin{aligned}
+	&\KL{q(z|x, \lambda)}{p(z|\phi)}  = \sum_{k=1}^K \KL{q(z_i|x, \lambda)}{p(z_i|\phi)} \\
+	&=  \sum_{k=1}^K b_k \log \frac{b_k}{\phi} + (1 - b_k) \log \frac{1 - b_k}{1 - \phi}
+\end{aligned}
+\end{equation*}
+
+\end{frame}
+
+\begin{frame}{Generative Network Gradient}
+\begin{equation*}
+\begin{aligned}
+&\pdv{\theta} \left( \E[q(z|x,\lambda)]{\log p(x|z,\theta)} - \overbrace{\KL{q(z|x,\lambda)}{p(z)}}^{\text{constant wrt }\theta} \right) \\ \pause 
+&=\underbrace{\E[q(z|x,\lambda)]{\pdv{\theta}\log p(x|z,\theta)}}_{\text{expected gradient :)}} \\ \pause
+&\overset{\text{MC}}{\approx} \frac{1}{K}\sum_{k=1}^{K}
+\pdv{\theta} \log p(x|z^{(k)},\theta) \quad \textcolor{gray}{\text{where } z^{(k)} \sim q(z|x,\lambda)}
+\end{aligned}
+\end{equation*}
+
+\end{frame}
+
+\begin{frame}{Inference Network Gradient}
+\begin{equation*}
+\begin{aligned}
+&\pdv{\lambda}\left(\E[q(z|x,\lambda)]{\log p(x|z,\theta)} - \overbrace{\KL{q(z|x,\lambda)}{p(z)}}^{\text{analytical}} \right) \\ \pause
+=&\pdv{\lambda}\E[q(z|x,\lambda)]{\log p(x|z,\theta)} - \underbrace{\pdv{\lambda}\KL{q(z|x,\lambda)}{p(z)}}_{\text{analytical computation}} \\
+\end{aligned}
+\end{equation*}
+\pause
+The first term again requires approximation by sampling,  but there is a problem
+
+\end{frame}
+
+\begin{frame}{Inference Network Gradient}
+\begin{equation*}
+\begin{aligned}
+&\pdv{\lambda}\E[q_\lambda(z|x)]{\log p_\theta(x|z)} \\ \pause
+&= \pdv{\lambda} \sum_z q(z|x,\lambda)\log p(x|z, \theta)  \\ \pause
+&=  \underbrace{\sum_z \alert{\pdv{\lambda}(q(z|x, \lambda))} \log p(x|z, \theta)}_{\text{not an expectation}} 
+\end{aligned}
+\end{equation*}
+
+\pause
+
+\begin{itemize}
+	\item MC estimator is non-differentiable \\ \pause
+	\item Differentiating the expression does not yield an expectation: cannot approximate via MC
+\end{itemize}
+
+\end{frame}
+
+
+\section{Score function estimator}
+
+\begin{frame}{Score function estimator}
+
+We can again use the log identity for derivatives
+\vspace{-5pt}
+\begin{equation*}
+\begin{aligned}
+&\pdv{\lambda}\E[q_\lambda(z|x)]{\log p_\theta(x|z)} \\ 
+%&= \pdv{\lambda} \sum_z q(z|x,\lambda)\log p(x|z, \theta)  \\ 
+&=  \sum_z \alert{\pdv{\lambda}(q(z|x, \lambda))} \log p(x|z, \theta) \\  \pause
+&= \sum_z \textcolor{blue}{q(z|x, \lambda) \pdv{\lambda}(\log q(z|x, \lambda))} \log p(x|z, \theta)  \\ \pause
+&= \underbrace{\mathbb E_{q(z|x, \lambda)} \left[  \log p(x|z, \theta)  \pdv{\lambda}\log q(z|x, \lambda)\right]}_{\text{expected gradient :)}}
+\end{aligned}
+\end{equation*}
+
+
+\end{frame}
+
+\begin{frame}{Score function estimator: remarks}
+
+
+We can now build an MC estimator
+\begin{small}
+\begin{equation*}
+\begin{aligned}
+&\pdv{\lambda}\E[q(z|x,\lambda)]{\log p(x|z,\theta)} \\ 
+&= \mathbb E_{q(z|x,\lambda)} \left[  \log p(x|z,\theta)  \pdv{\lambda}\log q(z|x,\lambda)\right] \\ \pause 
+&\overset{\text{MC}}{\approx} \frac{1}{K} \sum_{k=1}^K \alert{\log p(x|z^{(k)}, \theta)} \pdv{\lambda}\log q(z^{(k)}|x, \lambda) \\
+&\textcolor{gray}{\text{where } z^{(k)} \sim q(z|x, \lambda)}
+\end{aligned}
+\end{equation*}
+\end{small}
+
+\pause
+\begin{itemize}
+	\item magnitude of $\log p(x|z, \theta)$ varies widely \pause 
+	\item model likelihood does not contribute to direction of gradient 
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}{Computation Graph}
+\begin{figure}
+\center
+\begin{tikzpicture}[node distance=1cm]
+\node[rectangle, draw, rounded corners, thick] (input) {$x$};
+\node[rectangle, draw, rounded corners, thick, above left=of input] (psi) {$ \psi $};
+\node[rectangle, fill=blue!20, thick, above right= of input, rounded corners, draw] (loss) {$ x $};
+\draw[->, thick] (input) -- (psi) node[midway, above, rotate=145] {$ \lambda $};
+\draw[->, thick] (input) -- (loss) node[midway, above, rotate=225] {$ \theta $};
+\node[draw=orange, thick, rectangle, fit= (input) (psi), rounded corners] {};
+\node[below left= of input] (inference) {\textcolor{orange}{inference model}};
+\node[draw=blue!50, thick, rectangle, fit= (input) (loss), rounded corners] {};
+\node[below right= of input] (generation) {\textcolor{blue!50}{generation model}};
+
+\pause
+\node[rectangle, draw, fill=blue!20, thick, rounded corners, thick, left=of psi] (kl) {$ \KullbackLeibler $};
+\draw[->, thick] (psi) edge (kl);
+
+\pause
+\node[circle, draw, thick, above right= of loss] (z) {$ z $};
+\node[right = of z, xshift=-1cm] (random) {$ \sim \BerDist{\psi} $};
+\draw[->, thick] (z) edge (loss);
+
+
+
+\pause
+\node[rectangle, fill=blue!20, thick, above of= psi, rounded corners, draw, node distance=2cm] (scorefunction) {$ \log q_\lambda(z|\psi) \uncover<5->{\alert{\log p_\theta(x|z)}} $};
+\node[rectangle, fill=blue!20, thick, above right= of input, rounded corners, draw] (loss) {$ x $};
+\draw[->, thick] (psi) edge (scorefunction);
+\draw[->, thick] (z) edge (scorefunction);
+\uncover<5->{\draw[->, thick] (loss) edge node[strike out,draw,-,red,double]{} (scorefunction);}
+
+\end{tikzpicture}
+\end{figure}
+\end{frame}
+
+\begin{frame}{Pros and Cons}
+\begin{itemize}
+\item Pros
+\begin{itemize}
+\item Applicable to all distributions
+\item Many libraries come with samplers for common distributions
+\end{itemize}
+\pause
+\item Cons
+\begin{itemize}
+\item High Variance!
+\end{itemize}
+\end{itemize}
+\end{frame}
+
+\section{Variance reduction}
+\frame{\tableofcontents[currentsection]}
+
+\begin{frame}{When variance is high we can}
+
+\pause
+
+\begin{itemize}
+	\item sample more \\ \pause
+	\item use variance reduction techniques (e.g. baselines and control variates)\\ 
+\end{itemize}
+\end{frame}
+
+
+
+\begin{frame}{Control variates}
+
+Suppose we want to estimate $\mathbb E[f(Z)]$ 
+\begin{equation*}
+\hat f \overset{\text{MC}}{\approx} \frac{1}{S} \sum_{s=1}^S f(z_s)
+\end{equation*}
+and we know the expected value of another function $\psi(z)$ on the same support. \pause
+
+~
+
+It holds that 
+
+\begin{equation*}
+\mathbb E[f(Z)] = \mathbb E[f(Z) - \psi(Z)] + \mathbb E[\psi(Z)]
+\end{equation*}
+
+
+%If $\psi(z) = f(z)$, and we estimate the expected value of $f(x) - \psi(x)$, then we have reduced variance to $0$. \pause 
+
+\end{frame}
+
+\begin{frame}{Variance reduction}
+\begin{equation*}
+\hat d = \frac{1}{S} \left( \sum_{s=1}^S f(z_s) - \psi(z_s)\right) + \mathbb E[\psi(Z)]
+\end{equation*}
+In general
+\begin{equation*}
+\Var(\hat d) = \Var(\hat f) - 2\Cov(\hat f, \hat \psi) + \underbrace{\Var(\hat \psi)}_{0 \text{ by assumption}}
+\end{equation*}
+If $f$ and $\psi$ are strongly correlated, then we improve on the original estimation problem.
+
+
+\end{frame}
+
+\begin{frame}{Baselines}
+\begin{block}{Fact}
+The Expectation of the score function is 0. 
+\pause
+\begin{equation*}
+\E[q(z|x,\lambda)]{\pdv{\lambda} \log q(z|x,\lambda)} = 0
+\end{equation*}
+\end{block}
+\end{frame}
+
+\begin{frame}{Baselines}
+We attempt to centre the gradient estimate. To do this we learn a quantity $ C $ that we subtract
+from the reconstruction loss.
+\begin{equation*}
+\E[q(z|\lambda) ]{\log q(z|\lambda) \left( \log p(x|z,\theta) - C \right)}
+\end{equation*}
+We call $ C $ a baseline. It does not change the expected gradient \citep{Williams:1992}.
+\end{frame}
+
+\begin{frame}{Baselines}
+ \begin{equation*}
+\begin{aligned}
+&\E[q(z|\lambda)]{\pdv{\lambda}\log q(z|\lambda) \left( \log p(x|z,\theta) - C \right)} = \pause \\
+&\underbrace{\E[q(z|\lambda)]{\pdv{\lambda}\log q(z|\lambda)  \log p(x|z,\theta)}}_{\text{score function gradient}}  -
+\pause \\
+&\underbrace{\E[q(z|\lambda)]{\pdv{\lambda}\log q(z|\lambda)}}_{0}C
+\end{aligned}
+\end{equation*}
+\end{frame}
+
+\begin{frame}{Baselines}
+We can make baselines input-dependent to make them more flexible.
+\begin{equation*}
+\log q(z|\lambda) \left( \log p(x|z,\theta) - C(x; \omega) \right)
+\end{equation*}
+
+\pause
+
+However, baselines may not depend on the random value $ z $! Quantities that may depend on the
+random value ($ C(z) $) are called \textbf{control variates}. \\
+
+~
+
+See \cite{PaisleyEtAl:2012, RanganathEtAl:2014,GregorEtAl:2014}.
+\end{frame}
+
+\begin{frame}{Baselines}
+Baselines are predicted by a regression model (e.g. a neural net). \\
+
+~
+
+The model is trained using 
+an $ L_{2} $-loss.
+\begin{equation*}
+\min_\omega \left(C(x; \omega) - \log p(x|z,\theta)\right)^{2}
+\end{equation*}
+\end{frame}
+
+
+
+

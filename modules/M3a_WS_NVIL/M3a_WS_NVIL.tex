@@ -1,0 +1,141 @@
+\documentclass[14pt]{beamer}
+
+\usetheme{Montpellier}
+\usecolortheme{beaver}
+
+\usepackage{amsmath, amssymb, ../../vimacros, hyperref, tikz}
+\usepackage{../../pdfpcnotes}
+\usetikzlibrary{positioning, fit, bayesnet}
+\usepackage[round]{natbib}
+\usepackage{physics}
+\usepackage{verbatim}
+
+
+\hypersetup{breaklinks=true, colorlinks=true, linkcolor=blue, urlcolor=blue, citecolor=blue}
+
+\beamertemplatenavigationsymbolsempty
+
+\title{Deep Generative Models: \\
+Discrete Latente Variables}
+\author{Philip Schulz and Wilker Aziz\\
+\url{https://github.com/philschulz/VITutorial}}
+\date{}
+
+\setbeamertemplate{footline}[frame number]
+
+\begin{document}
+
+\begin{frame}
+\maketitle
+\end{frame}
+
+\frame{\tableofcontents}
+
+
+\begin{frame}{Generative Models}
+Joint distribution over observed data $ x $ and latent variables $ Z $.
+\begin{equation*}
+p(x,z|\theta) =  \underbrace{p(z)}_{\text{prior}} \underbrace{p(x|z,\theta)}_{\text{likelihood}}
+\end{equation*} 
+The likelihood and prior are often standard distributions (Gaussian, Bernoulli) with simple dependence on conditioning
+information.
+\end{frame}
+
+\begin{frame}{Deep generative models}
+
+Joint distribution with {\bf deep observation model}
+\begin{equation*}
+p(x, z|\theta) = \underbrace{p(z)}_{\text{prior}} \underbrace{p(x|z, \theta)}_{\text{likelihood}}
+\end{equation*}
+~ {\small mapping from $z$ to $p(x|z, \theta)$ is a NN with parameters $\theta$}
+
+~ \pause
+
+Marginal likelihood 
+\begin{equation*}
+p(x|\theta) = \int p(x, z|\theta) \dd{z} = \int p(z)p(x|z, \theta) \dd{z} 
+\end{equation*}
+~ \alert{intractable} in general
+
+
+
+\end{frame}
+
+
+\begin{frame}{Goals}
+
+\pnote{Q: Why is gradient-based MLE not possible?}
+
+We want
+\begin{itemize}
+	\item richer probabilistic models  \pause
+	\item complex observation models \\
+	parameterised by NNs 
+	%\item but we cannot use backprop for parameter estimation \\
+	%due to intractability of log-marginal and its gradient
+\end{itemize}
+\pause
+but we can't perform gradient-based MLE
+
+~
+
+\pause
+
+We need \alert{approximate inference} techniques!
+
+\end{frame}
+
+\begin{comment}  % TODO: move this closer to VAE
+\begin{frame}{Recap: Variational Inference}
+\begin{block}{Objective}
+\begin{equation*}
+\underset{q(z)}{\max}~\E{\log p(x,z)} + \Ent{q(z)}
+\end{equation*}
+\begin{itemize}
+\item The ELBO is a lower bound on $ \log p(x) $
+\item Mean field assumption: $ q(z) = \prod_{i=1}^{N}q(z_{i}) $
+\end{itemize}
+\end{block}
+\end{frame}
+\end{comment}
+
+\section{First Attempt: Wake-Sleep}
+\frame{\tableofcontents[currentsection]}
+
+
+\input{WS}
+
+\section{Neural Variational Inference}
+\frame{\tableofcontents[currentsection]}
+
+\input{NVIL}
+
+\begin{frame}{Summary}
+\begin{itemize}
+\item Wake-Sleep: train inference and generation networks with separate objectives
+\pause
+\item NVIL: A single objective for both models
+\pause
+\item Use score function estimator.
+\pause
+\item High variance.
+\pause
+\item Always use baselines for variance reduction!
+\end{itemize}
+\end{frame}
+
+\begin{frame}[allowframebreaks]{Literature}
+%\nocite{KingmaWelling:2013}
+\nocite{HintonEtAl:1995}
+\nocite{MnihNVIL}
+\nocite{greensmith2004variance}
+%\nocite{RezendeEtAl:2014}
+%\nocite{TitsiasLazarogredilla:2014}
+%\nocite{BergkirkpatrickEtAl:2010}
+%\nocite{KucukelbirEtAl:2017}
+
+\bibliographystyle{plainnat}
+\bibliography{../../VI}
+\end{frame}
+
+\end{document}

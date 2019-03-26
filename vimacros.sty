@@ -2,6 +2,10 @@
 
 \usepackage{amsmath, amssymb, xifthen, xstring}
 
+% footnotes
+\newcommand{\ack}[1]{\let\thefootnote\relax\footnote{\textcolor{gray}{#1}}}
+
+
 % Optimisation
 \DeclareMathOperator*{\argmin}{arg\,min}
 \DeclareMathOperator*{\argmax}{arg\,max}
@@ -16,13 +20,16 @@
 \DeclareMathOperator{\softmax}{softmax}
 \DeclareMathOperator{\relu}{relu}
 \DeclareMathOperator{\softplus}{softplus}
+\DeclareMathOperator{\sigmoid}{sigmoid}
 
 % Matrix
 \DeclareMathOperator{\diag}{diag}
+\DeclareMathOperator{\Cov}{Cov}
+\DeclareMathOperator{\Var}{Var}
+
 
 % KL divergence
 \DeclareMathOperator{\KullbackLeibler}{KL}
-\DeclareMathOperator{\Cat}{Cat}
 \newcommand{\KL}[2]{\KullbackLeibler\left(#1\mid\mid #2\right)}
 
 % Normal distribution
@@ -60,7 +67,9 @@
 % Bernoulli Distribution
 \DeclareMathOperator{\Bernoulli}{Bernoulli}
 \newcommand{\BerDist}[1]{\Bernoulli\left(#1\right)}
+\DeclareMathOperator{\Bern}{Bern}
 
 % Categorical Distribution
 \DeclareMathOperator{\Categorical}{Categorical}
 \newcommand{\CatDist}[1]{\Categorical\left(#1\right)}
+\DeclareMathOperator{\Cat}{Cat}
