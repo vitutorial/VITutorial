@@ -480,7 +480,7 @@ Continuous latent variable, discrete observation
 \grad_\theta \log p(x|\theta) \pause &= \grad_\theta \log \underbrace{\int p(x, z|\theta) \dd{z}}_{\text{marginal}} \\ \pause
 &= \underbrace{\frac{1}{\int p(x, z|\theta) \dd{z}} \int \grad_\theta p(x,z|\theta) \dd{z}}_{\text{chain rule}} \\ \pause
 &= \frac{1}{p(x|\theta)} \int \underbrace{p(x,z|\theta) \grad_\theta \log p(x,z|\theta)}_{\text{log-identity for derivatives}} \dd{z} \\ \pause
-&= \int \alert{p(z|x, \theta)} \grad_\theta \log p(x,z|\theta) \dd{z} %\\ \pause
+&= \int \underbrace{\alert{p(z|x, \theta)}}_{\text{posterior}} \grad_\theta \log p(x,z|\theta) \dd{z} %\\ \pause
 %&= \mathbb E_{\alert{p(z|x, \theta)}} \left[ \grad_\theta \log p(x,z|\theta) \right]
 \end{aligned}
 \end{equation*}
@@ -501,7 +501,7 @@ Continuous latent variable, discrete observation
 \end{aligned}
 \end{equation*}
 
-\pause But what are we sampling from exactly?
+\pause But the posterior is not available!
 
 \begin{equation*}
 \begin{aligned}
@@ -534,13 +534,15 @@ Some reasons
 
 \begin{frame}{Examples: Lexical alignment}
 
-Generate a word $x_i$ in L1 from a word $y_{a_i}$ in L2
+Generate a word $x_i$ in L1 from a word $y_{a_i}$ in L2 \pause
 	\begin{equation*}
 	\begin{aligned}
-		P(x|y, \theta) %&= \sum_{a_1=1}^{\abs{y}}\cdots \sum_{a_{\abs{x}}=1}^{\abs{y}} \prod_{i=1}^{\abs{x}} P(a_i|y)P(x_i|y,a_i, a_{<i}) \\
-		&\overset{\text{\alert{ind}}}{=} \prod_{i=1}^{\abs{x}} \sum_{a_i=1}^{\abs{y}}P(a_i|y)P(x_i|y_{\alert{a_i}}) 
+		p(x|y, \theta) %&= \sum_{a_1=1}^{\abs{y}}\cdots \sum_{a_{\abs{x}}=1}^{\abs{y}} \prod_{i=1}^{\abs{x}} P(a_i|y)P(x_i|y,a_i, a_{<i}) \\
+		&\overset{\text{\alert{ind}}}{=} \prod_{i=1}^{\abs{x}} \sum_{a_i=1}^{\abs{y}}p(a_i|y)p(x_i|y_{\alert{a_i}}) 
 		\end{aligned}
 	\end{equation*}
+
+\pause
 
 a mixture model whose mixture components are labelled by words \hfill \textcolor{blue}{marginalisation $O(\abs{x}\abs{y})$}
 
@@ -548,15 +550,15 @@ a mixture model whose mixture components are labelled by words \hfill \textcolor
 
 \begin{frame}{Examples: Rationale extraction}
 
-Sentiment analysis based on a subset of the input
+Sentiment analysis based on a subset of the input \pause
 \begin{equation*}
 	\begin{aligned}
-		P(x|y, \theta) &= \sum_{f_1=0}^{1}\cdots \sum_{f_{\abs{y}}=0}^{1} P(x|f,y) \prod_{i=1}^{\abs{y}} \Bernoulli(f_i|\theta_{y_i}) \\
+		p(x|y, \theta) &= \sum_{f_1=0}^{1}\cdots \sum_{f_{\abs{y}}=0}^{1} p(x|f,y) \prod_{i=1}^{\abs{y}} \Bernoulli(f_i|\theta_{y_i}) \\
 		\end{aligned}
 	\end{equation*}
-where $P(x|f,y)$ conditions on $y_i$ iff $f_i = 1$.
+where $p(x|f,y)$ conditions on $y_i$ iff $f_i = 1$.
 
-~
+~ \pause
 
 A factor model whose factors are labelled by words \\
 \hfill \alert{marginalisation $O(2^{\abs{y}})$}
@@ -565,15 +567,15 @@ A factor model whose factors are labelled by words \\
 
 \begin{frame}{Examples: Language modelling}
 
-	A (deterministic) RNNLM aways produces the same conditional for a given prefix. Isn't it reasonable to expect the conditional to depend on what we are talking about?: e.g. \emph{Rio de Janeiro $\ldots$}
+	A (deterministic) RNNLM aways produces the same conditional $p(x_i|x_{<i}, \theta)$ for a given prefix. \pause Isn't it reasonable to expect the conditional to depend on what we are talking about?: e.g. \emph{Rio de Janeiro $\ldots$}
 	\begin{itemize}
 		\item history: \emph{was once the Brazilian capital}
 		\item tourism: \emph{offers some of Brazil's most iconic landscapes}
 		\item news: \emph{recently hosted the world cup final}
-	\end{itemize}
+	\end{itemize} \pause
 	\vspace{-5pt}
 	\begin{equation*}
-		P(x|\theta) = \int \mathcal N(z|0, I) \prod_{i=1}^{\abs{x}} P(x_i|z, x_{<i}, \theta)
+		p(x|\theta) = \int \mathcal N(z|0, I) \prod_{i=1}^{\abs{x}} p(x_i|z, x_{<i}, \theta) \dd z
 	\end{equation*}
 
 \end{frame}
