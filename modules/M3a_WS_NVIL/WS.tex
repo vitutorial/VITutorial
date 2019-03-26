@@ -7,6 +7,7 @@
 \end{itemize}
 \end{frame}
 
+
 \begin{frame}{Wake-sleep Architecture}
 2 Neural Networks:
 \begin{itemize}
@@ -19,6 +20,56 @@
 \pause
 \item Training is performed in a ``hard EM'' fashion
 \end{itemize}
+\end{frame}
+
+\begin{frame}{Generator}
+
+\begin{figure}
+\center
+\begin{tikzpicture}
+\node[draw, circle] (z3) {$ z_{3} $};
+
+\node[draw, circle, below left =of z3] (z1) {$ z_{1} $};
+\node[draw, circle, below right = of z3] (z2) {$ z_{2} $};
+
+\node[draw, circle,  below left= of z1] (in1) {$ x_{1} $};
+\node[draw, circle, below left=of z2] (in2) {$ x_{2} $}; 
+\node[draw, circle, below right= of z2] (in3) {$ x_{3} $};
+
+\draw[->, thick] (z1) -- (in1) node[midway, above, rotate=45] {$ \theta $};
+\draw[->, thick] (z1) -- (in2) node[midway, above, rotate=315] {$ \theta $};
+\draw[->, thick] (z2) -- (in2) node[midway, above, rotate=45] {$ \theta $};
+\draw[->, thick] (z2) -- (in3) node[midway, above, rotate=315] {$ \theta $};
+\draw[->, thick] (z3) -- (z1) node[midway, above, rotate=45] {$ \theta $};
+\draw[->, thick] (z3) -- (z2) node[midway, above, rotate=315] {$ \theta $};
+\end{tikzpicture}
+\end{figure}
+
+\end{frame}
+
+\begin{frame}{Inference Network}
+
+\begin{figure}
+\center
+\begin{tikzpicture}
+\node[draw, circle] (z3) {$ z_{3} $};
+
+\node[draw, circle, below left =of z3] (z1) {$ z_{1} $};
+\node[draw, circle, below right = of z3] (z2) {$ z_{2} $};
+
+\node[draw, rectangle, fill=gray, below left= of z1] (in1) {$ x_{1} $};
+\node[draw, rectangle, fill=gray, below left=of z2] (in2) {$ x_{2} $}; 
+\node[draw, rectangle, fill=gray, below right= of z2] (in3) {$ x_{3} $};
+
+\draw[->, thick] (in1) -- (z1) node[midway, above, rotate=45] {$ \lambda $};
+\draw[->, thick] (in2) -- (z1) node[midway, above, rotate=315] {$ \lambda $};
+\draw[->, thick] (in2) -- (z2) node[midway, above, rotate=45] {$ \lambda $};
+\draw[->, thick] (in3) -- (z2) node[midway, above, rotate=315] {$ \lambda $};
+\draw[->, thick] (z1) -- (z3) node[midway, above, rotate=45] {$ \lambda $};
+\draw[->, thick] (z2) -- (z3) node[midway, above, rotate=315] {$ \lambda $};
+\end{tikzpicture}
+\end{figure}
+
 \end{frame}
 
 \begin{frame}{Wake-sleep Training}
