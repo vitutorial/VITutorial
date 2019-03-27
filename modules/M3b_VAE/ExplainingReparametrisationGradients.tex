@@ -1,0 +1,123 @@
+\documentclass[a4paper,11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath, amssymb, hyperref, ../../vimacros}
+\usepackage[round]{natbib}
+\usepackage{physics}
+\usepackage{mathtools}
+\hypersetup{breaklinks=true, colorlinks=true, urlcolor=blue, linkcolor=blue, citecolor=blue}
+
+%\DeclareMathOperator*{\argmax}{arg\,max}
+
+\author{Philip Schulz and Wilker Aziz}
+\title{Understanding Reparameterisation Gradients}
+\date{last modified: \today}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+This note explains in detail the reparametrisation trick presented in \citep{KingmaWelling:2013,RezendeEtAl:2014,TitsiasLazarogredilla:2014}. 
+Our derivation mostly follows that of \citet{TitsiasLazarogredilla:2014}. It also gives some advice on how terms such as Jacobians should be distributed.
+\end{abstract}
+
+
+We assume a model of some data $ x $ whose log-likelihood is given as
+\begin{equation}
+\log p(x|\theta) = \log \intl { \underbrace{p(x,z|\theta)}_{g(z)} } {z} 
+\end{equation}
+where $ z $ is any set of latent variables and $ \theta $ are the model parameters. The joint likelihood, which we abbreviate as $ g(z) $, can be arbitrarily
+complex; in particular, it can be given by a neural network. Since for complex models exact integration over the latent space is impossible, we employ variational
+inference for parameter optimisation. The variational parameters are called $ \lambda $. The objective is
+\begin{equation} \label{eq:objective}
+\underset{\lambda}{\argmax} ~ \mathbb E_{q(z; \lambda)}\left[ \log \frac{g(z)}{q(z; \lambda)} \right] \ .
+\end{equation}
+We further assume that exact integration is not possible even under the variational approximation (this is the case in non-conjugate models, such as neural networks). Instead we want to sample gradient estimates using Monte Carlo (MC) sampling. Unfortunately, the MC estimator is not differentiable, thus we derive what we call \emph{reparameterised gradients} which apply to models where $Z$ is a continuous random variable.
+
+\section{Location-scale $q$}
+ 
+In this section we focus on a restricted class of approximate posteriors for which $Z$ can be represented by transforming samples from a standard distribution $\phi(\epsilon)$ using an affine transformation:
+%We thus to sample the simpler random variable $ Z \sim \NDist{0}{I} $ which does not depend on the variational parameters. In order to express $ q(\theta|\lambda) $ in terms of the density 
+%$ \phi(z) $ we need to tranform one into the other.
+\begin{subequations}\label{eq:h}
+\begin{align}
+\epsilon &= h(z; \lambda) = C^{-1} (z - \mu)  \\
+z &= h^{-1}(\epsilon; \lambda) = \mu + C\epsilon ~ .
+\end{align}
+\end{subequations}
+Note that $\phi(\epsilon)$ does not depend on $\lambda = \{\mu, C\}$ since the affine transformation $ h $ has standardised the
+distribution; i.e. the terms $ C^{-1} $ and $ - \mu $ cancel with the distributions parameters. This in fact restricts the class of approximations $q(z; \lambda)$ to location-scale distributions.\footnote{The vector $\mu$ is called the \emph{location} and $C$ is a positive definite matrix called the \emph{scale}.}
+
+For the sake of generality we take $z$ and $\epsilon$ to be vector valued. 
+Then we write $J_{h(z; \lambda)}$ to denote the Jacobian matrix of the transformation $h(z; \lambda)$, and $J_{h^{-1}(\epsilon; \lambda)}$ to denote the Jacobian matrix of the inverse transformation.\footnote{Recall that a Jacobian matrix $\mathbf J \triangleq J_{f(x)}$ of some vector value function $f(x)$ is such that $J_{i,j} = \pdv{x_j} f_i(x)$.} 
+An important property, which we will use to derive reparameterised gradients, is that the inverse of a Jacobian matrix is related to the Jacobian matrix of the inverse function by $J_{f^{-1}} \circ f(x)= J^{-1}_{f(x)}$.\footnote{The notation $J_{f^{-1}} \circ f(x)$ denotes function composition, that is, $J_{f^{-1}(y=f(x))}$ or equivalently $J_{f^{-1}(y)}\evaluated_{y=f(x)}$.}
+
+For an invertible transformation of random variables, it holds that 
+\begin{equation}\label{eq:change-to-phi}
+q(z;\lambda) = \phi(h(z; \lambda))\abs{\det J_{h(z; \lambda)}}
+\end{equation}
+and therefore for the transformation in (\ref{eq:h}) we can write
+\begin{equation}
+q(z;\lambda) = \phi(C^{-1}(z - \mu))\abs{\det C^{-1}} 
+\end{equation}
+and
+\begin{equation}
+\phi(\epsilon) = q(\mu + C\epsilon; \lambda)\abs{\det C} ~ .
+\end{equation}
+
+In the following block of equations \eqref{eq:derivation} we will re-express the expectation in Equation~\eqref{eq:objective} in terms of the parameter-free standard density $\phi(\epsilon)$. The derivation relies on several identities, thus we will break it down into small steps. 
+We start by a change of density 
+\begin{small}
+\begin{subequations}\label{eq:derivation}
+\begin{align}
+& \int q(z;\lambda) \log \dfrac{g(z)}{q(z;\lambda)} \dd z \\
+&= \int \phi(\underbrace{h(z; \lambda)}_{\epsilon}) \abs{\det J_{h(z; \lambda)}} \log \frac{g(z)}{\phi(h(z; \lambda)) \abs{\det J_{h(z; \lambda)}}} \dd z \label{eq:change-density}\\
+\intertext{where we use the identity in \eqref{eq:change-to-phi} to introduce $\phi(\epsilon)$. 
+Note, however, that the variable of integration is still $z$ and therefore we have expressed every integrand---including $\phi(\epsilon)$---as a function of $z$. We now proceed to perform a change of variable
+}
+&= \int \phi(\epsilon) \abs{\det J_{h} \circ h^{-1}(\epsilon; \lambda)} \log \frac{g(h^{-1}(\epsilon; \lambda))}{\phi(\epsilon) \abs{\det J_{h} \circ h^{-1}(\epsilon; \lambda)}} \underbrace{\abs{\det J_{h^{-1}(\epsilon; \lambda)}} \dd \epsilon}_{\dd z} \label{eq:change-variable} \\
+\intertext{which calls for a change of infinitesimal volumes, i.e. $\dd z = \abs{\det J_{h^{-1}}(\epsilon; \lambda)} \dd \epsilon$, and requires expressing every integrand as a function of $\epsilon$ rather than $z$. Note that, to express the Jacobian $J_{h(z; \lambda)}$ as a function of $\epsilon$, we used function composition. At this point we can use the \href{https://en.wikipedia.org/wiki/Inverse_function_theorem}{inverse function theorem}
+}
+&= \int \phi(\epsilon) \abs{\det J^{-1}_{h^{-1}(\epsilon; \lambda)}} \log \frac{g(h^{-1}(\epsilon; \lambda))}{\phi(\epsilon) \abs{\det J^{-1}_{h^{-1}(\epsilon; \lambda)}}} \abs{\det J_{h^{-1}(\epsilon; \lambda)}} \dd \epsilon \label{eq:inverse-theorem} \\
+\intertext{to rewrite both Jacobian terms of the kind $J_{h} \circ h^{-1}(\epsilon; \lambda)$ as inverse Jacobians. This is convenient because the determinant of invertible matrices is such that $\det A^{-1} = \frac{1}{\det A}$ which we can use to re-arrange the inverse Jacobian terms
+}
+&= \int \phi(\epsilon) \frac{1}{\abs{\det J_{h^{-1}}(\epsilon; \lambda)}} \log \frac{g(h^{-1}(\epsilon; \lambda))\abs{\det J_{h^{-1}}(\epsilon; \lambda)}}{\phi(\epsilon)} \abs{\det J_{h^{-1}}(\epsilon; \lambda)} \dd \epsilon \label{eq:det} \\
+\intertext{revealing that some of them can be cancelled. 
+We are now left with a simpler expectation wrt $\phi(\epsilon)$ 
+}
+&= \int \phi(\epsilon) \log \frac{g(h^{-1}(\epsilon; \lambda))\abs{\det J_{h^{-1}}(\epsilon; \lambda)}}{\phi(\epsilon)} \dd \epsilon \label{eq:cancel}\\
+\intertext{and we can proceed to solve the Jacobian of the affine transformation}
+&= \int \phi(\epsilon) \log \left(g(h^{-1}(\epsilon; \lambda))\abs{\det \underbrace{J_{h^{-1}}(\epsilon; \lambda)}_{C}}\right) \dd \epsilon  \underbrace{- \int \phi(\epsilon) \log \phi(\epsilon) \dd \epsilon}_{\mathbb H[\phi(\epsilon)]} \label{eq:scale} \\
+\intertext{and to separate out the expected log-denominator (an entropy term). 
+Finally, recall that $\phi(\epsilon)$ does not depend on $C$ and therefore the log-determinant is constant with respect to the standard distribution and can be pushed outside the expectation.}
+&= \mathbb E_{\phi(\epsilon)}[\log g(h^{-1}(\epsilon; \lambda))] + \log \abs{C} + \mathbb H[\phi(\epsilon)] \label{eq:final}
+\end{align}
+\end{subequations}
+\end{small}
+Note that every expectation in \eqref{eq:final} is taken with respect to $q(\epsilon)$ which does not depend on $\lambda$, thus the gradient of \eqref{eq:objective} wrt $\lambda$ can be re-expressed as shown in Equation~\eqref{eq:rep-grad}.
+\begin{small}
+\begin{subequations}\label{eq:rep-grad}
+\begin{align}
+\grad_\lambda \mathbb E_{q(z; \lambda)}\left[ \log \frac{g(z)}{q(z; \lambda)} \right]
+ &= \grad_\lambda \left( \mathbb E_{\phi(\epsilon)}[\log g(h^{-1}(\epsilon; \lambda))] + \log \abs{C} + \mathbb H[\phi(\epsilon)] \right) \\
+ &= \mathbb E_{\phi(\epsilon)}[\grad_\lambda \log g(h^{-1}(\epsilon; \lambda))] + \grad_\lambda \log \abs{C} + \grad_\lambda \mathbb H[\phi(\epsilon)] \label{eq:push-grad} \\
+ &= \mathbb E_{\phi(\epsilon)}[\underbrace{\grad_{h^{-1}} \log g(h^{-1}(\epsilon; \lambda))\grad_\lambda h^{-1}(\epsilon; \lambda)}_{\text{chain rule}}] + \grad_\lambda \log \abs{C}  
+\end{align}
+\end{subequations}
+\end{small}
+Importantly, note that the first term can be estimated via MC, and that is exactly what  automatic differentiation/backprop computes for a given sample, while the second term can be found analytically. 
+
+\paragraph{Noteworthy Points}
+\begin{itemize}
+\item The cancellation of the absolute value of the Jacobian determinant and 
+\item We can usually rewrite $ g(z) = p(x|z, \theta)p(z|\theta) $. This enables us to split up the objective function as
+\begin{equation}
+\E[q(z;\lambda)]{\log \dfrac{p(x|z, \theta)p(z|\theta)}{q(z;\lambda)}} = \E[q(z;\lambda)]{\log p(x|z, \theta)} - \KL{q(z;\lambda)}{p(z|\theta)}
+\end{equation}
+In case we can compute the KL term analytically, we do not need to included $\abs{\det J_{h^{-1}(\epsilon; \lambda)}}$ in the objective. 
+\end{itemize}
+
+\bibliographystyle{plainnat}
+\bibliography{../../VI}
+
+\end{document}
