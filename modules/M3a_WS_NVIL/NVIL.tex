@@ -332,9 +332,10 @@ It holds that
 \end{equation*}
 In general
 \begin{equation*}
-\Var(\hat d) = \Var(\hat f) - 2\Cov(\hat f, \hat \psi) + \underbrace{\Var(\mu_\psi)}_{0}
+\Var(f - \psi) = \Var(f) - 2\Cov(f, \psi) + \Var(\psi)
 \end{equation*}
-If $f$ and $\psi$ are strongly correlated, then we improve on the original estimation problem.
+If $f$ and $\psi$ are strongly correlated, then we improve on the original estimation problem: \\
+~if $\Cov(f, \psi) > \frac{\Var(\psi)}{2}$
 
 
 \end{frame}
