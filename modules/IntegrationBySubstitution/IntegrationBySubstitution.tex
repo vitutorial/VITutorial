@@ -1,0 +1,143 @@
+\documentclass[14pt,dvipsnames, aspectratio=169]{beamer}
+
+\usetheme{Montpellier}
+\usecolortheme{beaver}
+
+\usepackage{physics}
+\usepackage{amsmath, amssymb, ../../vimacros, hyperref, tikz}
+\usetikzlibrary{positioning, fit, bayesnet, shapes.misc, patterns}
+\usepackage[round]{natbib}
+\usepackage{mathalfa}
+\usepackage{cancel}
+\usepackage{verbatim}
+
+\beamertemplatenavigationsymbolsempty
+
+\hypersetup{breaklinks=true, colorlinks=true, linkcolor=blue, urlcolor=blue, citecolor=blue}
+
+\newcommand{\balert}[1]{\textcolor{blue}{#1}}
+\newcommand{\galert}[1]{\textcolor{PineGreen}{#1}}
+
+\makeatletter
+\newenvironment{noheadline}{
+    \setbeamertemplate{headline}{}
+    \addtobeamertemplate{frametitle}{\vspace*{-0.9\baselineskip}}{}
+}{}
+\makeatother
+
+\title{Integration By Substitution}
+\author{Philip Schulz and Wilker Aziz\\
+\url{https://github.com/vitutorial/VITutorial}}
+\date{}
+
+\setbeamertemplate{footline}[frame number]
+
+\begin{document}
+
+\begin{frame}
+\maketitle
+\end{frame}
+
+\begin{frame}{Multivariate calculus recap}
+
+Let $x \in \mathbb R^K$ and let $\mathcal T: \mathbb R^K \to \mathbb R^K$ be differentiable and invertible
+\begin{itemize}
+	\item $y = \mathcal T(x) $
+	\item $x = \inv{\mathcal T}(y)$
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Jacobian}
+
+	The Jacobian matrix $\jac{\mathcal T}{x} $ of  $\mathcal T$ \\
+	~assessed at $x$ is the matrix of partial derivatives
+	\begin{equation*}
+		J_{ij} = \pdv{y_i}{x_j} = \pdv{\mathcal{T}(x)_{i}}{x_{j}}
+	\end{equation*} 
+	
+	\pause
+	Inverse function theorem
+	\begin{equation*}
+		\jac{\inv{\mathcal T}}{y} = \left( \jac{\mathcal T}{x} \right)^{-1}
+	\end{equation*}
+	
+\end{frame}
+
+\begin{frame}{Differential (or inifinitesimal)}
+
+	The {\bf differential} $\dd x$ of $x$ refers to an \emph{infinitely small} change in $x$\\ \pause
+	\vspace{10pt}
+
+	We can relate the differential $\dd y$ of $y = \mathcal T(x)$ to $\dd x$ \pause
+	\begin{block}{Scalar Case}
+		\begin{equation*}
+			\dd y \dv{x}{x} = \pause \alert{\dv{y}{x}} \dd x = \alert{\dv{\mathcal{T}(x)}{x}} \dd x \pause \implies \dd x = \dv{x}{y} \dd y
+		\end{equation*}
+		\pause
+		\begin{itemize}
+		\item \alert{$\dv*{y}{x}$} scales the differential $ \dd x $ to match it to $ \dd y $
+		\item if $ \alert{\dv*{y}{x}} > 1 $, $ \mathcal{T} $ expands the area around $ x $ locally
+		\end{itemize}
+	\end{block}
+
+\end{frame}
+
+\begin{frame}{Differential (or inifinitesimal)}
+
+	The {\bf differential} $\dd x$ of $x$ refers to an \emph{infinitely small} change in $x$\\ \pause
+	\vspace{10pt}
+
+	We can relate the differential $\dd y$ of $y = \mathcal T(x)$ to $\dd x$ \pause
+	\begin{block}{Multivariate Case}
+		\begin{equation*}
+        		\begin{aligned}
+			     \dd y = \alert{\djac{\mathcal T}{x}} \dd x % = \alert{\abs{\pdv{x}T(x)}} \dd x % in some texts people will find this notation
+		     \end{aligned}
+	     \end{equation*}
+		the absolute value absorbs the orientation 
+	\end{block}
+
+\end{frame}
+
+
+
+\begin{frame}{Integration by substitution}	
+	We can integrate a function $g(x)$ \\
+	~ by substituting $x = \inv{ \mathcal T}(y)$
+	\begin{equation*}
+	\begin{aligned}
+		\int g(\balert{x}) \alert{\dd x} \pause &= \int g(\underbrace{\balert{\inv{\mathcal T}(y)}}_{x}) \underbrace{\alert{\djac{\inv{\mathcal T}}{y} \dd y}}_{\dd x} \\ \pause
+	\end{aligned}
+	\end{equation*}
+	
+	\vspace{-10pt}
+	and similarly for a function $h(y)$
+	\begin{equation*}
+	\begin{aligned}
+		\int h(\balert{y}) \alert{\dd y} \pause &= \int h(\balert{\mathcal T(x)}) \alert{\djac{\mathcal T}{x} \dd x}
+	\end{aligned}
+	\end{equation*} 
+
+\end{frame}
+
+\begin{frame}{Change of density}
+
+Let $X$ take on values in $\mathbb R^K$ with density $p_X(x)$\\ \pause
+~ and recall that $y = \mathcal T(x)$ and $x = \inv{\mathcal T}(y)$\\ \pause
+
+~
+
+Then $\mathcal T$ induces a density $p_Y(y)$ expressed as
+\begin{equation*}
+p_Y(y) = p_X(\inv{\mathcal T}(y)) \djac{\inv{\mathcal T}}{y}
+\end{equation*} \pause
+and then it follows that
+\begin{equation*}
+p_X(x) = p_Y(\mathcal T(x)) \djac{\mathcal T}{x}
+\end{equation*}
+
+	
+\end{frame}
+
+\end{document}

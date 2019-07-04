@@ -1,4 +1,4 @@
-\documentclass[14pt]{beamer}
+\documentclass[14pt, aspectratio=169]{beamer}
 
 \usetheme{Montpellier}
 \usecolortheme{beaver}
@@ -30,7 +30,8 @@
 }
 
 \title{Normalising Flows}
-\author{Philip Schulz and Wilker Aziz\\
+\author{Philip Schulz\\
+\url{https://vitutorial.github.io} \\
 \url{https://github.com/vitutorial/VITutorial}}
 \date{}
 
@@ -92,7 +93,23 @@ Gaussian mixture model
 \tableofcontents[current]
 \end{frame}
 
-\begin{frame}{Recap: Reparametrisation}
+\begin{frame}{Recap: Change Of Variable}
+\begin{block}{What if a function is multivariate}
+	The Jacobian matrix $\jac{\mathcal T}{x} $ of  $\mathcal T$ \\
+	~assessed at $x$ is the matrix of partial derivatives
+	\begin{equation*}
+		J_{ij} = \pdv{y_i}{x_j} 
+	\end{equation*} 
+	
+	\pause
+	Inverse function theorem
+	\begin{equation*}
+		\jac{\inv{\mathcal T}}{y} = \left( \jac{\mathcal T}{x} \right)^{-1}
+	\end{equation*}
+\end{block}
+\end{frame}
+
+\begin{frame}{Recap: Change Of Variable}
 Express the density of a variable $ Y $ in terms of the density of a variable $ X $. Assume that a differentiable, invertible mapping
 $ h: \mathcal{X} \rightarrow \mathcal{Y} $ exists.
 \begin{equation*}
@@ -114,7 +131,7 @@ Let's learn the transformation $ h $ (or its inverse).
 \end{block}
 \pause
 \begin{block}{Problem}
-If we want $ p(y) $, we need to provide $ \djac{h^{-1}}{y} $ \textbf{in the forward pass}. But that's hard!
+If we want to express $ p(y) $ in terms of $ p(x) $, we need to provide $ \djac{h^{-1}}{y} $ \textbf{in the forward pass}. But that's hard!
 \end{block}
 We are going to devise ways to get $ \djac{h^{-1}}{y} $.
 \end{frame}
@@ -152,7 +169,8 @@ p_{Y}(y) &= p_{X}(x)\djac{h_{K}^{-1}}{y^{(K-1)}} \djac{h_{K-1}^{-1}}{y^{(K-2)}}\
 \tableofcontents[current]
 \end{frame}
 
-\begin{frame}{Normalising Flows: Density Estimation}
+\begin{frame}{Inverse Autoregressive Flows: Density Estimation}
+\begin{small}
 \begin{block}{Setting}
 Our data $ x $ has unknown continuous density $ p(x) $.
 We can therefore not handcraft a likelihood.
@@ -162,7 +180,6 @@ We can therefore not handcraft a likelihood.
 \pause
 \begin{block}{Goal}
 Transform unknown (observed)	 variable $ x $ into $ \epsilon = h(x) $ with \textbf{known} density $ p_{\epsilon}(\epsilon) $ and express the likelihood as
-\begin{small}
 \pause
 \begin{equation*}
 \begin{aligned}
@@ -171,8 +188,8 @@ p_{X}(x) &= p_{\epsilon}(\epsilon)\djac{h}{x} \\ \pause
 &= p_{\epsilon}(\textcolor{blue}{h_{1}(\epsilon^{(1)})})\djac{h_{1}}{\epsilon^{(1)}}\ldots \djac{h_{K}}{x}
 \end{aligned}
 \end{equation*}
-\end{small}
 \end{block}
+\end{small}
 \end{frame}
 
 \begin{frame}{2-step Flow}
@@ -432,7 +449,7 @@ We want a complex, multimodal approximate posterior $ q(z|x) $.
 \end{block}
 \end{frame}
 
-\begin{frame}{Normalising Flows: Inference}
+\begin{frame}{Inverse Autoregressive Flow: Inference}
 \begin{equation*}
 \begin{aligned}
 \ELBO &= -\KL{q(z|x)}{p(z|x)} \\
