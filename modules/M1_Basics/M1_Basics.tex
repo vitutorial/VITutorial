@@ -1,8 +1,8 @@
-\documentclass[14pt]{beamer}
+\documentclass[14pt, aspectratio=169]{beamer}
 \usetheme{Montpellier}
 \usecolortheme{beaver}
 
-\usepackage{amsmath, amssymb, ../../vimacros, hyperref, enumerate}
+\usepackage{amsmath, amssymb, ../../vimacros, hyperref, enumerate, subcaption}
 \usepackage[round]{natbib}
 
 \hypersetup{breaklinks=true, colorlinks=true, linkcolor=blue, citecolor=blue, urlcolor=blue}
@@ -238,76 +238,51 @@ Simply assume that the posterior consists of independent Markov chains.
 \end{block}
 \end{frame}
 
-\begin{frame}{Latent Dirichlet Allocation}
-An admixture model that changes its mixture weights per document. We assume that the mixture components
-are fixed.
+\begin{frame}{Latent Factor Model}
+\textcolor{blue}{Joint distribution:} latent variables are marginally independent a priori\\
+$$\text{for example, }K=3, N=4$$
 \begin{figure}
+\center
 \begin{tikzpicture}
-\node[obs] (w) {$ w $};
-\node[latent, left= of w] (z) {$ z $};
-\node[latent, left= of z] (theta) {$ \theta $};
-\node[left= of theta] (alpha) {$ \alpha $};
-\node[above= of w] (beta) {$ \beta $};
-\node[below= of z] (fake) {}; % needed to fit the document plate
-
-\plate {tokens} {(w)(z)} {$ N $};
-\plate {document} {(w)(z)(theta)(fake)} {$ D $};
-
-\edge {alpha} {theta};
-\edge {theta} {z};
-\edge {z} {w};
-\edge {beta} {w};
-
-\pause
-% inference edges
-\path (w) edge[->,bend left=30,color=red] (z);
-\edge[color=red] {beta} {z};
-\path (w) edge[->,bend left=30,color=red] (theta);
-\pause
-\path (z) edge[-,bend right=30,color=red] (theta);
-\path (alpha) edge[->, bend left=30, color=red] (theta);
+\foreach \x in {1,...,4} {
+  \pgfmathtruncatemacro{\y}{\x-1}
+  \ifthenelse{\x=1}{\node[obs] (x\x) {$ x_{\x} $}}{\node[obs, right= of x\y] (x\x) {$ x_{\x} $}};
+}
+\foreach \z in {1,2,3} {
+  \node[latent, above right = of x\z] (z\z) {$ z_{\z} $};
+  \only<1>{\edge[blue]{z\z}{x1,x2,x3,x4};}
+}
+\foreach \z in {1,2,3} {
+  \only<2>{\edge[red]{x1,x2,x3,x4}{z\z};}
+}
+\uncover<2->{
+\path[-, red]  (z1) edge[bend left = 30] (z3);
+\edge[-,red,bend left= 75]{z1}{z2};
+\edge[-,red]{z2}{z3};
+}
 \end{tikzpicture}
 \end{figure}
+
+~
+
+\uncover<2>{\alert{Posterior: } latent variables are conditionally dependent}
+
+%At inference time the latent variables are marginally dependent. For our variational distribution
+%we are going to assume that they are not (recall: mean field assumption).
 \end{frame}
 
-\begin{frame}{Latent Dirichlet Allocation}
-Inference network for LDA.
-\begin{figure}
-\begin{tikzpicture}
-\node[obs] (w) {$ w $};
-\node[latent, left= of w] (z) {$ z $};
-\node[latent, left= of z] (theta) {$ \theta $};
-\node[left= of theta] (alpha) {$ \alpha $};
-\node[above= of w] (beta) {$ \beta $};
-\node[below= of z] (fake) {}; % needed to fit the document plate
-
-\plate {tokens} {(w)(z)} {$ N $};
-\plate {document} {(w)(z)(theta)(fake)} {$ D $};
-
-% inference edges
-\path (w) edge[->,bend left=30,color=red] (z);
-\path (w) edge[->,bend left=30,color=red] (theta);
-\path (z) edge[-,bend right=30,color=red] (theta);
-\path (alpha) edge[->, bend left=30, color=red] (theta);
-\edge[color=red] {beta} {z};
-\end{tikzpicture}
-\end{figure}
-\end{frame}
-
-\begin{frame}{Latent Dirichlet Allocation}
-An admixture model that changes its mixture weights per document. Here we assume that the mixture components
-are fixed.
+\begin{frame}{Latent Factor Model}
+Latent binary variables that together produce an output.
 \begin{itemize}
-\item $ D $ documents.
-\item $ N $ tokens and latent variables per document.
-\item $ L $ outcomes per latent variable.
-\item Complexity of inference: $ \mathcal{O}(L^{DN}) $.
+\item $ N $ output variables (e.g. pixels).
+\item $ K $ binary factors (usually much less than $ N $).
+\item Complexity of inference: $ \mathcal{O}(2^{K}) $.
 \end{itemize}
 \end{frame}
 
-\begin{frame}{Latent Dirichlet Allocation}
+\begin{frame}{Latent Factor Model}
 \begin{block}{Intuition}
-Simply assume that the posterior consists of independent categorical and Dirichlet distributions.
+Simply assume that the posterior consists of independent Bernoulli variables.
 \end{block}
 \pause
 \begin{block}{Rule of Thumb}
@@ -362,7 +337,7 @@ a distribution $ p $.
 \begin{frame}{Recap KL divergence}
 \begin{block}{Properties}
 \begin{itemize}
-\item $ \KL{q(z)}{p(z|x)} \geq 0 $ with \\ equality iff $ q(z) = p(z|x) $.
+\item $ \KL{q(z)}{p(z|x)} = \E[q(z)]{\loga{\frac{q(z)}{p(z|x)}}} \geq 0 $ with \\ equality iff $ q(z) = p(z|x) $.
 \pause
 \item $ -\KL{q(z)}{p(z|x)} = \E[q(z)]{\loga{\frac{p(z|x)}{q(z)}}} \leq 0 $.
 \pause
@@ -452,7 +427,22 @@ or \textbf{ELBO} is our optimisation objective.
 \subsection{Relationship to EM}
 
 \begin{frame}{Performing VI (Frequentist Case)}
-VI in its basic form can be performed via coordinate ascent. This can be done as a 2-step procedure.
+\begin{block}{Variational Objective}
+\begin{equation*}
+\underset{q(z)}{\max}~\E[q(z)]{\log p(x,z) } + \Ent{q(z)}
+\end{equation*}
+This finds us the best posterior approximation for a \textbf{given model}.
+\end{block}
+\pause
+\begin{block}{Also optimize the model!}
+\begin{equation*}
+\underset{q(z), p(x,z)}{\max}~\E[q(z)]{\log p(x,z) } + \Ent{q(z)}
+\end{equation*}
+\end{block}
+\end{frame}
+
+\begin{frame}{Performing VI (Frequentist Case)}
+VI in its basic form can be performed as a 2-step procedure via coordinate ascent.
 \begin{enumerate}
 \pause
 \item Maximize (regularised) expected log-density.
@@ -592,70 +582,7 @@ This approximation strategy is commonly known as \textbf{mean field} approximati
 \center{Approximate posterior $ q(s,z) = \prod_{t=1}^{T}q(s_{t})q(z_{t})$}
 \end{frame}
 
-\begin{frame}{Original LDA Inference}
-\begin{figure}
-\begin{tikzpicture}
-\node[obs] (w) {$ w $};
-\node[latent, left= of w] (z) {$ z $};
-\node[latent, left= of z] (theta) {$ \theta $};
-\node[left= of theta] (alpha) {$ \alpha $};
-\node[above= of w] (beta) {$ \beta $};
-\node[below= of z] (fake) {}; % needed to fit the document plate
-
-\plate {tokens} {(w)(z)} {$ N $};
-\plate {document} {(w)(z)(theta)(fake)} {$ D $};
-
-% inference edges
-\path (w) edge[->,bend left=30,color=red] (z);
-\path (w) edge[->,bend left=30,color=red] (theta);
-\path (z) edge[-,bend right=30,color=red] (theta);
-\path (alpha) edge[->, bend left=30, color=red] (theta);
-\edge[color=red] {beta} {z};
-\end{tikzpicture}
-\end{figure}
-\center{Exact posterior $ p(z,\theta|w,\alpha, \beta) $}
-\end{frame}
-
-\begin{frame}{Mean field LDA Inference}
-\begin{figure}
-\begin{tikzpicture}
-\node[obs] (w) {$ w $};
-\node[latent, left= of w] (z) {$ z $};
-\node[latent, left= of z] (theta) {$ \theta $};
-\node[left= of theta] (alpha) {$ \alpha $};
-\node[above= of w] (beta) {$ \beta $};
-\node[below= of z] (fake) {}; % needed to fit the document plate
-
-\plate {tokens} {(w)(z)} {$ N $};
-\plate {document} {(w)(z)(theta)(fake)} {$ D $};
-
-% inference edges
-\path (w) edge[->,bend left=30,color=red] (z);
-\end{tikzpicture}
-\end{figure}
-\center{Approximate posterior $ q(z,\theta|w,\alpha, \beta) = \prod_{d=1}^{D}q(\theta_{d})\prod_{i=1}^{N}q(z_i|w) $}
-\end{frame}
-
-
-
-\begin{frame}{Latent Factor Document Model}
-Let us consider a latent factor model for document modelling: \pause
-
-\begin{itemize}
-	\item a document $ x = (x_{1},\ldots,x_{N})$ consists of $ n $ i.i.d. categorical draws from that model \pause
-	\item the categorical distribution in turn depends on binary latent factors $ z = (z_{1},\ldots,z_{K}) $ which are also i.i.d. \pause
-\end{itemize}
-
-\begin{equation*}
-\begin{aligned}
-Z_{j} &\sim \Bernoulli(\alpha) && (1 \leq j \leq K) \\ 
-X_{i}|z &\sim \CatDist{f_\theta(z)} && (1 \leq i \leq N)
-\end{aligned}
-\end{equation*} 
-$ f_\theta(\cdot) $ is computed by a NN with softmax output.
-\end{frame}
-
-\begin{frame}{Original LFDM Inference}
+\begin{frame}{Original Latent Factor Model Inference}
 \textcolor{blue}{Joint distribution:} latent variables are marginally independent a priori\\
 $$\text{for example, }K=3, N=4$$
 \begin{figure}
@@ -667,39 +594,68 @@ $$\text{for example, }K=3, N=4$$
 }
 \foreach \z in {1,2,3} {
   \node[latent, above right = of x\z] (z\z) {$ z_{\z} $};
-  \only<1>{\edge[blue]{z\z}{x1,x2,x3,x4};}
 }
 \foreach \z in {1,2,3} {
-  \only<2>{\edge[red]{x1,x2,x3,x4}{z\z};}
+ \edge[red]{x1,x2,x3,x4}{z\z};
 }
-\uncover<2->{
-\edge[-,red]{z1}{z2};
-\edge[-,red,bend left]{z1}{z3};
+\path[-, red]  (z1) edge[bend left = 30] (z3);
+\edge[-,red,bend left= 75]{z1}{z2};
 \edge[-,red]{z2}{z3};
+\end{tikzpicture}
+\end{figure}
+
+~
+
+\alert{Exact Posterior: } latent variables are dependent given observations
+
+%At inference time the latent variables are marginally dependent. For our variational distribution
+%we are going to assume that they are not (recall: mean field assumption).
+\end{frame}
+
+\begin{frame}{Mean Field Latent Factor Model Inference}
+\textcolor{blue}{Joint distribution:} latent variables are marginally independent a priori\\
+$$\text{for example, }K=3, N=4$$
+\begin{figure}
+\center
+\begin{tikzpicture}
+\foreach \x in {1,...,4} {
+  \pgfmathtruncatemacro{\y}{\x-1}
+  \ifthenelse{\x=1}{\node[obs] (x\x) {$ x_{\x} $}}{\node[obs, right= of x\y] (x\x) {$ x_{\x} $}};
+}
+\foreach \z in {1,2,3} {
+  \node[latent, above right = of x\z] (z\z) {$ z_{\z} $};
+}
+\foreach \z in {1,2,3} {
+ \edge[red]{x1,x2,x3,x4}{z\z};
 }
 \end{tikzpicture}
 \end{figure}
 
 ~
 
-\uncover<2>{\alert{Posterior: } latent variables are marginally dependent given observations}
+\alert{Approximate Posterior: } latent variables are conditionally independent
 
 %At inference time the latent variables are marginally dependent. For our variational distribution
 %we are going to assume that they are not (recall: mean field assumption).
 \end{frame}
 
+\section{Amortized VI}
+
+\begin{frame}
+\tableofcontents[currentsection]
+\end{frame}
 
 
 \begin{frame}{Mean field assumption}
 
-We have $K$ latent variables\\
+We have $K$ latent variables and $ D $ data points \\
 \begin{itemize}
-	\item assume the posterior factorises as $K$ independent terms
+	\item assume the posterior factorises as $KD$ independent terms
 \end{itemize}
 
 
 \begin{equation*}
-q(z_1, \ldots, z_K) = \underbrace{\prod_{j=1}^K q_{\alert{\lambda_j}}(z_j)}_{\text{mean field}}
+q(z_1, \ldots, z_KD) = \underbrace{\prod_{j=1}^{KD} q_{\alert{\lambda_j}}(z_j)}_{\text{mean field}}
 \end{equation*} \pause
 
 with independent sets of parameters $\lambda_j = \{b_j\}$
@@ -708,20 +664,36 @@ $$Z_j \sim \Bernoulli(b_j)$$
 \end{frame}
 
 \begin{frame}{Mean field: example}
-\begin{figure}
-\center
+\begin{figure}[t!]
+\begin{subfigure}[t]{.4\textwidth}
 \begin{tikzpicture}
 \foreach \x in {1,...,4} {
 \pgfmathtruncatemacro{\y}{\x-1}
-\ifthenelse{\x=1}{\node[obs] (x\x) {$ x_{\x} $}}{\node[obs, right= of x\y] (x\x) {$ x_{\x} $}};
+\ifthenelse{\x=1}{\node[obs] (x\x) {$ x_{\x} $}}{\node[obs, right= of x\y] (x\x) {$ x_{1\x} $}};
 }
 \foreach \z in {1,2,3} {
-  \node[latent, above right = of x\z] (z\z) {$ z_{\z} $};
+  \node[latent, above right = of x\z] (z\z) {$ z_{1\z} $};
   \edge[color=red]{x1,x2,x3,x4}{z\z};
-  \node[above = of z\z] (lambda\z) {$ \lambda_{\z} $};
+  \node[above = of z\z] (lambda\z) {$ \lambda_{1\z} $};
   \edge[color=red]{lambda\z}{z\z};
 }
 \end{tikzpicture}
+\end{subfigure}\hspace{.02\textwidth}
+~
+\begin{subfigure}[t]{.4\textwidth}
+\begin{tikzpicture}
+\foreach \x in {1,...,4} {
+\pgfmathtruncatemacro{\y}{\x-1}
+\ifthenelse{\x=1}{\node[obs] (x\x) {$ x_{\x} $}}{\node[obs, right= of x\y] (x\x) {$ x_{2\x} $}};
+}
+\foreach \z in {1,2,3} {
+  \node[latent, above right = of x\z] (z\z) {$ z_{2\z} $};
+  \edge[color=red]{x1,x2,x3,x4}{z\z};
+  \node[above = of z\z] (lambda\z) {$ \lambda_{2\z} $};
+  \edge[color=red]{lambda\z}{z\z};
+}
+\end{tikzpicture}
+\end{subfigure}
 \end{figure}
 
 \end{frame}
@@ -731,7 +703,7 @@ $$Z_j \sim \Bernoulli(b_j)$$
 
 Amortise the cost of inference using NNs
 \begin{equation*}
-q(z_1, \ldots, z_K|x) = \prod_{j=1}^K q_{\alert{\lambda}}(z_j|x)
+q(z_1, \ldots, z_{KD}|x) = \prod_{j=1}^{KD} q_{\alert{\lambda}}(z_j|x)
 \end{equation*} \pause
 ~ still mean field
 $$Z_j|x \sim \Bernoulli(b_j)$$\\  \pause
@@ -742,27 +714,45 @@ $$Z_j|x \sim \Bernoulli(b_j)$$\\  \pause
 
 \end{frame}
 
-
-\begin{frame}{Amortised VI: example}
-\begin{figure}
-\center
+\begin{frame}{Amortized mean field: example}
+\begin{figure}[t!]
+\begin{subfigure}[t]{.4\textwidth}
 \begin{tikzpicture}
 \foreach \x in {1,...,4} {
 \pgfmathtruncatemacro{\y}{\x-1}
-\ifthenelse{\x=1}{\node[obs] (x\x) {$ x_{\x} $}}{\node[obs, right= of x\y] (x\x) {$ x_{\x} $}};
+\ifthenelse{\x=1}{\node[obs] (x\x) {$ x_{\x} $}}{\node[obs, right= of x\y] (x\x) {$ x_{1\x} $}};
 }
 \foreach \z in {1,2,3} {
-  \node[latent, above right = of x\z] (z\z) {$ z_{\z} $};
+  \node[latent, above right = of x\z] (z\z) {$ z_{1\z} $};
   \edge[color=red]{x1,x2,x3,x4}{z\z};
 }
 \node[above = of z2] (lambda) {$ \lambda $};
 \foreach \z in {1,2,3} {
-  \edge[color=red]{lambda}{z\z};
+	\edge[color=red]{lambda}{z\z};
 }
 \end{tikzpicture}
+\end{subfigure}\hspace{.02\textwidth}
+~
+\begin{subfigure}[t]{.4\textwidth}
+\begin{tikzpicture}
+\foreach \x in {1,...,4} {
+\pgfmathtruncatemacro{\y}{\x-1}
+\ifthenelse{\x=1}{\node[obs] (x\x) {$ x_{\x} $}}{\node[obs, right= of x\y] (x\x) {$ x_{2\x} $}};
+}
+\foreach \z in {1,2,3} {
+  \node[latent, above right = of x\z] (z\z) {$ z_{2\z} $};
+  \edge[color=red]{x1,x2,x3,x4}{z\z};
+}
+\node[above = of z2] (lambda) {$ \lambda $};
+\foreach \z in {1,2,3} {
+	\edge[color=red]{lambda}{z\z};
+}
+\end{tikzpicture}
+\end{subfigure}
 \end{figure}
 
 \end{frame}
+
 
 \begin{frame}[plain]{Overview}
 
@@ -784,7 +774,7 @@ $$Z_j|x \sim \Bernoulli(b_j)$$\\  \pause
 	\end{tikzpicture}}
 	\end{minipage}\hfill%
     \begin{minipage}[b][.35\textheight][t]{.47\textwidth}
-    Posterior
+    Exact Posterior
     \scalebox{0.9}{
     \begin{tikzpicture}
 	\foreach \x in {1,...,4} {
@@ -795,8 +785,8 @@ $$Z_j|x \sim \Bernoulli(b_j)$$\\  \pause
 	  \node[latent, above right = of x\z] (z\z) {$ z_{\z} $};
 	  \edge[red]{x1,x2,x3,x4}{z\z};
 	}
-	\edge[-,red]{z1}{z2};
-	\edge[-,red,bend left]{z1}{z3};
+	\path[-, red]  (z1) edge[bend left = 30] (z3);
+	\edge[-,red,bend left= 75]{z1}{z2};
 	\edge[-,red]{z2}{z3};
 	\end{tikzpicture}
     }
