@@ -275,7 +275,7 @@ $$\text{for example, }K=3, N=4$$
 Latent binary variables that together produce an output.
 \begin{itemize}
 \item $ N $ output variables (e.g. pixels).
-\item $ K $ binary factors (usually much less than $ N $.
+\item $ K $ binary factors (usually much less than $ N $).
 \item Complexity of inference: $ \mathcal{O}(2^{K}) $.
 \end{itemize}
 \end{frame}
@@ -655,7 +655,7 @@ We have $K$ latent variables and $ D $ data points \\
 
 
 \begin{equation*}
-q(z_1, \ldots, z_K) = \underbrace{\prod_{j=1}^{KD} q_{\alert{\lambda_j}}(z_j)}_{\text{mean field}}
+q(z_1, \ldots, z_KD) = \underbrace{\prod_{j=1}^{KD} q_{\alert{\lambda_j}}(z_j)}_{\text{mean field}}
 \end{equation*} \pause
 
 with independent sets of parameters $\lambda_j = \{b_j\}$
@@ -713,6 +713,46 @@ $$Z_j|x \sim \Bernoulli(b_j)$$\\  \pause
 \end{itemize}
 
 \end{frame}
+
+\begin{frame}{Amortized mean field: example}
+\begin{figure}[t!]
+\begin{subfigure}[t]{.4\textwidth}
+\begin{tikzpicture}
+\foreach \x in {1,...,4} {
+\pgfmathtruncatemacro{\y}{\x-1}
+\ifthenelse{\x=1}{\node[obs] (x\x) {$ x_{\x} $}}{\node[obs, right= of x\y] (x\x) {$ x_{1\x} $}};
+}
+\foreach \z in {1,2,3} {
+  \node[latent, above right = of x\z] (z\z) {$ z_{1\z} $};
+  \edge[color=red]{x1,x2,x3,x4}{z\z};
+}
+\node[above = of z2] (lambda) {$ \lambda $};
+\foreach \z in {1,2,3} {
+	\edge[color=red]{lambda}{z\z};
+}
+\end{tikzpicture}
+\end{subfigure}\hspace{.02\textwidth}
+~
+\begin{subfigure}[t]{.4\textwidth}
+\begin{tikzpicture}
+\foreach \x in {1,...,4} {
+\pgfmathtruncatemacro{\y}{\x-1}
+\ifthenelse{\x=1}{\node[obs] (x\x) {$ x_{\x} $}}{\node[obs, right= of x\y] (x\x) {$ x_{2\x} $}};
+}
+\foreach \z in {1,2,3} {
+  \node[latent, above right = of x\z] (z\z) {$ z_{2\z} $};
+  \edge[color=red]{x1,x2,x3,x4}{z\z};
+}
+\node[above = of z2] (lambda) {$ \lambda $};
+\foreach \z in {1,2,3} {
+	\edge[color=red]{lambda}{z\z};
+}
+\end{tikzpicture}
+\end{subfigure}
+\end{figure}
+
+\end{frame}
+
 
 \begin{frame}[plain]{Overview}
 
